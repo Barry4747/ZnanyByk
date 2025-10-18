@@ -54,6 +54,7 @@ fun AddUserForm(modifier: Modifier = Modifier) {
 
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var statusMessage by remember { mutableStateOf("") }
 
     Column(
@@ -79,6 +80,15 @@ fun AddUserForm(modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxWidth()
         )
 
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
@@ -86,20 +96,22 @@ fun AddUserForm(modifier: Modifier = Modifier) {
                 scope.launch {
                     val user = User(
                         first_name = firstName,
-                        last_name = lastName
+                        last_name = lastName,
+                        email = email
                     )
                     repository.addUser(user)
-                        .onSuccess { id ->
-                            statusMessage = "Added: $firstName $lastName (ID: $id)"
+                        .onSuccess { userEmail ->
+                            statusMessage = "Added: $firstName $lastName (Email: $userEmail)"
                             firstName = ""
                             lastName = ""
+                            email = ""
                         }
                         .onFailure { e ->
                             statusMessage = "Error: ${e.message}"
                         }
                 }
             },
-            enabled = firstName.isNotBlank() && lastName.isNotBlank(),
+            enabled = firstName.isNotBlank() && lastName.isNotBlank() && email.isNotBlank(),
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Add User")

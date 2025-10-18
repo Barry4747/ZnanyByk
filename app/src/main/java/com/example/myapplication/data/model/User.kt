@@ -3,7 +3,6 @@ package com.example.myapplication.data.model
 import java.util.Date
 
 data class User (
-    val u_id: String = "",
     val first_name: String = "",
     val last_name: String = "",
     val email: String? = null,
