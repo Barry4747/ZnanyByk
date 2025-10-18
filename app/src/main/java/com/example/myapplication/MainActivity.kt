@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,7 +38,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MyApplicationTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    TestFirebaseScreen(
+                    AddUserForm(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -46,11 +48,13 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun TestFirebaseScreen(modifier: Modifier = Modifier) {
+fun AddUserForm(modifier: Modifier = Modifier) {
     val repository = remember { UserRepository() }
     val scope = rememberCoroutineScope()
-    var status by remember { mutableStateOf("Ready to test") }
-    var userId by remember { mutableStateOf<String?>(null) }
+
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
+    var statusMessage by remember { mutableStateOf("") }
 
     Column(
         modifier = modifier
@@ -59,93 +63,62 @@ fun TestFirebaseScreen(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "Firebase Test")
+        OutlinedTextField(
+            value = firstName,
+            onValueChange = { firstName = it },
+            label = { Text("First Name") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        Text(text = status)
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Button(onClick = {
-            scope.launch {
-                status = "Adding Jan Kowalski..."
-                val user = User(
-                    first_name = "Jan",
-                    last_name = "Kowalski"
-                )
-                repository.addUser(user)
-                    .onSuccess { id ->
-                        userId = id
-                        status = "User added! ID: $id"
-                    }
-                    .onFailure { e ->
-                        status = "Error adding: ${e.message}"
-                    }
-            }
-        }) {
-            Text("Add Jan Kowalski")
-        }
+        OutlinedTextField(
+            value = lastName,
+            onValueChange = { lastName = it },
+            label = { Text("Last Name") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = {
                 scope.launch {
-                    userId?.let { id ->
-                        status = "Checking if user exists..."
-                        repository.getUser(id)
-                            .onSuccess { user ->
-                                if (user != null) {
-                                    status = "✓ User found: ${user.first_name} ${user.last_name}"
-                                } else {
-                                    status = "✗ User not found"
-                                }
-                            }
-                            .onFailure { e ->
-                                status = "Error checking: ${e.message}"
-                            }
-                    } ?: run {
-                        status = "Add user first!"
-                    }
+                    val user = User(
+                        first_name = firstName,
+                        last_name = lastName
+                    )
+                    repository.addUser(user)
+                        .onSuccess { id ->
+                            statusMessage = "Added: $firstName $lastName (ID: $id)"
+                            firstName = ""
+                            lastName = ""
+                        }
+                        .onFailure { e ->
+                            statusMessage = "Error: ${e.message}"
+                        }
                 }
             },
-            enabled = userId != null
+            enabled = firstName.isNotBlank() && lastName.isNotBlank(),
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Check if Added")
+            Text("Add User")
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(onClick = {
-            scope.launch {
-                status = "Getting all users..."
-                repository.getAllUsers()
-                    .onSuccess { users ->
-                        status = "Found ${users.size} users in database"
-                    }
-                    .onFailure { e ->
-                        status = "Error: ${e.message}"
-                    }
-            }
-        }) {
-            Text("Get All Users")
+        if (statusMessage.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = statusMessage,
+                color = if (statusMessage.startsWith("Added")) Color.Green else Color.Red
+            )
         }
     }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Skibd $name!",
-        modifier = modifier
-    )
 }
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     MyApplicationTheme {
-        TestFirebaseScreen()
+        AddUserForm()
     }
 }
