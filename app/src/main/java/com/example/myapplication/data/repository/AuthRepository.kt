@@ -19,6 +19,16 @@ class AuthRepository @Inject constructor(
         }
     }
 
+    suspend fun loginUser(email: String, password: String): Result<String> {
+        return try {
+            val authResult = auth.signInWithEmailAndPassword(email, password).await()
+            val firebaseUser = authResult.user ?: throw Exception("Login failed")
+            Result.success(firebaseUser.uid)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     fun getCurrentUserEmail(): String? {
         return auth.currentUser?.email
     }

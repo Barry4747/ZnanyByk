@@ -24,7 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.myapplication.viewmodel.AuthViewModel
 
 @Composable
@@ -38,8 +38,8 @@ fun LoginScreen(
     val authState by viewModel.authState.collectAsState()
 
     var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
-    // Navigate to UserHome when login succeeds
     authState.user?.let { _ ->
         onLoginSuccess()
     }
@@ -67,6 +67,17 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") },
+            enabled = !authState.isLoading,
+            visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth()
+        )
+
         Spacer(modifier = Modifier.height(16.dp))
 
         if (authState.isLoading) {
@@ -74,9 +85,9 @@ fun LoginScreen(
         } else {
             Button(
                 onClick = {
-                    viewModel.login(email)
+                    viewModel.login(email, password)
                 },
-                enabled = email.isNotBlank(),
+                enabled = email.isNotBlank() && password.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Login")

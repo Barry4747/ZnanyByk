@@ -64,23 +64,32 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun login(email: String) {
+    fun login(email: String, password: String) {
         viewModelScope.launch {
             _authState.value = _authState.value.copy(isLoading = true, errorMessage = null)
 
-            userRepository.getUserByEmail(email)
-                .onSuccess { user ->
-                    if (user != null) {
-                        _authState.value = AuthState(
-                            isLoading = false,
-                            user = user
-                        )
-                    } else {
-                        _authState.value = AuthState(
-                            isLoading = false,
-                            errorMessage = "User not found"
-                        )
-                    }
+            authRepository.loginUser(email, password)
+                .onSuccess { uid ->
+                    userRepository.getUser(uid)
+                        .onSuccess { user ->
+                            if (user != null) {
+                                _authState.value = AuthState(
+                                    isLoading = false,
+                                    user = user
+                                )
+                            } else {
+                                _authState.value = AuthState(
+                                    isLoading = false,
+                                    errorMessage = "User data not found"
+                                )
+                            }
+                        }
+                        .onFailure { e ->
+                            _authState.value = AuthState(
+                                isLoading = false,
+                                errorMessage = e.message ?: "Failed to load user data"
+                            )
+                        }
                 }
                 .onFailure { e ->
                     _authState.value = AuthState(
