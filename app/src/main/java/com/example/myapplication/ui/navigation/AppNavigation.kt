@@ -7,11 +7,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.myapplication.ui.screens.HomeScreen
-import com.example.myapplication.ui.screens.LoginScreen
-import com.example.myapplication.ui.screens.CredentialsRegistrationScreen
-import com.example.myapplication.ui.screens.PersonalInfoRegistrationScreen
+import com.example.myapplication.ui.screens.auth.LoginScreen
+import com.example.myapplication.ui.screens.auth.CredentialsRegistrationScreen
+import com.example.myapplication.ui.screens.auth.PersonalInfoRegistrationScreen
 import com.example.myapplication.ui.screens.StartScreen
 import com.example.myapplication.viewmodel.AuthViewModel
 
@@ -20,6 +20,8 @@ fun AppNavigation(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
+    val sharedAuthViewModel: AuthViewModel = hiltViewModel()
+
     NavHost(
         navController = navController,
         startDestination = Screen.Welcome.route,
@@ -36,7 +38,7 @@ fun AppNavigation(
             )
         }
 
-        composable(Screen.Login.route) {
+        composable(Screen.Login.route) { backStackEntry ->
             LoginScreen(
                 onNavigateBack = {
                     navController.popBackStack()
@@ -46,11 +48,18 @@ fun AppNavigation(
                         popUpTo(Screen.Welcome.route)
                     }
                 },
+                onNavigateToPersonalInfo = {
+                    navController.navigate("registration_flow") {
+                        popUpTo(Screen.Welcome.route)
+                    }
+                    navController.navigate(Screen.PersonalInfo.route)
+                },
                 onLoginSuccess = {
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Welcome.route) { inclusive = true }
                     }
-                }
+                },
+                viewModel = sharedAuthViewModel
             )
         }
 
@@ -59,12 +68,6 @@ fun AppNavigation(
             route = "registration_flow"
         ) {
             composable(Screen.Register.route) { backStackEntry ->
-                // Pobierz ViewModel z parent navigation graph
-                val parentEntry = remember(backStackEntry) {
-                    navController.getBackStackEntry("registration_flow")
-                }
-                val viewModel: AuthViewModel = hiltViewModel(parentEntry)
-
                 CredentialsRegistrationScreen(
                     onNavigateBack = {
                         navController.popBackStack()
@@ -77,18 +80,14 @@ fun AppNavigation(
                     onNavigateToPersonalInfo = {
                         navController.navigate(Screen.PersonalInfo.route)
                     },
-                    viewModel = viewModel
+                    viewModel = sharedAuthViewModel
                 )
             }
 
             composable(Screen.PersonalInfo.route) { backStackEntry ->
-                val parentEntry = remember(backStackEntry) {
-                    navController.getBackStackEntry("registration_flow")
-                }
-                val viewModel: AuthViewModel = hiltViewModel(parentEntry)
-
                 PersonalInfoRegistrationScreen(
                     onNavigateBack = {
+                        sharedAuthViewModel.clearPendingGoogleRegistration()
                         navController.popBackStack()
                     },
                     onRegistrationSuccess = {
@@ -96,7 +95,7 @@ fun AppNavigation(
                             popUpTo(Screen.Welcome.route) { inclusive = true }
                         }
                     },
-                    viewModel = viewModel
+                    viewModel = sharedAuthViewModel
                 )
             }
         }

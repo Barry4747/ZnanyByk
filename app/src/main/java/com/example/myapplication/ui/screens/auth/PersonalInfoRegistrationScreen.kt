@@ -1,4 +1,4 @@
-package com.example.myapplication.ui.screens
+package com.example.myapplication.ui.screens.auth
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,7 +32,8 @@ fun PersonalInfoRegistrationScreen(
     onNavigateBack: () -> Unit,
     onRegistrationSuccess: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: AuthViewModel = hiltViewModel()
+    viewModel: AuthViewModel = hiltViewModel(),
+    onSignInWithGoogle: () -> Unit = {}
 ) {
     val registrationState by viewModel.authState.collectAsState()
 
@@ -108,6 +109,15 @@ fun PersonalInfoRegistrationScreen(
         ) {
             Text("Back")
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = onSignInWithGoogle,
+            enabled = !registrationState.isLoading,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Sign in with Google")
+        }
     }
 }
-
