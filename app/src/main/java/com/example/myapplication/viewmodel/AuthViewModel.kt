@@ -41,7 +41,7 @@ class AuthViewModel @Inject constructor(
         )
     }
 
-    fun register(firstName: String, lastName: String) {
+    fun register(firstName: String, lastName: String, phoneNumber: String? = null, birthDate: java.util.Date? = null) {
         viewModelScope.launch {
             _authState.value = _authState.value.copy(isLoading = true, errorMessage = null)
 
@@ -64,7 +64,9 @@ class AuthViewModel @Inject constructor(
                 val user = User(
                     firstName = firstName,
                     lastName = lastName,
-                    email = email
+                    email = email,
+                    phoneNumber = phoneNumber,
+                    birthDate = birthDate
                 )
 
                 userRepository.addUser(user, pendingUid)
@@ -85,7 +87,6 @@ class AuthViewModel @Inject constructor(
                 return@launch
             }
 
-            // Classic email/password flow - check credentials
             if (credentials.email.isBlank()) {
                 _authState.value = _authState.value.copy(
                     isLoading = false,
@@ -107,7 +108,9 @@ class AuthViewModel @Inject constructor(
                     val user = User(
                         firstName = firstName,
                         lastName = lastName,
-                        email = credentials.email
+                        email = credentials.email,
+                        phoneNumber = phoneNumber,
+                        birthDate = birthDate
                     )
 
                     userRepository.addUser(user, uid)
@@ -189,7 +192,6 @@ class AuthViewModel @Inject constructor(
                                     user = user
                                 )
                             } else {
-                                // User authenticated with Google but no Firestore profile -> start registration flow
                                 android.util.Log.d("AuthViewModel", "User NOT in Firestore, starting registration flow")
                                 val email = result.email ?: authRepository.getCurrentUserEmail()
                                 android.util.Log.d("AuthViewModel", "Email for registration: $email")

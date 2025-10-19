@@ -1,18 +1,17 @@
 package com.example.myapplication.ui.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.example.myapplication.ui.screens.HomeScreen
-import com.example.myapplication.ui.screens.auth.LoginScreen
-import com.example.myapplication.ui.screens.auth.CredentialsRegistrationScreen
-import com.example.myapplication.ui.screens.auth.PersonalInfoRegistrationScreen
 import com.example.myapplication.ui.screens.StartScreen
+import com.example.myapplication.ui.screens.auth.CredentialsRegistrationScreen
+import com.example.myapplication.ui.screens.auth.LoginScreen
+import com.example.myapplication.ui.screens.auth.PersonalInfoRegistrationScreen
+import com.example.myapplication.ui.screens.home.HomeScreen
 import com.example.myapplication.viewmodel.AuthViewModel
 
 @Composable

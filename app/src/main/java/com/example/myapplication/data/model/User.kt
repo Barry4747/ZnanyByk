@@ -1,13 +1,13 @@
 package com.example.myapplication.data.model
 
-import com.google.firebase.Timestamp
+import java.util.Date
 
 data class User(
     val email: String = "",
     val firstName: String = "",
     val lastName: String = "",
     val role: Role = Role.CLIENT,
-    val birthDate: Timestamp? = null,
+    val birthDate: Date? = null,
     val phoneNumber: String? = null,
 )
 
