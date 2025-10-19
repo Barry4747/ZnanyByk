@@ -31,6 +31,7 @@ fun HomeScreen(
 ) {
     val homeState by viewModel.homeState.collectAsState()
     val user = homeState.user
+    val errorMessage = homeState.errorMessage
 
     Column(
         modifier = modifier
@@ -74,7 +75,7 @@ fun HomeScreen(
                     UserDataRow(label = "Email", value = user.email)
                 }
             }
-        } else {
+        } else if (errorMessage != null) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -96,7 +97,7 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = homeState.errorMessage ?: "No user information available. Please log in again.",
+                        text = errorMessage,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onErrorContainer
                     )

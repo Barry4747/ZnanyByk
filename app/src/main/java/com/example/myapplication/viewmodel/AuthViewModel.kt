@@ -171,16 +171,4 @@ class AuthViewModel @Inject constructor(
                 }
         }
     }
-
-    fun logout() {
-        authRepository.logoutUser()
-        _authState.value = AuthState()
-    }
-
-    fun clearMessages() {
-        _authState.value = _authState.value.copy(
-            errorMessage = null,
-            successMessage = null
-        )
-    }
 }
