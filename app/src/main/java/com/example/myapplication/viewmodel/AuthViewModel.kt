@@ -12,11 +12,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class RegistrationCredentials(
+    val email: String = "",
+    val password: String = ""
+)
+
 data class AuthState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val successMessage: String? = null,
-    val user: User? = null
+    val user: User? = null,
+    val registrationCredentials: RegistrationCredentials = RegistrationCredentials()
 )
 
 @HiltViewModel
@@ -28,16 +34,31 @@ class AuthViewModel @Inject constructor(
     private val _authState = MutableStateFlow(AuthState())
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
 
-    fun register(firstName: String, lastName: String, email: String, password: String) {
+    fun saveRegistrationCredentials(email: String, password: String) {
+        _authState.value = _authState.value.copy(
+            registrationCredentials = RegistrationCredentials(email, password)
+        )
+    }
+
+    fun register(firstName: String, lastName: String) {
         viewModelScope.launch {
             _authState.value = _authState.value.copy(isLoading = true, errorMessage = null)
 
-            authRepository.registerUser(email, password)
+            val credentials = _authState.value.registrationCredentials
+            if (credentials.email.isBlank() || credentials.password.isBlank()) {
+                _authState.value = _authState.value.copy(
+                    isLoading = false,
+                    errorMessage = "Missing credentials. Please start registration again."
+                )
+                return@launch
+            }
+
+            authRepository.registerUser(credentials.email, credentials.password)
                 .onSuccess { uid ->
                     val user = User(
                         firstName = firstName,
                         lastName = lastName,
-                        email = email
+                        email = credentials.email
                     )
 
                     userRepository.addUser(user, uid)
