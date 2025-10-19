@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,6 +37,7 @@ fun LoginScreen(
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val authState by viewModel.authState.collectAsState()
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -91,6 +93,18 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Login")
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedButton(
+                onClick = {
+                    val webClientId = context.getString(com.example.myapplication.R.string.default_web_client_id)
+                    viewModel.signInWithGoogle(webClientId)
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Sign in with Google")
             }
         }
 

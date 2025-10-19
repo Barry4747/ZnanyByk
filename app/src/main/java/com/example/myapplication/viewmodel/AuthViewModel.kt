@@ -100,6 +100,57 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    fun signInWithGoogle(webClientId: String) {
+        viewModelScope.launch {
+            _authState.value = _authState.value.copy(isLoading = true, errorMessage = null)
+
+            authRepository.signInWithGoogle(webClientId)
+                .onSuccess { uid ->
+                    userRepository.getUser(uid)
+                        .onSuccess { user ->
+                            if (user != null) {
+                                _authState.value = AuthState(
+                                    isLoading = false,
+                                    user = user
+                                )
+                            } else {
+                                val email = authRepository.getCurrentUserEmail() ?: ""
+                                val newUser = User(
+                                    firstName = "",
+                                    lastName = "",
+                                    email = email
+                                )
+                                userRepository.addUser(newUser, uid)
+                                    .onSuccess {
+                                        _authState.value = AuthState(
+                                            isLoading = false,
+                                            user = newUser
+                                        )
+                                    }
+                                    .onFailure { e ->
+                                        _authState.value = AuthState(
+                                            isLoading = false,
+                                            errorMessage = e.message ?: "Failed to create user profile"
+                                        )
+                                    }
+                            }
+                        }
+                        .onFailure { e ->
+                            _authState.value = AuthState(
+                                isLoading = false,
+                                errorMessage = e.message ?: "Failed to load user data"
+                            )
+                        }
+                }
+                .onFailure { e ->
+                    _authState.value = AuthState(
+                        isLoading = false,
+                        errorMessage = e.message ?: "Google sign-in failed"
+                    )
+                }
+        }
+    }
+
     fun logout() {
         authRepository.logoutUser()
         _authState.value = AuthState()
