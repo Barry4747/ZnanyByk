@@ -38,7 +38,6 @@ fun StartScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Navigation buttons
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)

@@ -1,12 +1,15 @@
 package com.example.myapplication.data.repository
 
 import com.example.myapplication.data.model.User
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class UserRepository {
-    private val db = Firebase.firestore
+@Singleton
+class UserRepository @Inject constructor(
+    private val db: FirebaseFirestore
+) {
     private val usersCollection = db.collection("users")
 
     suspend fun addUser(user: User, uid: String): Result<String> {

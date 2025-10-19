@@ -24,24 +24,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.viewmodel.AuthViewModel
 
 @Composable
 fun LoginScreen(
     onNavigateBack: () -> Unit,
     onNavigateToRegister: () -> Unit,
-    onLoginSuccess: (String, String, String) -> Unit,
+    onLoginSuccess: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: AuthViewModel = viewModel()
+    viewModel: AuthViewModel = hiltViewModel()
 ) {
     val authState by viewModel.authState.collectAsState()
 
     var email by remember { mutableStateOf("") }
 
     // Navigate to UserHome when login succeeds
-    authState.user?.let { user ->
-        onLoginSuccess(user.first_name, user.last_name, user.email ?: "")
+    authState.user?.let { _ ->
+        onLoginSuccess()
     }
 
     Column(

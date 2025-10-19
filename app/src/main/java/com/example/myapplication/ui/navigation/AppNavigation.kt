@@ -3,10 +3,8 @@ package com.example.myapplication.ui.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import com.example.myapplication.ui.screens.HomeScreen
 import com.example.myapplication.ui.screens.LoginScreen
 import com.example.myapplication.ui.screens.RegistrationScreen
@@ -43,8 +41,8 @@ fun AppNavigation(
                         popUpTo(Screen.Welcome.route)
                     }
                 },
-                onLoginSuccess = { firstName, lastName, email ->
-                    navController.navigate(Screen.Home.createRoute(firstName, lastName, email)) {
+                onLoginSuccess = {
+                    navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Welcome.route) { inclusive = true }
                     }
                 }
@@ -61,30 +59,16 @@ fun AppNavigation(
                         popUpTo(Screen.Welcome.route)
                     }
                 },
-                onRegistrationSuccess = { firstName, lastName, email ->
-                    navController.navigate(Screen.Home.createRoute(firstName, lastName, email)) {
+                onRegistrationSuccess = {
+                    navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Welcome.route) { inclusive = true }
                     }
                 }
             )
         }
 
-        composable(
-            route = Screen.Home.route,
-            arguments = listOf(
-                navArgument("firstName") { type = NavType.StringType },
-                navArgument("lastName") { type = NavType.StringType },
-                navArgument("email") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val firstName = backStackEntry.arguments?.getString("firstName") ?: ""
-            val lastName = backStackEntry.arguments?.getString("lastName") ?: ""
-            val email = backStackEntry.arguments?.getString("email") ?: ""
-
+        composable(route = Screen.Home.route) {
             HomeScreen(
-                firstName = firstName,
-                lastName = lastName,
-                email = email,
                 onLogout = {
                     navController.navigate(Screen.Welcome.route) {
                         popUpTo(Screen.Welcome.route) { inclusive = true }

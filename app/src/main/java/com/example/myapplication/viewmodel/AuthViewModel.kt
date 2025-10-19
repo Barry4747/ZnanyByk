@@ -5,10 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.model.User
 import com.example.myapplication.data.repository.AuthRepository
 import com.example.myapplication.data.repository.UserRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class AuthState(
     val isLoading: Boolean = false,
@@ -17,9 +19,11 @@ data class AuthState(
     val user: User? = null
 )
 
-class AuthViewModel : ViewModel() {
-    private val authRepository = AuthRepository()
-    private val userRepository = UserRepository()
+@HiltViewModel
+class AuthViewModel @Inject constructor(
+    private val authRepository: AuthRepository,
+    private val userRepository: UserRepository
+) : ViewModel() {
 
     private val _authState = MutableStateFlow(AuthState())
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
@@ -31,8 +35,8 @@ class AuthViewModel : ViewModel() {
             authRepository.registerUser(email, password)
                 .onSuccess { uid ->
                     val user = User(
-                        first_name = firstName,
-                        last_name = lastName,
+                        firstName = firstName,
+                        lastName = lastName,
                         email = email
                     )
 

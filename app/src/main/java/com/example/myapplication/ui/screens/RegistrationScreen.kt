@@ -24,16 +24,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.viewmodel.AuthViewModel
 
 @Composable
 fun RegistrationScreen(
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
-    onRegistrationSuccess: (String, String, String) -> Unit,
+    onRegistrationSuccess: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: AuthViewModel = viewModel()
+    viewModel: AuthViewModel = hiltViewModel()
 ) {
     val registrationState by viewModel.authState.collectAsState()
 
@@ -42,9 +42,8 @@ fun RegistrationScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    // Navigate to UserHome when registration succeeds
     if (registrationState.successMessage != null) {
-        onRegistrationSuccess(firstName, lastName, email)
+        onRegistrationSuccess()
     }
 
     Column(

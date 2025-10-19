@@ -1,13 +1,14 @@
 package com.example.myapplication.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class AuthRepository {
-    private val auth: FirebaseAuth = Firebase.auth
-
+@Singleton
+class AuthRepository @Inject constructor(
+    private val auth: FirebaseAuth
+) {
     suspend fun registerUser(email: String, password: String): Result<String> {
         return try {
             val authResult = auth.createUserWithEmailAndPassword(email, password).await()
@@ -30,4 +31,3 @@ class AuthRepository {
         auth.signOut()
     }
 }
-
