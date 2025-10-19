@@ -7,10 +7,10 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.myapplication.ui.screens.StartScreen
+import com.example.myapplication.ui.screens.HomeScreen
 import com.example.myapplication.ui.screens.LoginScreen
 import com.example.myapplication.ui.screens.RegistrationScreen
-import com.example.myapplication.ui.screens.HomeScreen
+import com.example.myapplication.ui.screens.StartScreen
 
 @Composable
 fun AppNavigation(
@@ -41,6 +41,11 @@ fun AppNavigation(
                 onNavigateToRegister = {
                     navController.navigate(Screen.Register.route) {
                         popUpTo(Screen.Welcome.route)
+                    }
+                },
+                onLoginSuccess = { firstName, lastName, email ->
+                    navController.navigate(Screen.Home.createRoute(firstName, lastName, email)) {
+                        popUpTo(Screen.Welcome.route) { inclusive = true }
                     }
                 }
             )

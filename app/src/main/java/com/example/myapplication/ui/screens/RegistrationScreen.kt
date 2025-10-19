@@ -25,7 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.myapplication.viewmodel.RegistrationViewModel
+import com.example.myapplication.viewmodel.AuthViewModel
 
 @Composable
 fun RegistrationScreen(
@@ -33,13 +33,14 @@ fun RegistrationScreen(
     onNavigateToLogin: () -> Unit,
     onRegistrationSuccess: (String, String, String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: RegistrationViewModel = viewModel()
+    viewModel: AuthViewModel = viewModel()
 ) {
-    val registrationState by viewModel.registrationState.collectAsState()
+    val registrationState by viewModel.authState.collectAsState()
 
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
     // Navigate to UserHome when registration succeeds
     if (registrationState.successMessage != null) {
@@ -89,6 +90,17 @@ fun RegistrationScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") },
+            enabled = !registrationState.isLoading,
+            visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth()
+        )
+
         Spacer(modifier = Modifier.height(16.dp))
 
         if (registrationState.isLoading) {
@@ -96,9 +108,9 @@ fun RegistrationScreen(
         } else {
             Button(
                 onClick = {
-                    viewModel.register(firstName, lastName, email)
+                    viewModel.register(firstName, lastName, email, password)
                 },
-                enabled = firstName.isNotBlank() && lastName.isNotBlank() && email.isNotBlank(),
+                enabled = firstName.isNotBlank() && lastName.isNotBlank() && email.isNotBlank() && password.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Register")

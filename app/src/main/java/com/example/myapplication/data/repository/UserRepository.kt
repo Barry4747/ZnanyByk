@@ -9,26 +9,18 @@ class UserRepository {
     private val db = Firebase.firestore
     private val usersCollection = db.collection("users")
 
-    suspend fun addUser(user: User): Result<String> {
+    suspend fun addUser(user: User, uid: String): Result<String> {
         return try {
-            val email = user.email ?: throw IllegalArgumentException("Email is required")
-
-            // Sprawdź czy użytkownik już istnieje
-            val exists = usersCollection.document(email).get().await().exists()
-            if (exists) {
-                return Result.failure(Exception("User with this email already exists"))
-            }
-
-            usersCollection.document(email).set(user).await()
-            Result.success(email)
+            usersCollection.document(uid).set(user).await()
+            Result.success(uid)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    suspend fun getUser(email: String): Result<User?> {
+    suspend fun getUser(uid: String): Result<User?> {
         return try {
-            val doc = usersCollection.document(email).get().await()
+            val doc = usersCollection.document(uid).get().await()
             val user = doc.toObject(User::class.java)
             Result.success(user)
         } catch (e: Exception) {
@@ -36,18 +28,31 @@ class UserRepository {
         }
     }
 
-    suspend fun updateUser(email: String, user: User): Result<Unit> {
+    suspend fun getUserByEmail(email: String): Result<User?> {
         return try {
-            usersCollection.document(email).set(user).await()
+            val snapshot = usersCollection
+                .whereEqualTo("email", email)
+                .get()
+                .await()
+            val user = snapshot.documents.firstOrNull()?.toObject(User::class.java)
+            Result.success(user)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun updateUser(uid: String, user: User): Result<Unit> {
+        return try {
+            usersCollection.document(uid).set(user).await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    suspend fun deleteUser(email: String): Result<Unit> {
+    suspend fun deleteUser(uid: String): Result<Unit> {
         return try {
-            usersCollection.document(email).delete().await()
+            usersCollection.document(uid).delete().await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
