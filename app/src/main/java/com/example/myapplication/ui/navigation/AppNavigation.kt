@@ -103,8 +103,10 @@ fun AppNavigation(
         composable(route = Screen.Home.route) {
             HomeScreen(
                 onLogout = {
+                    sharedAuthViewModel.logout()
                     navController.navigate(Screen.Welcome.route) {
-                        popUpTo(Screen.Welcome.route) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
+                        launchSingleTop = true
                     }
                 }
             )
