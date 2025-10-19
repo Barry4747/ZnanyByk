@@ -31,14 +31,20 @@ import com.example.myapplication.viewmodel.RegistrationViewModel
 fun RegistrationScreen(
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    onRegistrationSuccess: (String, String, String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: RegistrationViewModel = viewModel()
 ) {
-    val authState by viewModel.registrationState.collectAsState()
+    val registrationState by viewModel.registrationState.collectAsState()
 
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+
+    // Navigate to UserHome when registration succeeds
+    if (registrationState.successMessage != null) {
+        onRegistrationSuccess(firstName, lastName, email)
+    }
 
     Column(
         modifier = modifier
@@ -59,7 +65,7 @@ fun RegistrationScreen(
             value = firstName,
             onValueChange = { firstName = it },
             label = { Text("First Name") },
-            enabled = !authState.isLoading,
+            enabled = !registrationState.isLoading,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -69,7 +75,7 @@ fun RegistrationScreen(
             value = lastName,
             onValueChange = { lastName = it },
             label = { Text("Last Name") },
-            enabled = !authState.isLoading,
+            enabled = !registrationState.isLoading,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -79,13 +85,13 @@ fun RegistrationScreen(
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },
-            enabled = !authState.isLoading,
+            enabled = !registrationState.isLoading,
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (authState.isLoading) {
+        if (registrationState.isLoading) {
             CircularProgressIndicator()
         } else {
             Button(
@@ -99,18 +105,18 @@ fun RegistrationScreen(
             }
         }
 
-        if (authState.successMessage != null) {
+        if (registrationState.successMessage != null) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = authState.successMessage ?: "",
+                text = registrationState.successMessage ?: "",
                 color = Color.Green
             )
         }
 
-        if (authState.errorMessage != null) {
+        if (registrationState.errorMessage != null) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = authState.errorMessage ?: "",
+                text = registrationState.errorMessage ?: "",
                 color = Color.Red
             )
         }
@@ -119,7 +125,7 @@ fun RegistrationScreen(
 
         TextButton(
             onClick = onNavigateToLogin,
-            enabled = !authState.isLoading
+            enabled = !registrationState.isLoading
         ) {
             Text("Already have an account? Login")
         }
@@ -128,10 +134,9 @@ fun RegistrationScreen(
 
         TextButton(
             onClick = onNavigateBack,
-            enabled = !authState.isLoading
+            enabled = !registrationState.isLoading
         ) {
             Text("Back to Home")
         }
     }
 }
-

@@ -3,11 +3,14 @@ package com.example.myapplication.ui.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.myapplication.ui.screens.HomeScreen
+import androidx.navigation.navArgument
+import com.example.myapplication.ui.screens.StartScreen
 import com.example.myapplication.ui.screens.LoginScreen
 import com.example.myapplication.ui.screens.RegistrationScreen
+import com.example.myapplication.ui.screens.HomeScreen
 
 @Composable
 fun AppNavigation(
@@ -16,11 +19,11 @@ fun AppNavigation(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route,
+        startDestination = Screen.Welcome.route,
         modifier = modifier
     ) {
-        composable(Screen.Home.route) {
-            HomeScreen(
+        composable(Screen.Welcome.route) {
+            StartScreen(
                 onNavigateToLogin = {
                     navController.navigate(Screen.Login.route)
                 },
@@ -37,7 +40,7 @@ fun AppNavigation(
                 },
                 onNavigateToRegister = {
                     navController.navigate(Screen.Register.route) {
-                        popUpTo(Screen.Home.route)
+                        popUpTo(Screen.Welcome.route)
                     }
                 }
             )
@@ -50,11 +53,39 @@ fun AppNavigation(
                 },
                 onNavigateToLogin = {
                     navController.navigate(Screen.Login.route) {
-                        popUpTo(Screen.Home.route)
+                        popUpTo(Screen.Welcome.route)
+                    }
+                },
+                onRegistrationSuccess = { firstName, lastName, email ->
+                    navController.navigate(Screen.Home.createRoute(firstName, lastName, email)) {
+                        popUpTo(Screen.Welcome.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = Screen.Home.route,
+            arguments = listOf(
+                navArgument("firstName") { type = NavType.StringType },
+                navArgument("lastName") { type = NavType.StringType },
+                navArgument("email") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val firstName = backStackEntry.arguments?.getString("firstName") ?: ""
+            val lastName = backStackEntry.arguments?.getString("lastName") ?: ""
+            val email = backStackEntry.arguments?.getString("email") ?: ""
+
+            HomeScreen(
+                firstName = firstName,
+                lastName = lastName,
+                email = email,
+                onLogout = {
+                    navController.navigate(Screen.Welcome.route) {
+                        popUpTo(Screen.Welcome.route) { inclusive = true }
                     }
                 }
             )
         }
     }
 }
-
