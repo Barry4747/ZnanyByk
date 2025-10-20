@@ -48,7 +48,7 @@ class AuthViewModel @Inject constructor(
         birthDate: java.util.Date? = null
     ) {
         viewModelScope.launch {
-            setLoading(true)
+            setLoading()
 
             val pendingUid = _authState.value.pendingGoogleUid
 
@@ -62,7 +62,7 @@ class AuthViewModel @Inject constructor(
 
     fun login(email: String, password: String) {
         viewModelScope.launch {
-            setLoading(true)
+            setLoading()
 
             authRepository.loginUser(email, password)
                 .onSuccess { uid -> loadUserData(uid) }
@@ -72,7 +72,7 @@ class AuthViewModel @Inject constructor(
 
     fun signInWithGoogle(webClientId: String) {
         viewModelScope.launch {
-            setLoading(true)
+            setLoading()
 
             authRepository.signInWithGoogle(webClientId)
                 .onSuccess { result ->
@@ -204,9 +204,9 @@ class AuthViewModel @Inject constructor(
         )
     }
 
-    private fun setLoading(isLoading: Boolean) {
+    private fun setLoading() {
         _authState.value = _authState.value.copy(
-            isLoading = isLoading,
+            isLoading = true,
             errorMessage = null
         )
     }

@@ -1,8 +1,9 @@
 package com.example.myapplication.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,8 +20,6 @@ fun AppNavigation(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    val sharedAuthViewModel: AuthViewModel = hiltViewModel()
-
     NavHost(
         navController = navController,
         startDestination = Screen.Welcome.route,
@@ -29,22 +28,29 @@ fun AppNavigation(
         composable(Screen.Welcome.route) {
             StartScreen(
                 onNavigateToLogin = {
-                    navController.navigate(Screen.Login.route)
+                    navController.navigate(Screen.Login.route) {
+                        launchSingleTop = true
+                    }
                 },
                 onNavigateToRegister = {
-                    navController.navigate("registration_flow")
+                    navController.navigate(Screen.RegistrationFlow.route) {
+                        launchSingleTop = true
+                    }
                 }
             )
         }
 
         composable(Screen.Login.route) {
+            val authViewModel: AuthViewModel = hiltViewModel()
+
             LoginScreen(
                 onNavigateBack = {
                     navController.popBackStack()
                 },
                 onNavigateToRegister = {
-                    navController.navigate("registration_flow") {
+                    navController.navigate(Screen.RegistrationFlow.route) {
                         popUpTo(Screen.Welcome.route)
+                        launchSingleTop = true
                     }
                 },
                 onNavigateToPersonalInfo = {
@@ -57,17 +63,23 @@ fun AppNavigation(
                         popUpTo(Screen.Welcome.route) { inclusive = true }
                     }
                 },
-                viewModel = sharedAuthViewModel
+                viewModel = authViewModel
             )
         }
 
         navigation(
             startDestination = Screen.Register.route,
-            route = "registration_flow"
+            route = Screen.RegistrationFlow.route
         ) {
             composable(Screen.Register.route) {
+                val navBackStackEntry = remember(navController) {
+                    navController.getBackStackEntry(Screen.RegistrationFlow.route)
+                }
+                val sharedAuthViewModel: AuthViewModel = hiltViewModel(navBackStackEntry)
+
                 CredentialsRegistrationScreen(
                     onNavigateBack = {
+                        sharedAuthViewModel.clearPendingGoogleRegistration()
                         navController.popBackStack()
                     },
                     onNavigateToLogin = {
@@ -83,6 +95,11 @@ fun AppNavigation(
             }
 
             composable(Screen.PersonalInfo.route) {
+                val navBackStackEntry = remember(navController) {
+                    navController.getBackStackEntry(Screen.RegistrationFlow.route)
+                }
+                val sharedAuthViewModel: AuthViewModel = hiltViewModel(navBackStackEntry)
+
                 PersonalInfoRegistrationScreen(
                     onNavigateBack = {
                         sharedAuthViewModel.clearPendingGoogleRegistration()
@@ -100,12 +117,13 @@ fun AppNavigation(
         }
 
         composable(route = Screen.Home.route) {
+            val authViewModel: AuthViewModel = hiltViewModel()
+
             HomeScreen(
                 onLogout = {
-                    sharedAuthViewModel.logout()
+                    authViewModel.logout()
                     navController.navigate(Screen.Welcome.route) {
                         popUpTo(Screen.Welcome.route) { inclusive = true }
-                        launchSingleTop = true
                     }
                 }
             )

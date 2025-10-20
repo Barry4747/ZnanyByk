@@ -45,7 +45,6 @@ fun CredentialsRegistrationScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    // Nawiguj do PersonalInfo gdy Google Sign-In zakończy się sukcesem
     LaunchedEffect(authState.pendingGoogleUid) {
         if (authState.pendingGoogleUid != null) {
             onNavigateToPersonalInfo()
