@@ -1,4 +1,4 @@
-package com.example.myapplication.ui.screens
+package com.example.myapplication.ui.screens.auth
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -7,13 +7,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,29 +20,36 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.myapplication.R
+import com.example.myapplication.ui.components.buttons.GoogleAuthButton
+import com.example.myapplication.ui.components.buttons.MainButton
+import com.example.myapplication.ui.components.buttons.MainTextButton
 import com.example.myapplication.viewmodel.AuthViewModel
 
 @Composable
-fun RegistrationScreen(
+fun CredentialsRegistrationScreen(
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
-    onRegistrationSuccess: () -> Unit,
+    onNavigateToPersonalInfo: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
-    val registrationState by viewModel.authState.collectAsState()
+    val authState by viewModel.authState.collectAsState()
+    val context = LocalContext.current
 
-    var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    if (registrationState.successMessage != null) {
-        onRegistrationSuccess()
+    // Nawiguj do PersonalInfo gdy Google Sign-In zakończy się sukcesem
+    LaunchedEffect(authState.pendingGoogleUid) {
+        if (authState.pendingGoogleUid != null) {
+            onNavigateToPersonalInfo()
+        }
     }
 
     Column(
@@ -54,7 +60,7 @@ fun RegistrationScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Register",
+            text = "Rejestracja",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold
         )
@@ -62,30 +68,10 @@ fun RegistrationScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         OutlinedTextField(
-            value = firstName,
-            onValueChange = { firstName = it },
-            label = { Text("First Name") },
-            enabled = !registrationState.isLoading,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = lastName,
-            onValueChange = { lastName = it },
-            label = { Text("Last Name") },
-            enabled = !registrationState.isLoading,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },
-            enabled = !registrationState.isLoading,
+            enabled = !authState.isLoading,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -94,60 +80,53 @@ fun RegistrationScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
-            enabled = !registrationState.isLoading,
-            visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+            label = { Text("Hasło") },
+            enabled = !authState.isLoading,
+            visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (registrationState.isLoading) {
+        if (authState.isLoading) {
             CircularProgressIndicator()
         } else {
-            Button(
+            MainButton(
+                text = "Kontynuuj",
                 onClick = {
-                    viewModel.register(firstName, lastName, email, password)
+                    viewModel.saveRegistrationCredentials(email, password)
+                    onNavigateToPersonalInfo()
                 },
-                enabled = firstName.isNotBlank() && lastName.isNotBlank() && email.isNotBlank() && password.isNotBlank(),
+                enabled = email.isNotBlank() && password.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Register")
-            }
-        }
-
-        if (registrationState.successMessage != null) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = registrationState.successMessage ?: "",
-                color = Color.Green
             )
-        }
 
-        if (registrationState.errorMessage != null) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = registrationState.errorMessage ?: "",
-                color = Color.Red
+            Spacer(modifier = Modifier.height(12.dp))
+
+            GoogleAuthButton(
+                text = "Zarejestruj się przez Google",
+                onClick = {
+                    val webClientId = context.getString(R.string.default_web_client_id)
+                    viewModel.signInWithGoogle(webClientId)
+                },
+                modifier = Modifier.fillMaxWidth()
             )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        TextButton(
+        MainTextButton(
+            text = "Masz już konto? Zaloguj się",
             onClick = onNavigateToLogin,
-            enabled = !registrationState.isLoading
-        ) {
-            Text("Already have an account? Login")
-        }
+            enabled = !authState.isLoading
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        TextButton(
+        MainTextButton(
+            text = "Wróć do ekranu startowego",
             onClick = onNavigateBack,
-            enabled = !registrationState.isLoading
-        ) {
-            Text("Back to Home")
-        }
+            enabled = !authState.isLoading
+        )
     }
 }

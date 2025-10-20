@@ -1,4 +1,4 @@
-package com.example.myapplication.ui.screens
+package com.example.myapplication.ui.screens.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,6 +31,7 @@ fun HomeScreen(
 ) {
     val homeState by viewModel.homeState.collectAsState()
     val user = homeState.user
+    val errorMessage = homeState.errorMessage
 
     Column(
         modifier = modifier
@@ -40,7 +41,7 @@ fun HomeScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Welcome!",
+            text = "Witaj!",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold
         )
@@ -58,7 +59,7 @@ fun HomeScreen(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(
-                        text = "User Profile",
+                        text = "Profil Użytkownika",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -74,7 +75,7 @@ fun HomeScreen(
                     UserDataRow(label = "Email", value = user.email)
                 }
             }
-        } else {
+        } else if (errorMessage != null) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -96,7 +97,7 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = homeState.errorMessage ?: "No user information available. Please log in again.",
+                        text = errorMessage,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onErrorContainer
                     )
@@ -113,7 +114,7 @@ fun HomeScreen(
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Logout")
+            Text("Wyloguj się")
         }
     }
 }

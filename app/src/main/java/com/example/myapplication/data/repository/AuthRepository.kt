@@ -12,10 +12,15 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
+data class GoogleSignInResult(
+    val uid: String,
+    val email: String?
+)
+
 @Singleton
 class AuthRepository @Inject constructor(
     private val auth: FirebaseAuth,
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) {
     suspend fun registerUser(email: String, password: String): Result<String> {
         return try {
@@ -37,7 +42,7 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    suspend fun signInWithGoogle(webClientId: String): Result<String> {
+    suspend fun signInWithGoogle(webClientId: String): Result<GoogleSignInResult> {
         return try {
             val credentialManager = CredentialManager.create(context)
 
@@ -63,7 +68,7 @@ class AuthRepository @Inject constructor(
             val authResult = auth.signInWithCredential(firebaseCredential).await()
             val firebaseUser = authResult.user ?: throw Exception("Google sign-in failed")
 
-            Result.success(firebaseUser.uid)
+            Result.success(GoogleSignInResult(firebaseUser.uid, firebaseUser.email))
         } catch (e: Exception) {
             Result.failure(e)
         }
