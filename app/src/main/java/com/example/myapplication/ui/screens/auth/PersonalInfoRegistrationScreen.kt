@@ -7,16 +7,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,10 +24,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.myapplication.ui.components.MainButton
+import com.example.myapplication.ui.components.MainTextButton
+import com.example.myapplication.utils.parseBirthDate
 import com.example.myapplication.viewmodel.AuthViewModel
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,10 +43,9 @@ fun PersonalInfoRegistrationScreen(
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
-    var selectedBirthDate by remember { mutableStateOf<Date?>(null) }
-    var showDatePicker by remember { mutableStateOf(false) }
+    var birthDateText by remember { mutableStateOf("") }
+    var birthDateError by remember { mutableStateOf<String?>(null) }
     val emailPrefill = registrationState.registrationCredentials.email
-    val dateFormatter = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
 
     if (registrationState.successMessage != null) {
         onRegistrationSuccess()
@@ -113,21 +107,25 @@ fun PersonalInfoRegistrationScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
-            value = selectedBirthDate?.let { dateFormatter.format(it) } ?: "",
-            onValueChange = {},
+            value = birthDateText,
+            onValueChange = {
+                birthDateText = it
+                val result = parseBirthDate(it)
+                birthDateError = result.error
+            },
             label = { Text("Data urodzenia (opcjonalne)") },
-            readOnly = true,
+            placeholder = { Text("dd/MM/yyyy") },
             enabled = !registrationState.isLoading,
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Wybierz datę") },
-            trailingIcon = {
-                TextButton(
-                    onClick = { showDatePicker = true },
-                    enabled = !registrationState.isLoading
-                ) {
-                    Text("Wybierz")
+            isError = birthDateError != null,
+            supportingText = {
+                if (birthDateError != null) {
+                    Text(
+                        text = birthDateError!!,
+                        color = Color.Red
+                    )
                 }
-            }
+            },
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -135,20 +133,21 @@ fun PersonalInfoRegistrationScreen(
         if (registrationState.isLoading) {
             CircularProgressIndicator()
         } else {
-            Button(
+            MainButton(
+                text = "Utwórz konto",
                 onClick = {
+                    val birthDate = parseBirthDate(birthDateText).date
+
                     viewModel.register(
                         firstName = firstName,
                         lastName = lastName,
                         phoneNumber = phoneNumber.ifBlank { null },
-                        birthDate = selectedBirthDate
+                        birthDate = birthDate
                     )
                 },
-                enabled = firstName.isNotBlank() && lastName.isNotBlank(),
+                enabled = firstName.isNotBlank() && lastName.isNotBlank() && (birthDateText.isBlank() || birthDateError == null),
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Utwórz konto")
-            }
+            )
         }
 
         if (registrationState.errorMessage != null) {
@@ -161,38 +160,10 @@ fun PersonalInfoRegistrationScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        TextButton(
+        MainTextButton(
+            text = "Wróć",
             onClick = onNavigateBack,
             enabled = !registrationState.isLoading
-        ) {
-            Text("Wróć")
-        }
-    }
-
-    if (showDatePicker) {
-        val datePickerState = rememberDatePickerState()
-
-        DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        datePickerState.selectedDateMillis?.let { millis ->
-                            selectedBirthDate = Date(millis)
-                        }
-                        showDatePicker = false
-                    }
-                ) {
-                    Text("OK")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
-                    Text("Anuluj")
-                }
-            }
-        ) {
-            DatePicker(state = datePickerState)
-        }
+        )
     }
 }

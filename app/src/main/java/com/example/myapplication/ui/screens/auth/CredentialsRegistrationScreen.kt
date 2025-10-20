@@ -7,11 +7,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.myapplication.ui.components.MainButton
+import com.example.myapplication.ui.components.MainTextButton
 import com.example.myapplication.viewmodel.AuthViewModel
 
 @Composable
@@ -70,31 +70,28 @@ fun CredentialsRegistrationScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
+        MainButton(
+            text = "Kontynuuj",
             onClick = {
                 viewModel.saveRegistrationCredentials(email, password)
                 onNavigateToPersonalInfo()
             },
             enabled = email.isNotBlank() && password.isNotBlank(),
             modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Kontynuuj")
-        }
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        TextButton(
+        MainTextButton(
+            text = "Masz już konto? Zaloguj się",
             onClick = onNavigateToLogin
-        ) {
-            Text("Masz już konto? Zaloguj się")
-        }
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        TextButton(
+        MainTextButton(
+            text = "Wróć do ekranu startowego",
             onClick = onNavigateBack
-        ) {
-            Text("Wróć do ekranu startowego")
-        }
+        )
     }
 }

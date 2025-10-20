@@ -7,13 +7,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,6 +28,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.myapplication.R
+import com.example.myapplication.ui.components.MainButton
+import com.example.myapplication.ui.components.MainTextButton
 import com.example.myapplication.viewmodel.AuthViewModel
 
 @Composable
@@ -96,15 +96,14 @@ fun LoginScreen(
         if (authState.isLoading) {
             CircularProgressIndicator()
         } else {
-            Button(
+            MainButton(
+                text = "Logowanie",
                 onClick = {
                     viewModel.login(email, password)
                 },
                 enabled = email.isNotBlank() && password.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Logowanie")
-            }
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -129,20 +128,18 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        TextButton(
+        MainTextButton(
+            text = "Nie masz konta? Zarejestruj się",
             onClick = onNavigateToRegister,
             enabled = !authState.isLoading
-        ) {
-            Text("Nie masz konta? Zarejestruj się")
-        }
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        TextButton(
+        MainTextButton(
+            text = "Wróć do ekranu startowego",
             onClick = onNavigateBack,
             enabled = !authState.isLoading
-        ) {
-            Text("Wróć do ekranu startowego")
-        }
+        )
     }
 }
