@@ -41,201 +41,189 @@ class AuthViewModel @Inject constructor(
         )
     }
 
-    fun register(firstName: String, lastName: String, phoneNumber: String? = null, birthDate: java.util.Date? = null) {
+    fun register(
+        firstName: String,
+        lastName: String,
+        phoneNumber: String? = null,
+        birthDate: java.util.Date? = null
+    ) {
         viewModelScope.launch {
-            _authState.value = _authState.value.copy(isLoading = true, errorMessage = null)
+            setLoading(true)
 
-            val credentials = _authState.value.registrationCredentials
             val pendingUid = _authState.value.pendingGoogleUid
 
             if (pendingUid != null) {
-                val email = credentials.email.ifBlank {
-                    authRepository.getCurrentUserEmail() ?: ""
-                }
-
-                if (email.isBlank()) {
-                    _authState.value = _authState.value.copy(
-                        isLoading = false,
-                        errorMessage = "Missing email from Google account. Please try signing in again."
-                    )
-                    return@launch
-                }
-
-                val user = User(
-                    firstName = firstName,
-                    lastName = lastName,
-                    email = email,
-                    phoneNumber = phoneNumber,
-                    birthDate = birthDate
-                )
-
-                userRepository.addUser(user, pendingUid)
-                    .onSuccess {
-                        _authState.value = AuthState(
-                            isLoading = false,
-                            successMessage = "Registration successful!",
-                            user = user
-                        )
-                    }
-                    .onFailure { e ->
-                        _authState.value = AuthState(
-                            isLoading = false,
-                            errorMessage = e.message ?: "Failed to save user data"
-                        )
-                    }
-
-                return@launch
+                handleGoogleRegistration(firstName, lastName, phoneNumber, birthDate, pendingUid)
+            } else {
+                handleEmailPasswordRegistration(firstName, lastName, phoneNumber, birthDate)
             }
-
-            if (credentials.email.isBlank()) {
-                _authState.value = _authState.value.copy(
-                    isLoading = false,
-                    errorMessage = "Missing email. Please start registration again."
-                )
-                return@launch
-            }
-
-            if (credentials.password.isBlank()) {
-                _authState.value = _authState.value.copy(
-                    isLoading = false,
-                    errorMessage = "Missing password. Please start registration again."
-                )
-                return@launch
-            }
-
-            authRepository.registerUser(credentials.email, credentials.password)
-                .onSuccess { uid ->
-                    val user = User(
-                        firstName = firstName,
-                        lastName = lastName,
-                        email = credentials.email,
-                        phoneNumber = phoneNumber,
-                        birthDate = birthDate
-                    )
-
-                    userRepository.addUser(user, uid)
-                        .onSuccess {
-                            _authState.value = AuthState(
-                                isLoading = false,
-                                successMessage = "Registration successful!",
-                                user = user
-                            )
-                        }
-                        .onFailure { e ->
-                            _authState.value = AuthState(
-                                isLoading = false,
-                                errorMessage = e.message ?: "Failed to save user data"
-                            )
-                        }
-                }
-                .onFailure { e ->
-                    _authState.value = AuthState(
-                        isLoading = false,
-                        errorMessage = e.message ?: "Registration failed"
-                    )
-                }
         }
     }
 
     fun login(email: String, password: String) {
         viewModelScope.launch {
-            _authState.value = _authState.value.copy(isLoading = true, errorMessage = null)
+            setLoading(true)
 
             authRepository.loginUser(email, password)
-                .onSuccess { uid ->
-                    userRepository.getUser(uid)
-                        .onSuccess { user ->
-                            if (user != null) {
-                                _authState.value = AuthState(
-                                    isLoading = false,
-                                    user = user
-                                )
-                            } else {
-                                _authState.value = AuthState(
-                                    isLoading = false,
-                                    errorMessage = "User data not found"
-                                )
-                            }
-                        }
-                        .onFailure { e ->
-                            _authState.value = AuthState(
-                                isLoading = false,
-                                errorMessage = e.message ?: "Failed to load user data"
-                            )
-                        }
-                }
-                .onFailure { e ->
-                    _authState.value = AuthState(
-                        isLoading = false,
-                        errorMessage = e.message ?: "Login failed"
-                    )
-                }
+                .onSuccess { uid -> loadUserData(uid) }
+                .onFailure { e -> setError(e.message ?: "Login failed") }
         }
     }
 
     fun signInWithGoogle(webClientId: String) {
         viewModelScope.launch {
-            _authState.value = _authState.value.copy(isLoading = true, errorMessage = null)
+            setLoading(true)
 
             authRepository.signInWithGoogle(webClientId)
                 .onSuccess { result ->
-                    val uid = result.uid
-                    android.util.Log.d("AuthViewModel", "Google sign-in result: uid=$uid, email=${result.email}")
-                    android.util.Log.d("AuthViewModel", "getCurrentUserEmail: ${authRepository.getCurrentUserEmail()}")
-
-                    userRepository.getUser(uid)
-                        .onSuccess { user ->
-                            if (user != null) {
-                                android.util.Log.d("AuthViewModel", "User exists in Firestore, logging in")
-                                _authState.value = AuthState(
-                                    isLoading = false,
-                                    user = user
-                                )
-                            } else {
-                                android.util.Log.d("AuthViewModel", "User NOT in Firestore, starting registration flow")
-                                val email = result.email ?: authRepository.getCurrentUserEmail()
-                                android.util.Log.d("AuthViewModel", "Email for registration: $email")
-
-                                if (email.isNullOrBlank()) {
-                                    android.util.Log.e("AuthViewModel", "Email is null or blank!")
-                                    _authState.value = AuthState(
-                                        isLoading = false,
-                                        errorMessage = "Google account did not provide an email."
-                                    )
-                                } else {
-                                    android.util.Log.d("AuthViewModel", "Setting pendingGoogleUid and registrationCredentials with email: $email")
-                                    _authState.value = _authState.value.copy(
-                                        isLoading = false,
-                                        registrationCredentials = RegistrationCredentials(email = email, password = ""),
-                                        pendingGoogleUid = uid
-                                    )
-                                }
-                            }
-                        }
-                        .onFailure { e ->
-                            android.util.Log.e("AuthViewModel", "Failed to get user from Firestore: ${e.message}", e)
-                            _authState.value = AuthState(
-                                isLoading = false,
-                                errorMessage = e.message ?: "Failed to load user data"
-                            )
-                        }
+                    handleGoogleSignInResult(result.uid, result.email)
                 }
-                .onFailure { e ->
-                    android.util.Log.e("AuthViewModel", "Google sign-in failed: ${e.message}", e)
-                    _authState.value = AuthState(
-                        isLoading = false,
-                        errorMessage = e.message ?: "Google sign-in failed"
-                    )
-                }
+                .onFailure { e -> setError(e.message ?: "Google sign-in failed") }
         }
     }
 
     fun clearPendingGoogleRegistration() {
-        _authState.value = _authState.value.copy(pendingGoogleUid = null)
+        _authState.value = _authState.value.copy(
+            pendingGoogleUid = null,
+            registrationCredentials = RegistrationCredentials()
+        )
     }
 
     fun logout() {
         authRepository.logoutUser()
         _authState.value = AuthState()
+    }
+
+    private suspend fun handleGoogleRegistration(
+        firstName: String,
+        lastName: String,
+        phoneNumber: String?,
+        birthDate: java.util.Date?,
+        uid: String
+    ) {
+        val email = getEmailForGoogleRegistration()
+        if (email == null) {
+            setError("Missing email. Please try signing in again.")
+            return
+        }
+
+        val user = createUser(firstName, lastName, email, phoneNumber, birthDate)
+        saveUserToFirestore(user, uid)
+    }
+
+    private suspend fun handleEmailPasswordRegistration(
+        firstName: String,
+        lastName: String,
+        phoneNumber: String?,
+        birthDate: java.util.Date?
+    ) {
+        val credentials = _authState.value.registrationCredentials
+
+        if (credentials.email.isBlank()) {
+            setError("Missing email. Please start registration again.")
+            return
+        }
+
+        if (credentials.password.isBlank()) {
+            setError("Missing password. Please start registration again.")
+            return
+        }
+
+        authRepository.registerUser(credentials.email, credentials.password)
+            .onSuccess { uid ->
+                val user = createUser(firstName, lastName, credentials.email, phoneNumber, birthDate)
+                saveUserToFirestore(user, uid)
+            }
+            .onFailure { e -> setError(e.message ?: "Registration failed") }
+    }
+
+    private suspend fun handleGoogleSignInResult(uid: String, email: String?) {
+        userRepository.getUser(uid)
+            .onSuccess { user ->
+                if (user != null) {
+                    setSuccess(user)
+                } else {
+                    startGoogleRegistrationFlow(uid, email)
+                }
+            }
+            .onFailure { e -> setError(e.message ?: "Failed to load user data") }
+    }
+
+    private fun startGoogleRegistrationFlow(uid: String, email: String?) {
+        val finalEmail = email ?: authRepository.getCurrentUserEmail()
+
+        if (finalEmail.isNullOrBlank()) {
+            setError("Google account did not provide an email.")
+        } else {
+            _authState.value = _authState.value.copy(
+                isLoading = false,
+                registrationCredentials = RegistrationCredentials(email = finalEmail, password = ""),
+                pendingGoogleUid = uid
+            )
+        }
+    }
+
+    private suspend fun loadUserData(uid: String) {
+        userRepository.getUser(uid)
+            .onSuccess { user ->
+                if (user != null) {
+                    setSuccess(user)
+                } else {
+                    setError("User data not found")
+                }
+            }
+            .onFailure { e -> setError(e.message ?: "Failed to load user data") }
+    }
+
+    private suspend fun saveUserToFirestore(user: User, uid: String) {
+        userRepository.addUser(user, uid)
+            .onSuccess { setSuccess(user, "Registration successful!") }
+            .onFailure { e -> setError(e.message ?: "Failed to save user data") }
+    }
+
+    private fun getEmailForGoogleRegistration(): String? {
+        val email = _authState.value.registrationCredentials.email.ifBlank {
+            authRepository.getCurrentUserEmail()
+        }
+        return email?.takeIf { it.isNotBlank() }
+    }
+
+    private fun createUser(
+        firstName: String,
+        lastName: String,
+        email: String,
+        phoneNumber: String?,
+        birthDate: java.util.Date?
+    ): User {
+        return User(
+            firstName = firstName,
+            lastName = lastName,
+            email = email,
+            phoneNumber = phoneNumber,
+            birthDate = birthDate
+        )
+    }
+
+    private fun setLoading(isLoading: Boolean) {
+        _authState.value = _authState.value.copy(
+            isLoading = isLoading,
+            errorMessage = null
+        )
+    }
+
+    private fun setError(message: String) {
+        _authState.value = _authState.value.copy(
+            isLoading = false,
+            errorMessage = message
+        )
+    }
+
+    private fun setSuccess(user: User, successMessage: String? = null) {
+        _authState.value = _authState.value.copy(
+            isLoading = false,
+            successMessage = successMessage,
+            user = user,
+            errorMessage = null
+        )
     }
 }
