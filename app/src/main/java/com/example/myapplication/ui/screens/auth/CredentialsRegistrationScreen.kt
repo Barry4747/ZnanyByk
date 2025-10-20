@@ -44,7 +44,7 @@ fun CredentialsRegistrationScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Register",
+            text = "Rejestracja",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold
         )
@@ -63,7 +63,7 @@ fun CredentialsRegistrationScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
+            label = { Text("Hasło") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
         )
@@ -78,7 +78,7 @@ fun CredentialsRegistrationScreen(
             enabled = email.isNotBlank() && password.isNotBlank(),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Next")
+            Text("Kontynuuj")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -86,7 +86,7 @@ fun CredentialsRegistrationScreen(
         TextButton(
             onClick = onNavigateToLogin
         ) {
-            Text("Already have an account? Login")
+            Text("Masz już konto? Zaloguj się")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -94,7 +94,7 @@ fun CredentialsRegistrationScreen(
         TextButton(
             onClick = onNavigateBack
         ) {
-            Text("Back to Home")
+            Text("Wróć do ekranu startowego")
         }
     }
 }

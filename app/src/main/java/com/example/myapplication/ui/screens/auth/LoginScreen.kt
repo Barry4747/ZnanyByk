@@ -65,7 +65,7 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Login",
+            text = "Logowanie",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold
         )
@@ -85,7 +85,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
+            label = { Text("Hasło") },
             enabled = !authState.isLoading,
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
@@ -103,7 +103,7 @@ fun LoginScreen(
                 enabled = email.isNotBlank() && password.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Login")
+                Text("Logowanie")
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -115,7 +115,7 @@ fun LoginScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Sign in with Google")
+                Text("Kontynuuj z Google")
             }
         }
 
@@ -133,7 +133,7 @@ fun LoginScreen(
             onClick = onNavigateToRegister,
             enabled = !authState.isLoading
         ) {
-            Text("Don't have an account? Register")
+            Text("Nie masz konta? Zarejestruj się")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -142,7 +142,7 @@ fun LoginScreen(
             onClick = onNavigateBack,
             enabled = !authState.isLoading
         ) {
-            Text("Back to Home")
+            Text("Wróć do ekranu startowego")
         }
     }
 }

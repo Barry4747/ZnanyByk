@@ -41,7 +41,7 @@ fun HomeScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Welcome!",
+            text = "Witaj!",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold
         )
@@ -59,7 +59,7 @@ fun HomeScreen(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(
-                        text = "User Profile",
+                        text = "Profil Użytkownika",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -114,7 +114,7 @@ fun HomeScreen(
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Logout")
+            Text("Wyloguj się")
         }
     }
 }

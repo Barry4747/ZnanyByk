@@ -28,7 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.myapplication.viewmodel.AuthViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -65,7 +65,7 @@ fun PersonalInfoRegistrationScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Personal Information",
+            text = "Dane Personalne",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold
         )
@@ -75,7 +75,7 @@ fun PersonalInfoRegistrationScreen(
         OutlinedTextField(
             value = firstName,
             onValueChange = { firstName = it },
-            label = { Text("First Name") },
+            label = { Text("Imię") },
             enabled = !registrationState.isLoading,
             modifier = Modifier.fillMaxWidth()
         )
@@ -85,14 +85,13 @@ fun PersonalInfoRegistrationScreen(
         OutlinedTextField(
             value = lastName,
             onValueChange = { lastName = it },
-            label = { Text("Last Name") },
+            label = { Text("Nazwisko") },
             enabled = !registrationState.isLoading,
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Email field (readonly, prefilled from Google or credentials)
         OutlinedTextField(
             value = emailPrefill,
             onValueChange = {},
@@ -106,7 +105,7 @@ fun PersonalInfoRegistrationScreen(
         OutlinedTextField(
             value = phoneNumber,
             onValueChange = { phoneNumber = it },
-            label = { Text("Phone Number (optional)") },
+            label = { Text("Numer telefonu (opcjonalne)") },
             enabled = !registrationState.isLoading,
             modifier = Modifier.fillMaxWidth()
         )
@@ -116,17 +115,17 @@ fun PersonalInfoRegistrationScreen(
         OutlinedTextField(
             value = selectedBirthDate?.let { dateFormatter.format(it) } ?: "",
             onValueChange = {},
-            label = { Text("Date of Birth (optional)") },
+            label = { Text("Data urodzenia (opcjonalne)") },
             readOnly = true,
             enabled = !registrationState.isLoading,
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Select date") },
+            placeholder = { Text("Wybierz datę") },
             trailingIcon = {
                 TextButton(
                     onClick = { showDatePicker = true },
                     enabled = !registrationState.isLoading
                 ) {
-                    Text("Select")
+                    Text("Wybierz")
                 }
             }
         )
@@ -148,7 +147,7 @@ fun PersonalInfoRegistrationScreen(
                 enabled = firstName.isNotBlank() && lastName.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Register")
+                Text("Utwórz konto")
             }
         }
 
@@ -166,11 +165,10 @@ fun PersonalInfoRegistrationScreen(
             onClick = onNavigateBack,
             enabled = !registrationState.isLoading
         ) {
-            Text("Back")
+            Text("Wróć")
         }
     }
 
-    // DatePicker Dialog
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState()
 
@@ -190,7 +188,7 @@ fun PersonalInfoRegistrationScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text("Cancel")
+                    Text("Anuluj")
                 }
             }
         ) {
