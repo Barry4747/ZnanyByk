@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,8 +27,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.myapplication.R
-import com.example.myapplication.ui.components.MainButton
-import com.example.myapplication.ui.components.MainTextButton
+import com.example.myapplication.ui.components.buttons.GoogleAuthButton
+import com.example.myapplication.ui.components.buttons.MainButton
+import com.example.myapplication.ui.components.buttons.MainTextButton
 import com.example.myapplication.viewmodel.AuthViewModel
 
 @Composable
@@ -107,15 +107,15 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            OutlinedButton(
+            GoogleAuthButton(
+                text = "Kontynuuj z Google",
                 onClick = {
                     val webClientId = context.getString(R.string.default_web_client_id)
                     viewModel.signInWithGoogle(webClientId)
                 },
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Kontynuuj z Google")
-            }
+            )
+
         }
 
         if (authState.errorMessage != null) {

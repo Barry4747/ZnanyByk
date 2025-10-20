@@ -37,7 +37,7 @@ fun AppNavigation(
             )
         }
 
-        composable(Screen.Login.route) { backStackEntry ->
+        composable(Screen.Login.route) {
             LoginScreen(
                 onNavigateBack = {
                     navController.popBackStack()
@@ -48,10 +48,9 @@ fun AppNavigation(
                     }
                 },
                 onNavigateToPersonalInfo = {
-                    navController.navigate("registration_flow") {
+                    navController.navigate(Screen.PersonalInfo.route) {
                         popUpTo(Screen.Welcome.route)
                     }
-                    navController.navigate(Screen.PersonalInfo.route)
                 },
                 onLoginSuccess = {
                     navController.navigate(Screen.Home.route) {
@@ -66,7 +65,7 @@ fun AppNavigation(
             startDestination = Screen.Register.route,
             route = "registration_flow"
         ) {
-            composable(Screen.Register.route) { backStackEntry ->
+            composable(Screen.Register.route) {
                 CredentialsRegistrationScreen(
                     onNavigateBack = {
                         navController.popBackStack()
@@ -83,13 +82,14 @@ fun AppNavigation(
                 )
             }
 
-            composable(Screen.PersonalInfo.route) { backStackEntry ->
+            composable(Screen.PersonalInfo.route) {
                 PersonalInfoRegistrationScreen(
                     onNavigateBack = {
                         sharedAuthViewModel.clearPendingGoogleRegistration()
                         navController.popBackStack()
                     },
                     onRegistrationSuccess = {
+                        sharedAuthViewModel.clearPendingGoogleRegistration()
                         navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Welcome.route) { inclusive = true }
                         }
@@ -104,7 +104,7 @@ fun AppNavigation(
                 onLogout = {
                     sharedAuthViewModel.logout()
                     navController.navigate(Screen.Welcome.route) {
-                        popUpTo(0) { inclusive = true }
+                        popUpTo(Screen.Welcome.route) { inclusive = true }
                         launchSingleTop = true
                     }
                 }

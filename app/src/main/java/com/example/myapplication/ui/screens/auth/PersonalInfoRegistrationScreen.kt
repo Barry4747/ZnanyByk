@@ -24,8 +24,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.example.myapplication.ui.components.MainButton
-import com.example.myapplication.ui.components.MainTextButton
+import com.example.myapplication.ui.components.buttons.MainButton
+import com.example.myapplication.ui.components.buttons.MainTextButton
 import com.example.myapplication.utils.parseBirthDate
 import com.example.myapplication.viewmodel.AuthViewModel
 
