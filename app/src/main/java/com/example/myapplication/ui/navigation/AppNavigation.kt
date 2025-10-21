@@ -10,6 +10,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.example.myapplication.ui.screens.SplashScreen
 import com.example.myapplication.ui.screens.StartScreen
 import com.example.myapplication.ui.screens.auth.CredentialsRegistrationScreen
 import com.example.myapplication.ui.screens.auth.LoginScreen
@@ -25,13 +26,28 @@ fun AppNavigation(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Welcome.route,
+        startDestination = Screen.Splash.route,
         modifier = modifier,
         enterTransition = { fadeIn(animationSpec = androidx.compose.animation.core.tween(150)) },
         exitTransition = { fadeOut(animationSpec = androidx.compose.animation.core.tween(150)) },
         popEnterTransition = { fadeIn(animationSpec = androidx.compose.animation.core.tween(150)) },
         popExitTransition = { fadeOut(animationSpec = androidx.compose.animation.core.tween(150)) }
     ) {
+        composable(Screen.Splash.route) {
+            SplashScreen(
+                onNavigateToStart = {
+                    navController.navigate(Screen.Welcome.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                },
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable(Screen.Welcome.route) {
             StartScreen(
                 onNavigateToLogin = {

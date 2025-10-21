@@ -16,7 +16,8 @@ data class AuthState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val user: User? = null,
-    val pendingGoogleUid: String? = null
+    val pendingGoogleUid: String? = null,
+    val isCheckingAuth: Boolean = false
 )
 
 @HiltViewModel
@@ -27,6 +28,27 @@ class AuthViewModel @Inject constructor(
 
     private val _authState = MutableStateFlow(AuthState())
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
+
+    fun checkAuthState() {
+        viewModelScope.launch {
+            _authState.value = _authState.value.copy(isCheckingAuth = true)
+
+            val userId = authRepository.getCurrentUserId()
+
+            if (userId != null) {
+                val cachedData = userRepository.getCachedUser()
+
+                if (cachedData != null && cachedData.first == userId) {
+                    setSuccess(cachedData.second)
+                } else {
+                    loadUserData(userId)
+                }
+            } else {
+                userRepository.clearCachedUser()
+                _authState.value = _authState.value.copy(isCheckingAuth = false)
+            }
+        }
+    }
 
     fun login(email: String, password: String) {
         viewModelScope.launch {
@@ -44,21 +66,25 @@ class AuthViewModel @Inject constructor(
 
             authRepository.signInWithGoogle(webClientId)
                 .onSuccess { result ->
-                    handleGoogleSignInResult(result.uid, result.email)
+                    handleGoogleSignInResult(result.uid)
                 }
                 .onFailure { e -> setError(e.message ?: "Google sign-in failed") }
         }
     }
 
     fun logout() {
-        authRepository.logoutUser()
-        _authState.value = AuthState()
+        viewModelScope.launch {
+            authRepository.logoutUser()
+            userRepository.clearCachedUser()
+            _authState.value = AuthState()
+        }
     }
 
-    private suspend fun handleGoogleSignInResult(uid: String, email: String?) {
+    private suspend fun handleGoogleSignInResult(uid: String) {
         userRepository.getUser(uid)
             .onSuccess { user ->
                 if (user != null) {
+                    userRepository.saveCachedUser(user, uid)
                     setSuccess(user)
                 } else {
                     _authState.value = _authState.value.copy(
@@ -74,6 +100,7 @@ class AuthViewModel @Inject constructor(
         userRepository.getUser(uid)
             .onSuccess { user ->
                 if (user != null) {
+                    userRepository.saveCachedUser(user, uid)
                     setSuccess(user)
                 } else {
                     setError("User data not found")
@@ -85,14 +112,16 @@ class AuthViewModel @Inject constructor(
     private fun setLoading() {
         _authState.value = _authState.value.copy(
             isLoading = true,
-            errorMessage = null
+            errorMessage = null,
+            isCheckingAuth = false
         )
     }
 
     private fun setError(message: String) {
         _authState.value = _authState.value.copy(
             isLoading = false,
-            errorMessage = message
+            errorMessage = message,
+            isCheckingAuth = false
         )
     }
 
@@ -100,7 +129,8 @@ class AuthViewModel @Inject constructor(
         _authState.value = _authState.value.copy(
             isLoading = false,
             user = user,
-            errorMessage = null
+            errorMessage = null,
+            isCheckingAuth = false
         )
     }
 }

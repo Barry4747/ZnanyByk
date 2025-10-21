@@ -150,7 +150,11 @@ class RegistrationViewModel @Inject constructor(
 
     private suspend fun saveUserToFirestore(user: User, uid: String) {
         userRepository.addUser(user, uid)
-            .onSuccess { setSuccess(user, "Registration successful!") }
+            .onSuccess {
+                // Zapisz użytkownika w cache po rejestracji
+                userRepository.saveCachedUser(user, uid)
+                setSuccess(user, "Registration successful!")
+            }
             .onFailure { e -> setError(e.message ?: "Failed to save user data") }
     }
 
@@ -200,4 +204,3 @@ class RegistrationViewModel @Inject constructor(
         )
     }
 }
-
