@@ -18,7 +18,7 @@ import com.example.myapplication.R
 import com.example.myapplication.ui.components.buttons.MainButton
 
 @Composable
-fun StartScreen(
+fun WelcomeScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToRegister: () -> Unit,
     modifier: Modifier = Modifier

@@ -36,6 +36,7 @@ fun CredentialsRegistrationScreen(
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
     onNavigateToPersonalInfo: () -> Unit,
+    onGoogleSignInSuccess: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: RegistrationViewModel = hiltViewModel()
 ) {
@@ -44,6 +45,12 @@ fun CredentialsRegistrationScreen(
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    registrationState.user?.let { _ ->
+        LaunchedEffect(Unit) {
+            onGoogleSignInSuccess()
+        }
+    }
 
     LaunchedEffect(registrationState.pendingGoogleUid) {
         if (registrationState.pendingGoogleUid != null) {

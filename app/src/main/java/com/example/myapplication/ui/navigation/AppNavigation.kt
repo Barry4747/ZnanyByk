@@ -11,7 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.example.myapplication.ui.screens.SplashScreen
-import com.example.myapplication.ui.screens.StartScreen
+import com.example.myapplication.ui.screens.WelcomeScreen
 import com.example.myapplication.ui.screens.auth.CredentialsRegistrationScreen
 import com.example.myapplication.ui.screens.auth.LoginScreen
 import com.example.myapplication.ui.screens.auth.PersonalInfoRegistrationScreen
@@ -49,7 +49,7 @@ fun AppNavigation(
         }
 
         composable(Screen.Welcome.route) {
-            StartScreen(
+            WelcomeScreen(
                 onNavigateToLogin = {
                     navController.navigate(Screen.Login.route)
                 },
@@ -111,6 +111,12 @@ fun AppNavigation(
                     },
                     onNavigateToPersonalInfo = {
                         navController.navigate(Screen.PersonalInfo.route)
+                    },
+                    onGoogleSignInSuccess = {
+                        sharedRegistrationViewModel.clearPendingGoogleRegistration()
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Welcome.route) { inclusive = true }
+                        }
                     },
                     viewModel = sharedRegistrationViewModel
                 )

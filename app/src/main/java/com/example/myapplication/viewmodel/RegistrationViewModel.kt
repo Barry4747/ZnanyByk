@@ -126,7 +126,8 @@ class RegistrationViewModel @Inject constructor(
         userRepository.getUser(uid)
             .onSuccess { user ->
                 if (user != null) {
-                    setError("Account already exists. Please sign in instead.")
+                    userRepository.saveCachedUser(user, uid)
+                    setSuccess(user, "Account already exists. Logging you in...")
                 } else {
                     startGoogleRegistrationFlow(uid, email)
                 }
@@ -151,7 +152,6 @@ class RegistrationViewModel @Inject constructor(
     private suspend fun saveUserToFirestore(user: User, uid: String) {
         userRepository.addUser(user, uid)
             .onSuccess {
-                // Zapisz użytkownika w cache po rejestracji
                 userRepository.saveCachedUser(user, uid)
                 setSuccess(user, "Registration successful!")
             }
