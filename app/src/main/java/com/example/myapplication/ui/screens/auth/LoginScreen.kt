@@ -101,7 +101,7 @@ fun LoginScreen(
                 onClick = {
                     viewModel.login(email, password)
                 },
-                enabled = email.isNotBlank() && password.isNotBlank(),
+                enabled = email.isNotBlank() && password.isNotBlank() && !authState.isLoading,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -113,6 +113,7 @@ fun LoginScreen(
                     val webClientId = context.getString(R.string.default_web_client_id)
                     viewModel.signInWithGoogle(webClientId)
                 },
+                enabled = !authState.isLoading,
                 modifier = Modifier.fillMaxWidth()
             )
 
