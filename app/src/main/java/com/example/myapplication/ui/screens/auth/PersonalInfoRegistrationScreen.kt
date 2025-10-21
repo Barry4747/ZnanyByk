@@ -27,7 +27,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.ui.components.buttons.MainTextButton
 import com.example.myapplication.utils.parseBirthDate
-import com.example.myapplication.viewmodel.AuthViewModel
+import com.example.myapplication.viewmodel.RegistrationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,10 +35,9 @@ fun PersonalInfoRegistrationScreen(
     onNavigateBack: () -> Unit,
     onRegistrationSuccess: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: AuthViewModel = hiltViewModel(),
-    onSignInWithGoogle: () -> Unit = {}
+    viewModel: RegistrationViewModel = hiltViewModel()
 ) {
-    val registrationState by viewModel.authState.collectAsState()
+    val registrationState by viewModel.registrationState.collectAsState()
 
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }

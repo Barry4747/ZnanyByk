@@ -29,7 +29,7 @@ import com.example.myapplication.R
 import com.example.myapplication.ui.components.buttons.GoogleAuthButton
 import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.ui.components.buttons.MainTextButton
-import com.example.myapplication.viewmodel.AuthViewModel
+import com.example.myapplication.viewmodel.RegistrationViewModel
 
 @Composable
 fun CredentialsRegistrationScreen(
@@ -37,16 +37,16 @@ fun CredentialsRegistrationScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToPersonalInfo: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: AuthViewModel = hiltViewModel()
+    viewModel: RegistrationViewModel = hiltViewModel()
 ) {
-    val authState by viewModel.authState.collectAsState()
+    val registrationState by viewModel.registrationState.collectAsState()
     val context = LocalContext.current
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    LaunchedEffect(authState.pendingGoogleUid) {
-        if (authState.pendingGoogleUid != null) {
+    LaunchedEffect(registrationState.pendingGoogleUid) {
+        if (registrationState.pendingGoogleUid != null) {
             onNavigateToPersonalInfo()
         }
     }
@@ -70,7 +70,7 @@ fun CredentialsRegistrationScreen(
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },
-            enabled = !authState.isLoading,
+            enabled = !registrationState.isLoading,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -80,14 +80,14 @@ fun CredentialsRegistrationScreen(
             value = password,
             onValueChange = { password = it },
             label = { Text("Hasło") },
-            enabled = !authState.isLoading,
+            enabled = !registrationState.isLoading,
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (authState.isLoading) {
+        if (registrationState.isLoading) {
             CircularProgressIndicator()
         } else {
             MainButton(
@@ -103,10 +103,10 @@ fun CredentialsRegistrationScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             GoogleAuthButton(
-                text = "Zarejestruj się przez Google",
+                text = "Kontynuuj z Google",
                 onClick = {
                     val webClientId = context.getString(R.string.default_web_client_id)
-                    viewModel.signInWithGoogle(webClientId)
+                    viewModel.signUpWithGoogle(webClientId)
                 },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -117,7 +117,7 @@ fun CredentialsRegistrationScreen(
         MainTextButton(
             text = "Masz już konto? Zaloguj się",
             onClick = onNavigateToLogin,
-            enabled = !authState.isLoading
+            enabled = !registrationState.isLoading
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -125,7 +125,7 @@ fun CredentialsRegistrationScreen(
         MainTextButton(
             text = "Wróć do ekranu startowego",
             onClick = onNavigateBack,
-            enabled = !authState.isLoading
+            enabled = !registrationState.isLoading
         )
     }
 }

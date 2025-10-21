@@ -1,9 +1,11 @@
 package com.example.myapplication.ui.navigation
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,6 +16,7 @@ import com.example.myapplication.ui.screens.auth.LoginScreen
 import com.example.myapplication.ui.screens.auth.PersonalInfoRegistrationScreen
 import com.example.myapplication.ui.screens.home.HomeScreen
 import com.example.myapplication.viewmodel.AuthViewModel
+import com.example.myapplication.viewmodel.RegistrationViewModel
 
 @Composable
 fun AppNavigation(
@@ -23,19 +26,19 @@ fun AppNavigation(
     NavHost(
         navController = navController,
         startDestination = Screen.Welcome.route,
-        modifier = modifier
+        modifier = modifier,
+        enterTransition = { fadeIn(animationSpec = androidx.compose.animation.core.tween(150)) },
+        exitTransition = { fadeOut(animationSpec = androidx.compose.animation.core.tween(150)) },
+        popEnterTransition = { fadeIn(animationSpec = androidx.compose.animation.core.tween(150)) },
+        popExitTransition = { fadeOut(animationSpec = androidx.compose.animation.core.tween(150)) }
     ) {
         composable(Screen.Welcome.route) {
             StartScreen(
                 onNavigateToLogin = {
-                    navController.navigate(Screen.Login.route) {
-                        launchSingleTop = true
-                    }
+                    navController.navigate(Screen.Login.route)
                 },
                 onNavigateToRegister = {
-                    navController.navigate(Screen.RegistrationFlow.route) {
-                        launchSingleTop = true
-                    }
+                    navController.navigate(Screen.RegistrationFlow.route)
                 }
             )
         }
@@ -54,7 +57,7 @@ fun AppNavigation(
                     }
                 },
                 onNavigateToPersonalInfo = {
-                    navController.navigate(Screen.PersonalInfo.route) {
+                    navController.navigate(Screen.RegistrationFlow.route) {
                         popUpTo(Screen.Welcome.route)
                     }
                 },
@@ -71,59 +74,62 @@ fun AppNavigation(
             startDestination = Screen.Register.route,
             route = Screen.RegistrationFlow.route
         ) {
-            composable(Screen.Register.route) {
-                val navBackStackEntry = remember(navController) {
+            composable(Screen.Register.route) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(Screen.RegistrationFlow.route)
                 }
-                val sharedAuthViewModel: AuthViewModel = hiltViewModel(navBackStackEntry)
+                val sharedRegistrationViewModel: RegistrationViewModel = hiltViewModel(parentEntry)
 
                 CredentialsRegistrationScreen(
                     onNavigateBack = {
-                        sharedAuthViewModel.clearPendingGoogleRegistration()
+                        sharedRegistrationViewModel.clearPendingGoogleRegistration()
                         navController.popBackStack()
                     },
                     onNavigateToLogin = {
                         navController.navigate(Screen.Login.route) {
-                            popUpTo(Screen.Welcome.route)
+                            popUpTo(Screen.Welcome.route) {
+                                inclusive = false
+                            }
+                            launchSingleTop = true
                         }
                     },
                     onNavigateToPersonalInfo = {
                         navController.navigate(Screen.PersonalInfo.route)
                     },
-                    viewModel = sharedAuthViewModel
+                    viewModel = sharedRegistrationViewModel
                 )
             }
 
-            composable(Screen.PersonalInfo.route) {
-                val navBackStackEntry = remember(navController) {
+            composable(Screen.PersonalInfo.route) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(Screen.RegistrationFlow.route)
                 }
-                val sharedAuthViewModel: AuthViewModel = hiltViewModel(navBackStackEntry)
+                val sharedRegistrationViewModel: RegistrationViewModel = hiltViewModel(parentEntry)
 
                 PersonalInfoRegistrationScreen(
                     onNavigateBack = {
-                        sharedAuthViewModel.clearPendingGoogleRegistration()
+                        sharedRegistrationViewModel.clearPendingGoogleRegistration()
                         navController.popBackStack()
                     },
                     onRegistrationSuccess = {
-                        sharedAuthViewModel.clearPendingGoogleRegistration()
+                        sharedRegistrationViewModel.clearPendingGoogleRegistration()
                         navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Welcome.route) { inclusive = true }
                         }
                     },
-                    viewModel = sharedAuthViewModel
+                    viewModel = sharedRegistrationViewModel
                 )
             }
         }
 
-        composable(route = Screen.Home.route) {
+        composable(Screen.Home.route) {
             val authViewModel: AuthViewModel = hiltViewModel()
 
             HomeScreen(
                 onLogout = {
                     authViewModel.logout()
                     navController.navigate(Screen.Welcome.route) {
-                        popUpTo(Screen.Welcome.route) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
