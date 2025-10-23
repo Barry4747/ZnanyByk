@@ -1,192 +1,74 @@
-//import androidx.compose.foundation.layout.Box
-//import androidx.compose.foundation.layout.fillMaxSize
-//import androidx.compose.foundation.layout.padding
-//import androidx.compose.material3.ExperimentalMaterial3Api
-//import androidx.compose.material3.Icon
-//import androidx.compose.material3.NavigationBar
-//import androidx.compose.material3.NavigationBarDefaults
-//import androidx.compose.material3.NavigationBarItem
-//import androidx.compose.material3.NavigationRail
-//import androidx.compose.material3.NavigationRailItem
-//import androidx.compose.material3.PrimaryTabRow
-//import androidx.compose.material3.Scaffold
-//import androidx.compose.material3.Tab
-//import androidx.compose.material3.Text
-//import androidx.compose.runtime.Composable
-//import androidx.compose.runtime.getValue
-//import androidx.compose.runtime.mutableIntStateOf
-//import androidx.compose.runtime.saveable.rememberSaveable
-//import androidx.compose.runtime.setValue
-//import androidx.compose.ui.Alignment
-//import androidx.compose.ui.Modifier
-//import androidx.compose.ui.graphics.vector.ImageVector
-//import androidx.compose.ui.text.style.TextOverflow
-//import androidx.compose.ui.tooling.preview.Preview
-//import androidx.navigation.NavHostController
-//import androidx.navigation.compose.NavHost
-//import androidx.navigation.compose.composable
-//import androidx.navigation.compose.rememberNavController
-//
-//@Composable
-//fun SongsScreen(modifier: Modifier = Modifier) {
-//    Box(
-//        modifier = Modifier.fillMaxSize(),
-//        contentAlignment = Alignment.Center
-//    ) {
-//        Text("Songs Screen")
-//    }
-//}
-//
-//@Composable
-//fun AlbumScreen(modifier: Modifier = Modifier) {
-//    Box(
-//        modifier = Modifier.fillMaxSize(),
-//        contentAlignment = Alignment.Center
-//    ) {
-//        Text("Album Screen")
-//    }
-//}
-//
-//@Composable
-//fun PlaylistScreen(modifier: Modifier = Modifier) {
-//    Box(
-//        modifier = Modifier.fillMaxSize(),
-//        contentAlignment = Alignment.Center
-//    ) {
-//        Text("Playlist Screen")
-//    }
-//}
-//
-//enum class Destination(
-//    val route: String,
-//    val label: String,
-//    val icon: ImageVector,
-//    val contentDescription: String
-//) {
-//    //SONGS("songs", "Songs", Icons.Default.MusicNote, "Songs"),
-//    //ALBUM("album", "Album", Icons.Default.Album, "Album"),
-//    //PLAYLISTS("playlist", "Playlist", Icons.Default.PlaylistAddCircle, "Playlist")
-//}
-//
-//@Composable
-//fun AppNavHost(
-//    navController: NavHostController,
-//    startDestination: Destination,
-//    modifier: Modifier = Modifier
-//) {
-//    NavHost(
-//        navController,
-//        startDestination = startDestination.route
-//    ) {
-//        Destination.entries.forEach { destination ->
-//            composable(destination.route) {
-//                when (destination) {
-//                    Destination.SONGS -> SongsScreen()
-//                    Destination.ALBUM -> AlbumScreen()
-//                    Destination.PLAYLISTS -> PlaylistScreen()
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//@Preview()
-//// [START android_compose_components_navigationbarexample]
-//@Composable
-//fun NavigationBarExample(modifier: Modifier = Modifier) {
-//    val navController = rememberNavController()
-//    val startDestination = Destination.SONGS
-//    var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
-//
-//    Scaffold(
-//        modifier = modifier,
-//        bottomBar = {
-//            NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
-//                Destination.entries.forEachIndexed { index, destination ->
-//                    NavigationBarItem(
-//                        selected = selectedDestination == index,
-//                        onClick = {
-//                            navController.navigate(route = destination.route)
-//                            selectedDestination = index
-//                        },
-//                        icon = {
-//                            Icon(
-//                                destination.icon,
-//                                contentDescription = destination.contentDescription
-//                            )
-//                        },
-//                        label = { Text(destination.label) }
-//                    )
-//                }
-//            }
-//        }
-//    ) { contentPadding ->
-//        AppNavHost(navController, startDestination, modifier = Modifier.padding(contentPadding))
-//    }
-//}
-//// [END android_compose_components_navigationbarexample]
-//
-//@Preview()
-//// [START android_compose_components_navigationrailexample]
-//@Composable
-//fun NavigationRailExample(modifier: Modifier = Modifier) {
-//    val navController = rememberNavController()
-//    val startDestination = Destination.SONGS
-//    var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
-//
-//    Scaffold(modifier = modifier) { contentPadding ->
-//        NavigationRail(modifier = Modifier.padding(contentPadding)) {
-//            Destination.entries.forEachIndexed { index, destination ->
-//                NavigationRailItem(
-//                    selected = selectedDestination == index,
-//                    onClick = {
-//                        navController.navigate(route = destination.route)
-//                        selectedDestination = index
-//                    },
-//                    icon = {
-//                        Icon(
-//                            destination.icon,
-//                            contentDescription = destination.contentDescription
-//                        )
-//                    },
-//                    label = { Text(destination.label) }
-//                )
-//            }
-//        }
-//        AppNavHost(navController, startDestination)
-//    }
-//}
-//// [END android_compose_components_navigationrailexample]
-//
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Preview(showBackground = true)
-//// [START android_compose_components_navigationtabexample]
-//@Composable
-//fun NavigationTabExample(modifier: Modifier = Modifier) {
-//    val navController = rememberNavController()
-//    val startDestination = Destination.SONGS
-//    var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
-//
-//    Scaffold(modifier = modifier) { contentPadding ->
-//        PrimaryTabRow(selectedTabIndex = selectedDestination, modifier = Modifier.padding(contentPadding)) {
-//            Destination.entries.forEachIndexed { index, destination ->
-//                Tab(
-//                    selected = selectedDestination == index,
-//                    onClick = {
-//                        navController.navigate(route = destination.route)
-//                        selectedDestination = index
-//                    },
-//                    text = {
-//                        Text(
-//                            text = destination.label,
-//                            maxLines = 2,
-//                            overflow = TextOverflow.Ellipsis
-//                        )
-//                    }
-//                )
-//            }
-//        }
-//        AppNavHost(navController, startDestination)
-//    }
-//}
-//// [END android_compose_components_navigationtabexample]
+package com.example.myapplication.ui.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.example.myapplication.R
+
+enum class Destination(
+    val route: String,
+    val label: String,
+    val iconRes: Int,
+    val contentDescription: String
+) {
+    HOME("home", "Home", R.drawable.home, "Home"),
+    SCHEDULER("scheduler", "Scheduler", R.drawable.scheduler, "Scheduler"),
+    CHATS("chats", "Chats", R.drawable.chats, "Chats"),
+    PROFILE("profile", "Profile", R.drawable.user, "Profile")
+    //można dodać później TRAINERPROFILE, żeby trener miał dodatkową ikonkę
+}
+
+@Composable
+fun NavigationBarExample(
+    modifier: Modifier = Modifier,
+    navController: NavHostController
+) {
+    val currentRoute = currentRoute(navController)
+
+    NavigationBar(modifier = modifier.navigationBarsPadding().background(color=Color.White), windowInsets = NavigationBarDefaults.windowInsets) {
+        Destination.entries.forEach { destination ->
+            NavigationBarItem(
+                selected = currentRoute == destination.route,
+                onClick = {
+                    if (currentRoute != destination.route) {
+                        navController.navigate(destination.route) {
+                            popUpTo(Destination.HOME.route)
+                            launchSingleTop = true
+                        }
+                    }
+                },
+                icon = {
+                    Icon(
+                        painter = painterResource(id = destination.iconRes),
+                        contentDescription = destination.contentDescription,
+                        modifier = modifier.height(32.dp).aspectRatio(1f).alpha(1.0f)
+                    )
+
+                },
+                label = {},
+                modifier = modifier.background(color = Color.White)
+            )
+        }
+    }
+}
+
+@Composable
+fun currentRoute(navController: NavHostController): String? {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    return navBackStackEntry?.destination?.route
+}
+

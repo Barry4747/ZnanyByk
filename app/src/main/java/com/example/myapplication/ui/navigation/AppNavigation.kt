@@ -2,6 +2,9 @@ package com.example.myapplication.ui.navigation
 
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -9,7 +12,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
+import com.example.myapplication.ui.components.Destination
+import com.example.myapplication.ui.components.NavigationBarExample
 import com.example.myapplication.ui.screens.SplashScreen
 import com.example.myapplication.ui.screens.WelcomeScreen
 import com.example.myapplication.ui.screens.auth.CredentialsRegistrationScreen
@@ -18,6 +24,8 @@ import com.example.myapplication.ui.screens.auth.PersonalInfoRegistrationScreen
 import com.example.myapplication.ui.screens.home.HomeScreen
 import com.example.myapplication.viewmodel.AuthViewModel
 import com.example.myapplication.viewmodel.RegistrationViewModel
+import com.example.myapplication.ui.screens.scheduler.SchedulerScreen
+
 
 @Composable
 fun AppNavigation(
@@ -144,17 +152,54 @@ fun AppNavigation(
             }
         }
 
-        composable(Screen.Home.route) {
-            val authViewModel: AuthViewModel = hiltViewModel()
+        /*
+        *PORADNIK DO DODAWANIA NAVIGATION BARA DO SCREENOW
+        * Aby dodać do danego Screena NavigationBar wystarczy w środku composable opleść
+        * dany Screen w klasę NavigationBarWrapper(). Przyjmuje ona parametry:
+        * item= (tutaj piszemy danego Composable'a z jego kodem w nawiasach { })
+        * navController= tutaj przekazujemy navController*/
 
-            HomeScreen(
-                onLogout = {
-                    authViewModel.logout()
-                    navController.navigate(Screen.Welcome.route) {
-                        popUpTo(0) { inclusive = true }
+        composable(Screen.Home.route) {
+            val bottomNavController = rememberNavController()
+
+            Scaffold(
+                bottomBar = {
+                    NavigationBarExample(navController = bottomNavController)
+                }
+            ) { innerPadding ->
+                Box(modifier = Modifier.padding(innerPadding)) {
+                    NavHost(
+                        navController = bottomNavController,
+                        startDestination = Destination.HOME.route
+                    ) {
+                        composable(Destination.HOME.route) {
+                            val authViewModel: AuthViewModel = hiltViewModel()
+                            HomeScreen(
+                                onLogout = {
+                                    authViewModel.logout()
+                                    navController.navigate(Screen.Welcome.route) { // używamy głównego
+                                        popUpTo(0) { inclusive = true }
+                                    }
+                                }
+                            )
+                        }
+
+                        composable(Destination.SCHEDULER.route) {
+                            SchedulerScreen()
+                        }
+
+                        composable(Destination.CHATS.route) {
+                            /* ChatsScreen() */
+                        }
+
+                        composable(Destination.PROFILE.route) {
+                            /* ProfileScreen() */
+                        }
                     }
                 }
-            )
+            }
         }
     }
 }
+
+
