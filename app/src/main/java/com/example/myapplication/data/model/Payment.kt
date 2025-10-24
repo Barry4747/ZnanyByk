@@ -1,6 +1,6 @@
 package com.example.myapplication.data.model
 
-data class Payments (
+data class Payment (
     val paymentId: String = "",
     val trainingsId: String = "",
     val amount: Double = 0.0,
