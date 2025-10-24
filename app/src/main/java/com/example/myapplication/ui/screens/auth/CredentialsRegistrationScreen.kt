@@ -20,12 +20,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.example.myapplication.R
 import com.example.myapplication.ui.components.buttons.GoogleAuthButton
 import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.ui.components.buttons.MainTextButton
@@ -41,13 +39,12 @@ fun CredentialsRegistrationScreen(
     viewModel: RegistrationViewModel = hiltViewModel()
 ) {
     val registrationState by viewModel.registrationState.collectAsState()
-    val context = LocalContext.current
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    registrationState.user?.let { _ ->
-        LaunchedEffect(Unit) {
+    LaunchedEffect(registrationState.user) {
+        if (registrationState.user != null) {
             onGoogleSignInSuccess()
         }
     }
@@ -111,10 +108,7 @@ fun CredentialsRegistrationScreen(
 
             GoogleAuthButton(
                 text = "Kontynuuj z Google",
-                onClick = {
-                    val webClientId = context.getString(R.string.default_web_client_id)
-                    viewModel.signUpWithGoogle(webClientId)
-                },
+                onClick = { viewModel.signUpWithGoogle() },
                 modifier = Modifier.fillMaxWidth()
             )
         }

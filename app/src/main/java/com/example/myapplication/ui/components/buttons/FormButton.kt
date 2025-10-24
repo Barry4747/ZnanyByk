@@ -20,6 +20,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
+private val BUTTON_HEIGHT = 56.dp
+private val BUTTON_CORNER_RADIUS = 4.dp
+private val BORDER_WIDTH = 1.dp
+private val HORIZONTAL_PADDING = 16.dp
+private val VERTICAL_PADDING = 16.dp
+private const val DISABLED_CONTAINER_ALPHA = 0.12f
+private const val DISABLED_CONTENT_ALPHA = 0.38f
+
 @Composable
 fun FormButton(
     text: String,
@@ -32,23 +40,23 @@ fun FormButton(
         enabled = enabled,
         modifier = modifier
             .fillMaxWidth()
-            .height(56.dp),
-        shape = RoundedCornerShape(4.dp),
+            .height(BUTTON_HEIGHT),
+        shape = RoundedCornerShape(BUTTON_CORNER_RADIUS),
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.12f),
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = DISABLED_CONTAINER_ALPHA),
+            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_CONTENT_ALPHA)
         ),
         border = BorderStroke(
-            width = 1.dp,
+            width = BORDER_WIDTH,
             color = if (enabled) {
                 MaterialTheme.colorScheme.outline
             } else {
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_CONTAINER_ALPHA)
             }
         ),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
+        contentPadding = PaddingValues(horizontal = HORIZONTAL_PADDING, vertical = VERTICAL_PADDING)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -78,4 +86,3 @@ fun FormButtonPreview() {
         )
     }
 }
-
