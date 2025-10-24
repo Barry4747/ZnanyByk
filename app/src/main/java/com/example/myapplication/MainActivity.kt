@@ -9,22 +9,35 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.example.myapplication.ui.components.CustomBottomBar
+import com.example.myapplication.ui.components.Destination
+import com.example.myapplication.ui.components.currentRoute
 import com.example.myapplication.ui.navigation.AppNavigation
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import dagger.hilt.android.AndroidEntryPoint
-import com.google.firebase.FirebaseApp
-
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        FirebaseApp.initializeApp(this)
         enableEdgeToEdge()
         setContent {
             MyApplicationTheme {
                 val navController = rememberNavController()
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(modifier = Modifier.fillMaxSize(),
+                    bottomBar = {
+                    val route = currentRoute(navController)
+                    if (route in listOf(
+                            Destination.HOME.route,
+                            Destination.SCHEDULER.route,
+                            Destination.CHATS.route,
+                            Destination.USER.route
+                        )
+                    ) {
+                        CustomBottomBar(navController = navController)
+                    }
+                }
+                ) { innerPadding ->
                     AppNavigation(
                         navController = navController,
                         modifier = Modifier.padding(innerPadding)

@@ -1,22 +1,17 @@
 package com.example.myapplication.ui.navigation
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.myapplication.ui.components.CustomBottomBar
+import androidx.navigation.compose.navigation
 import com.example.myapplication.ui.components.Destination
-import com.example.myapplication.ui.components.currentRoute
 import com.example.myapplication.ui.screens.SplashScreen
 import com.example.myapplication.ui.screens.WelcomeScreen
 import com.example.myapplication.ui.screens.auth.CredentialsRegistrationScreen
@@ -32,30 +27,16 @@ fun AppNavigation(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    Scaffold(
-        bottomBar = {
-            val route = currentRoute(navController)
-            if (route in listOf(
-                    Destination.HOME.route,
-                    Destination.SCHEDULER.route,
-                    Destination.CHATS.route,
-                    Destination.PROFILE.route
-                )
-            ) {
-                CustomBottomBar(navController = navController)
-            }
-        }
-    ) { innerPadding ->
 
-        Box(modifier = Modifier.padding(innerPadding)) {
+        Box(modifier = Modifier) {
             NavHost(
                 navController = navController,
                 startDestination = Screen.Splash.route,
                 modifier = modifier,
-                enterTransition = { fadeIn(animationSpec = tween(10)) },
-                exitTransition = { fadeOut(animationSpec = tween(10)) },
-                popEnterTransition = { fadeIn(animationSpec = tween(10)) },
-                popExitTransition = { fadeOut(animationSpec = tween(10)) }
+                enterTransition = { fadeIn(animationSpec = androidx.compose.animation.core.tween(150)) },
+                exitTransition = { fadeOut(animationSpec = androidx.compose.animation.core.tween(150)) },
+                popEnterTransition = { fadeIn(animationSpec = androidx.compose.animation.core.tween(150)) },
+                popExitTransition = { fadeOut(animationSpec = androidx.compose.animation.core.tween(150)) }
             ) {
 
                 composable(Screen.Splash.route) {
@@ -77,14 +58,10 @@ fun AppNavigation(
                 composable(Screen.Welcome.route) {
                     WelcomeScreen(
                         onNavigateToLogin = {
-                            navController.navigate(Screen.Login.route) {
-                                launchSingleTop = true
-                            }
+                            navController.navigate(Screen.Login.route)
                         },
                         onNavigateToRegister = {
-                            navController.navigate(Screen.Register.route) {
-                                launchSingleTop = true
-                            }
+                            navController.navigate(Screen.RegistrationFlow.route)
                         }
                     )
                 }
@@ -94,20 +71,15 @@ fun AppNavigation(
                     val authViewModel: AuthViewModel = hiltViewModel()
 
                     LoginScreen(
-                        onNavigateBack = {
-                            navController.navigate(Screen.Welcome.route){
-                                popUpTo(Screen.Welcome.route)
-                                launchSingleTop = true
-                            }
-                        },
+                        onNavigateBack = { navController.popBackStack() },
                         onNavigateToRegister = {
-                            navController.navigate(Screen.Register.route) {
+                            navController.navigate(Screen.RegistrationFlow.route) {
                                 popUpTo(Screen.Welcome.route)
                                 launchSingleTop = true
                             }
                         },
                         onNavigateToPersonalInfo = {
-                            navController.navigate(Screen.PersonalInfo.route) {
+                            navController.navigate(Screen.RegistrationFlow.route) {
                                 popUpTo(Screen.Welcome.route)
                             }
                         },
@@ -121,50 +93,60 @@ fun AppNavigation(
                 }
 
 
-                composable(Screen.Register.route) {
-                    val registrationViewModel: RegistrationViewModel = hiltViewModel()
+                navigation(
+                    startDestination = Screen.Register.route,
+                    route = Screen.RegistrationFlow.route
+                ) {
+                    composable(Screen.Register.route) { backStackEntry ->
+                        val parentEntry = remember(backStackEntry) {
+                            navController.getBackStackEntry(Screen.RegistrationFlow.route)
+                        }
+                        val sharedRegistrationViewModel: RegistrationViewModel = hiltViewModel(parentEntry)
 
-                    CredentialsRegistrationScreen(
-                        onNavigateBack = {
-                            navController.navigate(Screen.Welcome.route){
-                                popUpTo(Screen.Welcome.route)
-                                launchSingleTop = true
-                            }
-                        },
-                        onNavigateToLogin = {
-                            navController.navigate(Screen.Login.route) {
-                                popUpTo(Screen.Welcome.route)
-                                launchSingleTop = true
-                            }
-                        },
-                        onNavigateToPersonalInfo = {
-                            navController.navigate(Screen.PersonalInfo.route)
-                        },
-                        onGoogleSignInSuccess = {
-                            navController.navigate(Destination.HOME.route) {
-                                popUpTo(Screen.Welcome.route) { inclusive = true }
-                                launchSingleTop = true
-                            }
-                        },
-                        viewModel = registrationViewModel
-                    )
-                }
+                        CredentialsRegistrationScreen(
+                            onNavigateBack = {
+                                sharedRegistrationViewModel.clearPendingGoogleRegistration()
+                                navController.popBackStack()
+                            },
+                            onNavigateToLogin = {
+                                navController.navigate(Screen.Login.route) {
+                                    popUpTo(Screen.Welcome.route) { inclusive = false }
+                                    launchSingleTop = true
+                                }
+                            },
+                            onNavigateToPersonalInfo = {
+                                navController.navigate(Screen.PersonalInfo.route)
+                            },
+                            onGoogleSignInSuccess = {
+                                sharedRegistrationViewModel.clearPendingGoogleRegistration()
+                                navController.navigate(Destination.HOME.route) {
+                                    popUpTo(Screen.Welcome.route) { inclusive = true }
+                                }
+                            },
+                            viewModel = sharedRegistrationViewModel
+                        )
+                    }
 
+                    composable(Screen.PersonalInfo.route) { backStackEntry ->
+                        val parentEntry = remember(backStackEntry) {
+                            navController.getBackStackEntry(Screen.RegistrationFlow.route)
+                        }
+                        val sharedRegistrationViewModel: RegistrationViewModel = hiltViewModel(parentEntry)
 
-                composable(Screen.PersonalInfo.route) {
-                    val registrationViewModel: RegistrationViewModel = hiltViewModel()
-
-                    PersonalInfoRegistrationScreen(
-                        onNavigateBack = {
-                            navController.popBackStack()
-                        },
-                        onRegistrationSuccess = {
-                            navController.navigate(Destination.HOME.route) {
-                                popUpTo(Screen.Welcome.route) { inclusive = true }
-                            }
-                        },
-                        viewModel = registrationViewModel
-                    )
+                        PersonalInfoRegistrationScreen(
+                            onNavigateBack = {
+                                sharedRegistrationViewModel.clearPendingGoogleRegistration()
+                                navController.popBackStack()
+                            },
+                            onRegistrationSuccess = {
+                                sharedRegistrationViewModel.clearPendingGoogleRegistration()
+                                navController.navigate(Destination.HOME.route) {
+                                    popUpTo(Screen.Welcome.route) { inclusive = true }
+                                }
+                            },
+                            viewModel = sharedRegistrationViewModel
+                        )
+                    }
                 }
 
                 composable(Destination.HOME.route) {
@@ -187,10 +169,10 @@ fun AppNavigation(
                     /* ChatsScreen() */
                 }
 
-                composable(Destination.PROFILE.route) {
+                composable(Destination.USER.route) {
                     /* ProfileScreen() */
                 }
             }
         }
     }
-}
+

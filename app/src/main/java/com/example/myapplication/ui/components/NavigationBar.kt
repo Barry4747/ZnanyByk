@@ -25,19 +25,20 @@ enum class Destination(
     val route: String,
     val label: String,
     val iconRes: Int,
+    val iconActiveRes: Int,
     val contentDescription: String
 ) {
-    HOME("home", "Home", R.drawable.home, "Home"),
-    SCHEDULER("scheduler", "Scheduler", R.drawable.scheduler, "Scheduler"),
-    CHATS("chats", "Chats", R.drawable.chats, "Chats"),
-    PROFILE("profile", "Profile", R.drawable.user, "Profile")
+    HOME("home", "Home", R.drawable.home, R.drawable.home_active, "Home"),
+    CHATS("chats", "Chats", R.drawable.chats, R.drawable.chats_active, "Chats"),
+    SCHEDULER("scheduler", "Scheduler", R.drawable.scheduler, R.drawable.scheduler_active, "Scheduler"),
+    USER("profile", "Profile", R.drawable.user, R.drawable.user_active, "Profile")
     //można dodać później TRAINERPROFILE, żeby trener miał dodatkową ikonkę
 }
 
 @Composable
 fun CustomBottomBar(
     navController: NavHostController,
-    height: Dp = 56.dp,
+    height: Dp = 72.dp,
     iconSize: Dp = 24.dp
 ) {
     val currentRoute = currentRoute(navController)
@@ -47,8 +48,11 @@ fun CustomBottomBar(
             .fillMaxWidth()
             .height(height)
             .background(Color.White)
+            .windowInsetsPadding(WindowInsets.navigationBars)
     ) {
         Destination.entries.forEach { destination ->
+            val isSelected = currentRoute == destination.route
+
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -64,7 +68,9 @@ fun CustomBottomBar(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = painterResource(id = destination.iconRes),
+                    painter = painterResource(
+                        id = if (isSelected) destination.iconActiveRes else destination.iconRes
+                    ),
                     contentDescription = destination.contentDescription,
                     modifier = Modifier.size(iconSize)
                 )
