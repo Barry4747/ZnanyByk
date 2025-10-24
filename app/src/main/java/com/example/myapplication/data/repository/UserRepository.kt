@@ -9,9 +9,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.example.myapplication.data.model.User
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -20,81 +18,32 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 
 @Singleton
 class UserRepository @Inject constructor(
-    private val db: FirebaseFirestore,
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) {
-    private val usersCollection = db.collection("users")
+    private val usersCollection = FirebaseFirestore.getInstance().collection("users")
     private val dataStore = context.dataStore
 
     companion object {
         private val USER_ID_KEY = stringPreferencesKey("user_id")
-        private val USER_EMAIL_KEY = stringPreferencesKey("user_email")
-        private val USER_FIRST_NAME_KEY = stringPreferencesKey("user_first_name")
-        private val USER_LAST_NAME_KEY = stringPreferencesKey("user_last_name")
-        private val USER_BIRTH_DATE_KEY = stringPreferencesKey("user_birth_date")
     }
 
-    // DataStore methods
     suspend fun saveCachedUser(user: User, uid: String) {
         dataStore.edit { preferences ->
             preferences[USER_ID_KEY] = uid
-            preferences[USER_EMAIL_KEY] = user.email
-            preferences[USER_FIRST_NAME_KEY] = user.firstName
-            preferences[USER_LAST_NAME_KEY] = user.lastName
-            preferences[USER_BIRTH_DATE_KEY] = user.birthDate?.toString() ?: ""
         }
     }
 
     suspend fun getCachedUser(): Pair<String, User>? {
         val preferences = dataStore.data.first()
         val uid = preferences[USER_ID_KEY] ?: return null
-        val email = preferences[USER_EMAIL_KEY] ?: return null
-        val firstName = preferences[USER_FIRST_NAME_KEY] ?: return null
-        val lastName = preferences[USER_LAST_NAME_KEY] ?: return null
-        val birthDateString = preferences[USER_BIRTH_DATE_KEY] ?: ""
-
-        val user = User(
-            email = email,
-            firstName = firstName,
-            lastName = lastName,
-            birthDate = if (birthDateString.isNotEmpty()) {
-                try {
-                    java.text.SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", java.util.Locale.ENGLISH).parse(birthDateString)
-                } catch (e: Exception) {
-                    null
-                }
-            } else null
-        )
-
+        val doc = usersCollection.document(uid).get().await()
+        val user = doc.toObject(User::class.java) ?: return null
         return Pair(uid, user)
-    }
-
-    fun getCachedUserFlow(): Flow<Pair<String, User>?> = dataStore.data.map { preferences ->
-        val uid = preferences[USER_ID_KEY] ?: return@map null
-        val email = preferences[USER_EMAIL_KEY] ?: return@map null
-        val firstName = preferences[USER_FIRST_NAME_KEY] ?: return@map null
-        val lastName = preferences[USER_LAST_NAME_KEY] ?: return@map null
-        val birthDateString = preferences[USER_BIRTH_DATE_KEY] ?: ""
-
-        val user = User(
-            email = email,
-            firstName = firstName,
-            lastName = lastName,
-            birthDate = if (birthDateString.isNotEmpty()) {
-                try {
-                    java.text.SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", java.util.Locale.ENGLISH).parse(birthDateString)
-                } catch (e: Exception) {
-                    null
-                }
-            } else null
-        )
-
-        Pair(uid, user)
     }
 
     suspend fun clearCachedUser() {
         dataStore.edit { preferences ->
-            preferences.clear()
+            preferences.remove(USER_ID_KEY)
         }
     }
 

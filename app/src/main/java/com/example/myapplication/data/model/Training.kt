@@ -3,7 +3,7 @@ package com.example.myapplication.data.model
 import java.util.Date
 
 
-data class Trainings (
+data class Training (
     val trainingsID: String = "",
     val date: Date? = null,
     val price: Double? = null,
