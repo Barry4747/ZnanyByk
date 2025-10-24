@@ -3,19 +3,22 @@ package com.example.myapplication.ui.navigation
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
+import com.example.myapplication.ui.components.CustomBottomBar
 import com.example.myapplication.ui.components.Destination
-import com.example.myapplication.ui.components.NavigationBarExample
 import com.example.myapplication.ui.screens.SplashScreen
 import com.example.myapplication.ui.screens.WelcomeScreen
 import com.example.myapplication.ui.screens.auth.CredentialsRegistrationScreen
@@ -153,52 +156,48 @@ fun AppNavigation(
         }
 
         /*
-        *PORADNIK DO DODAWANIA NAVIGATION BARA DO SCREENOW
-        * Aby dodać do danego Screena NavigationBar wystarczy w środku composable opleść
-        * dany Screen w klasę NavigationBarWrapper(). Przyjmuje ona parametry:
-        * item= (tutaj piszemy danego Composable'a z jego kodem w nawiasach { })
-        * navController= tutaj przekazujemy navController*/
+        *tutaj można dodawać ekrany, które mają mieć navigation bar*/
 
         composable(Screen.Home.route) {
             val bottomNavController = rememberNavController()
 
             Scaffold(
                 bottomBar = {
-                    NavigationBarExample(navController = bottomNavController)
+                    CustomBottomBar(navController = bottomNavController)
                 }
             ) { innerPadding ->
-                Box(modifier = Modifier.padding(innerPadding)) {
-                    NavHost(
-                        navController = bottomNavController,
-                        startDestination = Destination.HOME.route
-                    ) {
-                        composable(Destination.HOME.route) {
-                            val authViewModel: AuthViewModel = hiltViewModel()
-                            HomeScreen(
-                                onLogout = {
-                                    authViewModel.logout()
-                                    navController.navigate(Screen.Welcome.route) { // używamy głównego
-                                        popUpTo(0) { inclusive = true }
-                                    }
+                NavHost(
+                    navController = bottomNavController,
+                    startDestination = Destination.HOME.route,
+                    modifier = Modifier.padding(innerPadding)
+                ) {
+                    composable(Destination.HOME.route) {
+                        val authViewModel: AuthViewModel = hiltViewModel()
+                        HomeScreen(
+                            onLogout = {
+                                authViewModel.logout()
+                                navController.navigate(Screen.Welcome.route) {
+                                    popUpTo(0) { inclusive = true }
                                 }
-                            )
-                        }
+                            }
+                        )
+                    }
 
-                        composable(Destination.SCHEDULER.route) {
-                            SchedulerScreen()
-                        }
+                    composable(Destination.SCHEDULER.route) {
+                        SchedulerScreen()
+                    }
 
-                        composable(Destination.CHATS.route) {
-                            /* ChatsScreen() */
-                        }
+                    composable(Destination.CHATS.route) {
+                        /* ChatsScreen() */
+                    }
 
-                        composable(Destination.PROFILE.route) {
-                            /* ProfileScreen() */
-                        }
+                    composable(Destination.PROFILE.route) {
+                        /* ProfileScreen() */
                     }
                 }
             }
         }
+
     }
 }
 
