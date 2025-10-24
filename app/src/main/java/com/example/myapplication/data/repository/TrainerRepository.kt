@@ -2,6 +2,7 @@ package com.example.myapplication.data.repository
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.animation.core.copy
 import com.example.myapplication.data.model.Trainer
 import com.example.myapplication.data.model.User
 import com.google.firebase.firestore.firestore
@@ -10,6 +11,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import kotlin.jvm.optionals.getOrNull
 
 class TrainerRepository @Inject constructor(
     private val db: FirebaseFirestore
@@ -22,9 +24,23 @@ class TrainerRepository @Inject constructor(
             val snapshot = trainerCollection.get().await()
             val trainers = snapshot.toObjects(Trainer::class.java)
             Log.d("TRAINER_REPO", "📊 Trenerzy: ${trainers.map { it.name }}")
+
+            for (trainer in trainers) {
+                val avgRating = getTrainerAvgRating(trainer)
+                trainer.avgRating = avgRating
+            }
+
             Result.success(trainers)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    suspend fun getTrainerAvgRating(trainer: Trainer): String {
+        return if (trainer.ratings.isNotEmpty()) {
+            "%.2f".format(trainer.ratings.average()) // 👈 Dwa miejsca po przecinku
+        } else {
+            "0.00"
         }
     }
 
@@ -46,7 +62,7 @@ class TrainerRepository @Inject constructor(
                 location = "Warszawa",
                 ratings = listOf(5, 4, 5),
                 pricePerHour =  100,
-                experience = 4.5f,
+                experience = 4,
                 id = "1"
             )
 
