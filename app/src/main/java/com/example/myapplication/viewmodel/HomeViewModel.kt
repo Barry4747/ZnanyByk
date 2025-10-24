@@ -2,8 +2,10 @@ package com.example.myapplication.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myapplication.data.model.Trainer
 import com.example.myapplication.data.model.User
 import com.example.myapplication.data.repository.AuthRepository
+import com.example.myapplication.data.repository.TrainerRepository
 import com.example.myapplication.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +16,7 @@ import javax.inject.Inject
 
 data class HomeState(
     val user: User? = null,
+    val trainers: List<Trainer> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null
 )
@@ -21,7 +24,8 @@ data class HomeState(
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val trainerRepository: TrainerRepository
 ) : ViewModel() {
 
     private val _homeState = MutableStateFlow(HomeState())
@@ -29,7 +33,9 @@ class HomeViewModel @Inject constructor(
 
     init {
         loadCurrentUser()
+        loadTrainers()
     }
+
 
     private fun loadCurrentUser() {
         viewModelScope.launch {
@@ -56,6 +62,35 @@ class HomeViewModel @Inject constructor(
                     errorMessage = "No user logged in"
                 )
             }
+        }
+    }
+
+    private fun loadTrainers() {
+        viewModelScope.launch {
+            _homeState.value = _homeState.value.copy(isLoading = true)
+
+            trainerRepository.getAllTrainers()
+                .onSuccess { trainersList ->
+                    if (trainersList.isNotEmpty()) {
+                        _homeState.value = _homeState.value.copy(
+                            isLoading = false,
+                            trainers = trainersList
+                        )
+                    } else {
+                        _homeState.value = _homeState.value.copy(
+                            isLoading = false,
+                            trainers = emptyList(),
+                        )
+                    }
+                }
+                .onFailure { exception ->
+                    _homeState.value = _homeState.value.copy(
+                        isLoading = false,
+                        errorMessage = exception.message ?: "Nie udało się załadować trenerów"
+                    )
+                }
+
+
         }
     }
 

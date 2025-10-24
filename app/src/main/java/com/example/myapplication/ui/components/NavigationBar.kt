@@ -37,7 +37,8 @@ enum class Destination(
 @Composable
 fun CustomBottomBar(
     navController: NavHostController,
-    height: Dp = 56.dp
+    height: Dp = 56.dp,
+    iconSize: Dp = 24.dp
 ) {
     val currentRoute = currentRoute(navController)
 
@@ -60,17 +61,18 @@ fun CustomBottomBar(
                             }
                         }
                     },
-                contentAlignment = Alignment.BottomCenter
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
                     painter = painterResource(id = destination.iconRes),
                     contentDescription = destination.contentDescription,
-                    modifier = Modifier.size(height)
+                    modifier = Modifier.size(iconSize)
                 )
             }
         }
     }
 }
+
 
 
 
