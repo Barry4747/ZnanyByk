@@ -20,9 +20,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.myapplication.R
 import com.example.myapplication.viewmodel.SchedulerViewModel
 import com.example.myapplication.viewmodel.Task
 
@@ -43,7 +45,7 @@ fun SchedulerScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Twój Harmonogram",
+            text = stringResource(R.string.twoj_harmonogram),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold
         )
@@ -58,7 +60,7 @@ fun SchedulerScreen(
                 ErrorCard(errorMessage)
             }
             tasks.isEmpty() -> {
-                Text("Brak zaplanowanych zadań.", style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(R.string.brak_zaplanowanych_zadan), style = MaterialTheme.typography.bodyLarge)
             }
             else -> {
                 LazyColumn(
@@ -78,7 +80,7 @@ fun SchedulerScreen(
             onClick = { viewModel.refreshTasks() },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Odśwież")
+            Text(stringResource(R.string.odswiez))
         }
     }
 }
@@ -99,14 +101,14 @@ fun TaskCard(task: Task) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Godzina: ${task.time}",
+                text = stringResource(R.string.godzina, task.time),
                 style = MaterialTheme.typography.bodyMedium
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Opis: ${task.description}",
+                text = stringResource(R.string.opis, task.description),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.secondary
             )
@@ -128,7 +130,7 @@ fun ErrorCard(message: String) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "⚠️ Błąd",
+                text = stringResource(R.string.blad),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.error

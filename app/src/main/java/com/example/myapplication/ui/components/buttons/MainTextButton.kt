@@ -9,10 +9,10 @@ import androidx.compose.ui.text.style.TextDecoration
 
 @Composable
 fun MainTextButton(
+    modifier: Modifier = Modifier,
     text: String,
     onClick: () -> Unit = {},
-    enabled : Boolean = true,
-    modifier: Modifier = Modifier
+    enabled : Boolean = true
 ) {
     TextButton(
         onClick = onClick,
