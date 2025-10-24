@@ -177,7 +177,7 @@ class RegistrationViewModel @Inject constructor(
         userRepository.getUser(uid)
             .onSuccess { user ->
                 if (user != null) {
-                    userRepository.saveCachedUser(user, uid)
+                    authRepository.saveCachedUser(user, uid)
                     setSuccess(user, "Account already exists. Logging you in...")
                 } else {
                     startGoogleRegistrationFlow(uid, email)
@@ -203,7 +203,7 @@ class RegistrationViewModel @Inject constructor(
     private suspend fun saveUserToFirestore(user: User, uid: String) {
         userRepository.addUser(user, uid)
             .onSuccess {
-                userRepository.saveCachedUser(user, uid)
+                authRepository.saveCachedUser(user, uid)
                 setSuccess(user, "Registration successful!")
             }
             .onFailure { e -> setError(e.message ?: "Failed to save user data") }

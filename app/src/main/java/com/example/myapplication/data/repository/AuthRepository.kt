@@ -6,11 +6,16 @@ import androidx.credentials.GetCredentialRequest
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.example.myapplication.data.model.User
 
 data class GoogleSignInResult(
     val uid: String,
@@ -22,10 +27,17 @@ class AuthRepository @Inject constructor(
     private val auth: FirebaseAuth,
     @param:ApplicationContext private val context: Context
 ) {
+    private val _currentUser = MutableStateFlow(auth.currentUser)
+    val currentUser: StateFlow<FirebaseUser?> = _currentUser.asStateFlow()
+
+    @Volatile
+    private var cachedUserData: Pair<String, User>? = null
+
     suspend fun registerUser(email: String, password: String): Result<String> {
         return try {
             val authResult = auth.createUserWithEmailAndPassword(email, password).await()
             val firebaseUser = authResult.user ?: throw Exception("User creation failed")
+            _currentUser.value = firebaseUser
             Result.success(firebaseUser.uid)
         } catch (e: Exception) {
             Result.failure(e)
@@ -36,6 +48,7 @@ class AuthRepository @Inject constructor(
         return try {
             val authResult = auth.signInWithEmailAndPassword(email, password).await()
             val firebaseUser = authResult.user ?: throw Exception("Login failed")
+            _currentUser.value = firebaseUser
             Result.success(firebaseUser.uid)
         } catch (e: Exception) {
             Result.failure(e)
@@ -68,21 +81,36 @@ class AuthRepository @Inject constructor(
             val authResult = auth.signInWithCredential(firebaseCredential).await()
             val firebaseUser = authResult.user ?: throw Exception("Google sign-in failed")
 
+            _currentUser.value = firebaseUser
             Result.success(GoogleSignInResult(firebaseUser.uid, firebaseUser.email))
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
+    fun saveCachedUser(user: User, uid: String) {
+        cachedUserData = Pair(uid, user)
+    }
+
+    fun getCachedUser(): Pair<String, User>? {
+        return cachedUserData
+    }
+
+    fun clearCachedUser() {
+        cachedUserData = null
+    }
+
     fun getCurrentUserEmail(): String? {
-        return auth.currentUser?.email
+        return _currentUser.value?.email
     }
 
     fun getCurrentUserId(): String? {
-        return auth.currentUser?.uid
+        return _currentUser.value?.uid
     }
 
     fun logoutUser() {
         auth.signOut()
+        _currentUser.value = null
+        clearCachedUser()
     }
 }

@@ -1,65 +1,14 @@
 package com.example.myapplication.data.repository
 
-import android.content.Context
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import com.example.myapplication.data.model.User
 import com.google.firebase.firestore.FirebaseFirestore
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences")
-
 @Singleton
-class UserRepository @Inject constructor(
-    @param:ApplicationContext private val context: Context
-) {
+class UserRepository @Inject constructor() {
     private val usersCollection = FirebaseFirestore.getInstance().collection("users")
-    private val dataStore = context.dataStore
-
-    companion object {
-        private val USER_ID_KEY = stringPreferencesKey("user_id")
-    }
-
-    @Volatile
-    private var cachedUserIdInMemory: String? = null
-    suspend fun saveCachedUser(user: User, uid: String) {
-        cachedUserIdInMemory = uid
-        dataStore.edit { preferences ->
-            preferences[USER_ID_KEY] = uid
-        }
-    }
-
-    suspend fun getCachedUser(): Pair<String, User>? {
-        val preferences = dataStore.data.first()
-        val uid = preferences[USER_ID_KEY] ?: return null
-        cachedUserIdInMemory = uid
-        val doc = usersCollection.document(uid).get().await()
-        val user = doc.toObject(User::class.java) ?: return null
-        return Pair(uid, user)
-    }
-
-    suspend fun clearCachedUser() {
-        dataStore.edit { preferences ->
-            preferences.remove(USER_ID_KEY)
-        }
-    }
-
-    suspend fun isUserCached(): Boolean {
-        val preferences = dataStore.data.first()
-        return preferences[USER_ID_KEY] != null
-    }
-
-    suspend fun getCachedUserId(): String? {
-        val preferences = dataStore.data.first()
-        return preferences[USER_ID_KEY]
-    }
 
     suspend fun addUser(user: User, uid: String): Result<String> {
         return try {
@@ -120,5 +69,4 @@ class UserRepository @Inject constructor(
             Result.failure(e)
         }
     }
-    fun getCachedUserIdSync(): String? = cachedUserIdInMemory
 }
