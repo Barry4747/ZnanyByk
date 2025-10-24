@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.data.model.Chat
+import com.example.myapplication.data.repository.UserRepository
 import com.example.myapplication.viewmodel.ChatsListState
 import com.example.myapplication.viewmodel.ChatsListViewModel
 import java.text.SimpleDateFormat
@@ -50,9 +51,10 @@ fun ChatsListScreen(
 @Composable
 fun ChatItem(
     chat: Chat,
-    onClick: (chatId: String, receiverId: String) -> Unit
+    onClick: (chatId: String, receiverId: String) -> Unit,
+    viewModel: ChatsListViewModel = hiltViewModel()
 ) {
-    val receiverId = chat.users.firstOrNull { it != /* tu wstaw currentUserId z ViewModelu lub DI */ "currentUserId" } ?: ""
+    val receiverId = chat.users.firstOrNull { it != viewModel.getCurrentUser()} ?: ""
 
     Row(
         modifier = Modifier

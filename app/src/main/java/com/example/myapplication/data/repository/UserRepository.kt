@@ -27,7 +27,10 @@ class UserRepository @Inject constructor(
         private val USER_ID_KEY = stringPreferencesKey("user_id")
     }
 
+    @Volatile
+    private var cachedUserIdInMemory: String? = null
     suspend fun saveCachedUser(user: User, uid: String) {
+        cachedUserIdInMemory = uid
         dataStore.edit { preferences ->
             preferences[USER_ID_KEY] = uid
         }
@@ -36,6 +39,7 @@ class UserRepository @Inject constructor(
     suspend fun getCachedUser(): Pair<String, User>? {
         val preferences = dataStore.data.first()
         val uid = preferences[USER_ID_KEY] ?: return null
+        cachedUserIdInMemory = uid
         val doc = usersCollection.document(uid).get().await()
         val user = doc.toObject(User::class.java) ?: return null
         return Pair(uid, user)
@@ -116,4 +120,5 @@ class UserRepository @Inject constructor(
             Result.failure(e)
         }
     }
+    fun getCachedUserIdSync(): String? = cachedUserIdInMemory
 }

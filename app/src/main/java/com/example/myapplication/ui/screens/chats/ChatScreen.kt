@@ -34,7 +34,7 @@ fun ChatScreen(
     viewModel: ChatViewModel = hiltViewModel()
 ) {
     LaunchedEffect(Unit) {
-        viewModel.init(chatId, "mockUser1")
+        viewModel.init(chatId)
     }
     val messages by viewModel.messages.collectAsState()
     var text by remember { mutableStateOf("") }

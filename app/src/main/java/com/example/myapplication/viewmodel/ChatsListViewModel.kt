@@ -62,4 +62,8 @@ class ChatsListViewModel @Inject constructor(
             )
         }
     }
+
+    fun getCurrentUser(): String? {
+        return userRepository.getCachedUserIdSync()
+    }
 }

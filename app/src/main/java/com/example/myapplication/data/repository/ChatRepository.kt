@@ -56,7 +56,7 @@ class ChatRepository @Inject constructor() {
     }
     fun getMessagesForChatFlow(chatId: String): Flow<List<Message>> = callbackFlow {
         val chatRef = chatsCollection.document(chatId).collection("messages")
-            .orderBy("timestamp", Query.Direction.ASCENDING)
+            .orderBy("timestamp", Query.Direction.DESCENDING)
 
         val listener: ListenerRegistration = chatRef.addSnapshotListener { snapshot, error ->
             if (error != null) {
@@ -94,15 +94,7 @@ class ChatRepository @Inject constructor() {
                 val msgRef = chatRef.collection("messages").document()
                 batch.set(msgRef, message)
 
-                batch.set(
-                    chatRef,
-                    mapOf(
-                        "users" to listOf(currentUserId, receiverId),
-                        "lastMessage" to text,
-                        "lastTimestamp" to message.timestamp
-                    ),
-                    com.google.firebase.firestore.SetOptions.merge()
-                )
+
             }.await()
 
             Result.success(Unit)
@@ -110,6 +102,7 @@ class ChatRepository @Inject constructor() {
             Result.failure(e)
         }
     }
+
     suspend fun createChatIfNotExists(userA: String, userB: String): Result<String> {
         return try {
             val snapshot = chatsCollection
