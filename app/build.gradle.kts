@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.myapplication"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -56,6 +56,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation("androidx.compose.material:material-icons-extended:1.7.5")
 
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -74,6 +75,8 @@ dependencies {
     implementation(libs.googleid)
 
     implementation(libs.androidx.datastore.preferences)
+
+    implementation(libs.wheelpickercompose)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
