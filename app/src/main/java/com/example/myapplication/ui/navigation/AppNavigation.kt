@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -22,6 +22,8 @@ import com.example.myapplication.ui.screens.scheduler.SchedulerScreen
 import com.example.myapplication.viewmodel.AuthViewModel
 import com.example.myapplication.viewmodel.RegistrationViewModel
 
+private const val ANIMATION_DURATION = 50
+
 @Composable
 fun AppNavigation(
     navController: NavHostController,
@@ -33,10 +35,10 @@ fun AppNavigation(
                 navController = navController,
                 startDestination = Screen.Splash.route,
                 modifier = modifier,
-                enterTransition = { fadeIn(animationSpec = androidx.compose.animation.core.tween(150)) },
-                exitTransition = { fadeOut(animationSpec = androidx.compose.animation.core.tween(150)) },
-                popEnterTransition = { fadeIn(animationSpec = androidx.compose.animation.core.tween(150)) },
-                popExitTransition = { fadeOut(animationSpec = androidx.compose.animation.core.tween(150)) }
+                enterTransition = { fadeIn(animationSpec = androidx.compose.animation.core.tween(ANIMATION_DURATION)) },
+                exitTransition = { fadeOut(animationSpec = androidx.compose.animation.core.tween(ANIMATION_DURATION)) },
+                popEnterTransition = { fadeIn(animationSpec = androidx.compose.animation.core.tween(ANIMATION_DURATION)) },
+                popExitTransition = { fadeOut(animationSpec = androidx.compose.animation.core.tween(ANIMATION_DURATION)) }
             ) {
 
                 composable(Screen.Splash.route) {
@@ -71,7 +73,12 @@ fun AppNavigation(
                     val authViewModel: AuthViewModel = hiltViewModel()
 
                     LoginScreen(
-                        onNavigateBack = { navController.popBackStack() },
+                        onNavigateBack = {
+                            navController.navigate(Screen.Welcome.route) {
+                                popUpTo(Screen.Welcome.route)
+                                launchSingleTop = true
+                            }
+                        },
                         onNavigateToRegister = {
                             navController.navigate(Screen.RegistrationFlow.route) {
                                 popUpTo(Screen.Welcome.route)
@@ -106,7 +113,10 @@ fun AppNavigation(
                         CredentialsRegistrationScreen(
                             onNavigateBack = {
                                 sharedRegistrationViewModel.clearPendingGoogleRegistration()
-                                navController.popBackStack()
+                                navController.navigate(Screen.Welcome.route) {
+                                    popUpTo(Screen.Welcome.route)
+                                    launchSingleTop = true
+                                }
                             },
                             onNavigateToLogin = {
                                 navController.navigate(Screen.Login.route) {
@@ -175,4 +185,3 @@ fun AppNavigation(
             }
         }
     }
-
