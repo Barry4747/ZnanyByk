@@ -83,7 +83,7 @@ fun FormButton(
 fun FormButtonPreview() {
     MaterialTheme {
         FormButton(
-            text = stringResource(R.string.wybierz_dat_urodzenia_opcjonalne),
+            text = stringResource(R.string.birthday_opt),
             onClick = {}
         )
     }

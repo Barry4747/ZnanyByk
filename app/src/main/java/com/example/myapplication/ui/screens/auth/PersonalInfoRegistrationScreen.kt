@@ -26,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -76,7 +75,7 @@ fun PersonalInfoRegistrationScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(R.string.dane_personalne),
+            text = stringResource(R.string.personal_info),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold
         )
@@ -86,7 +85,7 @@ fun PersonalInfoRegistrationScreen(
         MainFormTextField(
             value = firstName,
             onValueChange = { firstName = it },
-            label = stringResource(R.string.imie),
+            label = stringResource(R.string.first_name),
             enabled = !registrationState.isLoading
         )
 
@@ -95,7 +94,7 @@ fun PersonalInfoRegistrationScreen(
         MainFormTextField(
             value = lastName,
             onValueChange = { lastName = it },
-            label = stringResource(R.string.nazwisko),
+            label = stringResource(R.string.last_name),
             enabled = !registrationState.isLoading
         )
 
@@ -113,7 +112,7 @@ fun PersonalInfoRegistrationScreen(
         MainFormTextField(
             value = phoneNumber,
             onValueChange = { phoneNumber = it },
-            label = stringResource(R.string.numer_telefonu_opcjonalne),
+            label = stringResource(R.string.phone_number_opt),
             enabled = !registrationState.isLoading
         )
 
@@ -122,7 +121,7 @@ fun PersonalInfoRegistrationScreen(
         FormButton(
             text = birthDateMillis?.let {
                 SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date(it))
-            } ?: stringResource(R.string.wybierz_dat_urodzenia_opcjonalne),
+            } ?: stringResource(R.string.birthday_opt),
             onClick = { showDatePicker = true },
             enabled = !registrationState.isLoading
         )
@@ -133,7 +132,7 @@ fun PersonalInfoRegistrationScreen(
             CircularProgressIndicator()
         } else {
             MainButton(
-                text = stringResource(R.string.utworz_konto),
+                text = stringResource(R.string.create_account),
                 onClick = {
                     val birthDate = birthDateMillis?.let { Date(it) }
 
@@ -160,7 +159,7 @@ fun PersonalInfoRegistrationScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         MainTextButton(
-            text = stringResource(R.string.wr),
+            text = stringResource(R.string.back),
             onClick = onNavigateBack,
             enabled = !registrationState.isLoading
         )
@@ -188,7 +187,7 @@ fun PersonalInfoRegistrationScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = stringResource(R.string.wybierz_dat_urodzenia),
+                        text = stringResource(R.string.choose_birth_date),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -220,7 +219,7 @@ fun PersonalInfoRegistrationScreen(
                         horizontalArrangement = Arrangement.End
                     ) {
                         TextButton(onClick = { showDatePicker = false }) {
-                            Text(stringResource(R.string.anuluj))
+                            Text(stringResource(R.string.cancel))
                         }
                         TextButton(onClick = {
                             val millis =
