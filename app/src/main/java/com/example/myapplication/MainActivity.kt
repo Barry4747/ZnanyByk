@@ -15,7 +15,6 @@ import com.example.myapplication.ui.components.currentRoute
 import com.example.myapplication.ui.navigation.AppNavigation
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlin.collections.contains
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

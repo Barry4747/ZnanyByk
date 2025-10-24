@@ -1,11 +1,14 @@
 package com.example.myapplication.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myapplication.R
 import com.example.myapplication.data.model.User
 import com.example.myapplication.data.repository.AuthRepository
 import com.example.myapplication.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,9 +16,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
 
+private const val MINIMUM_PASSWORD_LENGTH = 6
+
 data class RegistrationCredentials(
     val email: String = "",
-    val password: String = ""
+    val password: String = "",
+    val repeatPassword: String = ""
 )
 
 data class RegistrationState(
@@ -24,22 +30,65 @@ data class RegistrationState(
     val successMessage: String? = null,
     val user: User? = null,
     val registrationCredentials: RegistrationCredentials = RegistrationCredentials(),
-    val pendingGoogleUid: String? = null
+    val pendingGoogleUid: String? = null,
+    val passwordValidationError: String? = null
 )
 
 @HiltViewModel
 class RegistrationViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
-    @param:Named("webClientId") private val webClientId: String
+    @param:Named("webClientId") private val webClientId: String,
+    @ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
     private val _registrationState = MutableStateFlow(RegistrationState())
     val registrationState: StateFlow<RegistrationState> = _registrationState.asStateFlow()
 
+    fun updateEmail(email: String) {
+        _registrationState.value = _registrationState.value.copy(
+            registrationCredentials = _registrationState.value.registrationCredentials.copy(email = email)
+        )
+    }
+
+    fun updatePassword(password: String) {
+        val credentials = _registrationState.value.registrationCredentials.copy(password = password)
+        _registrationState.value = _registrationState.value.copy(
+            registrationCredentials = credentials,
+            passwordValidationError = validatePasswords(password, credentials.repeatPassword)
+        )
+    }
+
+    fun updateRepeatPassword(repeatPassword: String) {
+        val credentials = _registrationState.value.registrationCredentials.copy(repeatPassword = repeatPassword)
+        _registrationState.value = _registrationState.value.copy(
+            registrationCredentials = credentials,
+            passwordValidationError = validatePasswords(credentials.password, repeatPassword)
+        )
+    }
+
+    private fun validatePasswords(password: String, repeatPassword: String): String? {
+        return when {
+            password.isBlank() && repeatPassword.isBlank() -> null
+            password.length < MINIMUM_PASSWORD_LENGTH -> appContext.getString(R.string.minum_characters_password)
+            repeatPassword.isNotBlank() && password != repeatPassword -> appContext.getString(R.string.passwords_mismatch)
+            else -> null
+        }
+    }
+
+    fun isFormValid(): Boolean {
+        val credentials = _registrationState.value.registrationCredentials
+        return credentials.email.isNotBlank() &&
+               credentials.password.isNotBlank() &&
+               credentials.repeatPassword.isNotBlank() &&
+               credentials.password == credentials.repeatPassword &&
+               credentials.password.length >= MINIMUM_PASSWORD_LENGTH &&
+               _registrationState.value.passwordValidationError == null
+    }
+
     fun saveRegistrationCredentials(email: String, password: String) {
         _registrationState.value = _registrationState.value.copy(
-            registrationCredentials = RegistrationCredentials(email, password)
+            registrationCredentials = RegistrationCredentials(email, password, password)
         )
     }
 

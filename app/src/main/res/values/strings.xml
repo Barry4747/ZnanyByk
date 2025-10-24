@@ -33,4 +33,7 @@
     <string name="error">Error</string>
     <string name="logout">Wyloguj się</string>
     <string name="google_logo">Google logo</string>
+    <string name="minum_characters_password">Hasło musi mieć minimum 6 znaków</string>
+    <string name="passwords_mismatch">Hasła nie są identyczne</string>
+    <string name="repeat_password">Powtórz hasło</string>
 </resources>
