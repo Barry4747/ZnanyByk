@@ -1,6 +1,7 @@
 package com.example.myapplication.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -11,6 +12,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -33,38 +35,44 @@ enum class Destination(
 }
 
 @Composable
-fun NavigationBarExample(
-    modifier: Modifier = Modifier,
-    navController: NavHostController
+fun CustomBottomBar(
+    navController: NavHostController,
+    height: Dp = 56.dp
 ) {
     val currentRoute = currentRoute(navController)
 
-    NavigationBar(modifier = modifier.navigationBarsPadding().background(color=Color.White), windowInsets = NavigationBarDefaults.windowInsets) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height)
+            .background(Color.White)
+    ) {
         Destination.entries.forEach { destination ->
-            NavigationBarItem(
-                selected = currentRoute == destination.route,
-                onClick = {
-                    if (currentRoute != destination.route) {
-                        navController.navigate(destination.route) {
-                            popUpTo(Destination.HOME.route)
-                            launchSingleTop = true
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .clickable {
+                        if (currentRoute != destination.route) {
+                            navController.navigate(destination.route) {
+                                popUpTo(Destination.HOME.route)
+                                launchSingleTop = true
+                            }
                         }
-                    }
-                },
-                icon = {
-                    Icon(
-                        painter = painterResource(id = destination.iconRes),
-                        contentDescription = destination.contentDescription,
-                        modifier = modifier.height(32.dp).aspectRatio(1f).alpha(1.0f)
-                    )
-
-                },
-                label = {},
-                modifier = modifier.background(color = Color.White)
-            )
+                    },
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                Icon(
+                    painter = painterResource(id = destination.iconRes),
+                    contentDescription = destination.contentDescription,
+                    modifier = Modifier.size(height)
+                )
+            }
         }
     }
 }
+
+
 
 @Composable
 fun currentRoute(navController: NavHostController): String? {
