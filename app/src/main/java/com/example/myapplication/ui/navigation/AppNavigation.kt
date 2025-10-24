@@ -10,9 +10,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import androidx.navigation.navArgument
 import com.example.myapplication.ui.components.CustomBottomBar
 import com.example.myapplication.ui.components.Destination
 import com.example.myapplication.ui.components.currentRoute
@@ -21,6 +23,8 @@ import com.example.myapplication.ui.screens.WelcomeScreen
 import com.example.myapplication.ui.screens.auth.CredentialsRegistrationScreen
 import com.example.myapplication.ui.screens.auth.LoginScreen
 import com.example.myapplication.ui.screens.auth.PersonalInfoRegistrationScreen
+import com.example.myapplication.ui.screens.chats.ChatScreen
+import com.example.myapplication.ui.screens.chats.ChatsListScreen
 import com.example.myapplication.ui.screens.home.HomeScreen
 import com.example.myapplication.ui.screens.scheduler.SchedulerScreen
 import com.example.myapplication.viewmodel.AuthViewModel
@@ -169,13 +173,32 @@ fun AppNavigation(
                     SchedulerScreen()
                 }
 
-                composable(Destination.CHATS.route) {
-                    /* ChatsScreen() */
+                composable("chats") {
+                    ChatsListScreen(
+                        onChatClick = { chatId, receiverId ->
+                            navController.navigate("chat/$chatId/$receiverId")
+                        }
+                    )
                 }
+
+                composable(
+                    route = "chat/{chatId}/{receiverId}",
+                    arguments = listOf(
+                        navArgument("chatId") { type = NavType.StringType },
+                        navArgument("receiverId") { type = NavType.StringType }
+                    )
+                ) { backStackEntry ->
+                    val chatId = backStackEntry.arguments?.getString("chatId") ?: return@composable
+                    val receiverId = backStackEntry.arguments?.getString("receiverId") ?: return@composable
+
+                    ChatScreen(chatId = chatId, receiverId = receiverId)
+                }
+
 
                 composable(Destination.USER.route) {
                     /* ProfileScreen() */
                 }
+
             }
         }
     }
