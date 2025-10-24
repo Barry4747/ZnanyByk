@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 
 data class RegistrationCredentials(
     val email: String = "",
@@ -29,7 +30,8 @@ data class RegistrationState(
 @HiltViewModel
 class RegistrationViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    @param:Named("webClientId") private val webClientId: String
 ) : ViewModel() {
 
     private val _registrationState = MutableStateFlow(RegistrationState())
@@ -60,7 +62,7 @@ class RegistrationViewModel @Inject constructor(
         }
     }
 
-    fun signUpWithGoogle(webClientId: String) {
+    fun signUpWithGoogle() {
         viewModelScope.launch {
             setLoading()
 

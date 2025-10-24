@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 
 data class AuthState(
     val isLoading: Boolean = false,
@@ -23,7 +24,8 @@ data class AuthState(
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    @param:Named("webClientId") private val webClientId: String
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow(AuthState())
@@ -60,7 +62,7 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun signInWithGoogle(webClientId: String) {
+    fun signInWithGoogle() {
         viewModelScope.launch {
             setLoading()
 

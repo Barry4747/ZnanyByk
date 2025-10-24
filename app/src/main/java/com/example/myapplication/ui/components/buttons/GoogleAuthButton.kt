@@ -18,6 +18,9 @@ import androidx.compose.ui.unit.dp
 import com.example.myapplication.R
 
 private val BUTTON_CORNER_RADIUS = 8.dp
+private val BORDER_WIDTH = 1.dp
+private val ICON_SIZE = 18.dp
+private val ICON_SPACING = 8.dp
 
 @Composable
 fun GoogleAuthButton(
@@ -35,15 +38,15 @@ fun GoogleAuthButton(
             containerColor = Color.White,
             contentColor = Color.Black
         ),
-        border = BorderStroke(1.dp, Color.Black)
+        border = BorderStroke(BORDER_WIDTH, Color.Black)
     ) {
         Icon(
             painter = painterResource(id = R.drawable.google__g__logo),
             contentDescription = "Google logo",
-            modifier = Modifier.size(18.dp),
+            modifier = Modifier.size(ICON_SIZE),
             tint = Color.Unspecified
         )
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(ICON_SPACING))
         Text(text)
     }
 }

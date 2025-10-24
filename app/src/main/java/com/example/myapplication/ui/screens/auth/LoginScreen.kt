@@ -21,12 +21,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.example.myapplication.R
 import com.example.myapplication.ui.components.buttons.GoogleAuthButton
 import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.ui.components.buttons.MainTextButton
@@ -42,13 +40,14 @@ fun LoginScreen(
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val authState by viewModel.authState.collectAsState()
-    val context = LocalContext.current
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    authState.user?.let { _ ->
-        onLoginSuccess()
+    LaunchedEffect(authState.user) {
+        if (authState.user != null) {
+            onLoginSuccess()
+        }
     }
 
     LaunchedEffect(authState.pendingGoogleUid) {
@@ -98,10 +97,8 @@ fun LoginScreen(
         } else {
             MainButton(
                 text = "Logowanie",
-                onClick = {
-                    viewModel.login(email, password)
-                },
-                enabled = email.isNotBlank() && password.isNotBlank() && !authState.isLoading,
+                onClick = { viewModel.login(email, password) },
+                enabled = email.isNotBlank() && password.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -109,14 +106,10 @@ fun LoginScreen(
 
             GoogleAuthButton(
                 text = "Kontynuuj z Google",
-                onClick = {
-                    val webClientId = context.getString(R.string.default_web_client_id)
-                    viewModel.signInWithGoogle(webClientId)
-                },
+                onClick = { viewModel.signInWithGoogle() },
                 enabled = !authState.isLoading,
                 modifier = Modifier.fillMaxWidth()
             )
-
         }
 
         if (authState.errorMessage != null) {
