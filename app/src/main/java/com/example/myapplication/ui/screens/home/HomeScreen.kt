@@ -29,9 +29,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.myapplication.R
 import com.example.myapplication.data.model.Trainer
 import com.example.myapplication.viewmodel.HomeViewModel
 
@@ -56,7 +58,7 @@ fun HomeScreen(
         verticalArrangement = Arrangement.Top
     ) {
         Text(
-            text = "Znajdź swojego trenera",
+            text = stringResource(R.string.znajdz_swojego_trenera),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold
         )
@@ -66,12 +68,12 @@ fun HomeScreen(
         OutlinedTextField(
             value = searchTrainerText,
             onValueChange = { searchTrainerText = it},
-            label = { Text("Wyszukaj") },
+            label = { Text(stringResource(R.string.wyszukaj)) },
             modifier = Modifier.fillMaxWidth(),
             leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Search,
-                contentDescription = "Search Icon"
+                contentDescription = stringResource(R.string.search_icon)
             )
         }, singleLine = true
         )
@@ -102,7 +104,7 @@ fun HomeScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "⚠️ Error",
+                        text = stringResource(R.string.error),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.error
@@ -128,7 +130,7 @@ fun HomeScreen(
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Wyloguj się")
+            Text(stringResource(R.string.wyloguj_sie))
         }
     }
 

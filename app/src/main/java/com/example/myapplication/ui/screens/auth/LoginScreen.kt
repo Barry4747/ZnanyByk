@@ -21,10 +21,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.myapplication.R
 import com.example.myapplication.ui.components.buttons.GoogleAuthButton
 import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.ui.components.buttons.MainTextButton
@@ -64,7 +66,7 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Logowanie",
+            text = stringResource(R.string.logowanie),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold
         )
@@ -74,7 +76,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email") },
+            label = { Text(stringResource(R.string.email)) },
             enabled = !authState.isLoading,
             modifier = Modifier.fillMaxWidth()
         )
@@ -84,7 +86,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Hasło") },
+            label = { Text(stringResource(R.string.has_o)) },
             enabled = !authState.isLoading,
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
@@ -96,7 +98,7 @@ fun LoginScreen(
             CircularProgressIndicator()
         } else {
             MainButton(
-                text = "Logowanie",
+                text = stringResource(R.string.email),
                 onClick = { viewModel.login(email, password) },
                 enabled = email.isNotBlank() && password.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
@@ -105,9 +107,9 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             GoogleAuthButton(
-                text = "Kontynuuj z Google",
+                text = stringResource(R.string.kontynuuj_z_google),
                 onClick = { viewModel.signInWithGoogle() },
-                enabled = !authState.isLoading,
+                enabled = true,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -123,7 +125,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         MainTextButton(
-            text = "Nie masz konta? Zarejestruj się",
+            text = stringResource(R.string.nie_masz_konta_zarejestruj),
             onClick = onNavigateToRegister,
             enabled = !authState.isLoading
         )
@@ -131,7 +133,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         MainTextButton(
-            text = "Wróć do ekranu startowego",
+            text = stringResource(R.string.wr_do_ekranu_startowego),
             onClick = onNavigateBack,
             enabled = !authState.isLoading
         )
