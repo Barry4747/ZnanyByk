@@ -2,6 +2,7 @@ package com.example.myapplication.ui.screens.auth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -36,6 +37,7 @@ import com.commandiron.wheel_picker_compose.WheelDatePicker
 import com.commandiron.wheel_picker_compose.core.WheelPickerDefaults
 import com.example.myapplication.R
 import com.example.myapplication.ui.components.buttons.FormButton
+import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.ui.components.buttons.MainTextButton
 import com.example.myapplication.ui.components.fields.MainFormTextField
@@ -67,102 +69,111 @@ fun PersonalInfoRegistrationScreen(
         onRegistrationSuccess()
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = stringResource(R.string.personal_info),
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        MainFormTextField(
-            value = firstName,
-            onValueChange = { firstName = it },
-            label = stringResource(R.string.first_name),
-            enabled = !registrationState.isLoading
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        MainFormTextField(
-            value = lastName,
-            onValueChange = { lastName = it },
-            label = stringResource(R.string.last_name),
-            enabled = !registrationState.isLoading
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        MainFormTextField(
-            value = emailPrefill,
-            onValueChange = {},
-            label = stringResource(R.string.email),
-            enabled = false
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        MainFormTextField(
-            value = phoneNumber,
-            onValueChange = { phoneNumber = it },
-            label = stringResource(R.string.phone_number_opt),
-            enabled = !registrationState.isLoading
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        FormButton(
-            text = birthDateMillis?.let {
-                SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date(it))
-            } ?: stringResource(R.string.birthday_opt),
-            onClick = { showDatePicker = true },
-            enabled = !registrationState.isLoading
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (registrationState.isLoading) {
-            CircularProgressIndicator()
-        } else {
-            MainButton(
-                text = stringResource(R.string.create_account),
-                onClick = {
-                    val birthDate = birthDateMillis?.let { Date(it) }
-
-                    viewModel.register(
-                        firstName = firstName,
-                        lastName = lastName,
-                        phoneNumber = phoneNumber.ifBlank { null },
-                        birthDate = birthDate
-                    )
-                },
-                enabled = firstName.isNotBlank() && lastName.isNotBlank(),
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-
-        if (registrationState.errorMessage != null) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = registrationState.errorMessage ?: "",
-                color = Color.Red
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        MainTextButton(
-            text = stringResource(R.string.back),
+    Box(modifier = modifier.fillMaxSize()) {
+        MainBackButton(
             onClick = onNavigateBack,
-            enabled = !registrationState.isLoading
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(16.dp)
         )
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = stringResource(R.string.personal_info),
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            MainFormTextField(
+                value = firstName,
+                onValueChange = { firstName = it },
+                label = stringResource(R.string.first_name),
+                enabled = !registrationState.isLoading
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            MainFormTextField(
+                value = lastName,
+                onValueChange = { lastName = it },
+                label = stringResource(R.string.last_name),
+                enabled = !registrationState.isLoading
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            MainFormTextField(
+                value = emailPrefill,
+                onValueChange = {},
+                label = stringResource(R.string.email),
+                enabled = false
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            MainFormTextField(
+                value = phoneNumber,
+                onValueChange = { phoneNumber = it },
+                label = stringResource(R.string.phone_number_opt),
+                enabled = !registrationState.isLoading
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            FormButton(
+                text = birthDateMillis?.let {
+                    SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date(it))
+                } ?: stringResource(R.string.birthday_opt),
+                onClick = { showDatePicker = true },
+                enabled = !registrationState.isLoading
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (registrationState.isLoading) {
+                CircularProgressIndicator()
+            } else {
+                MainButton(
+                    text = stringResource(R.string.create_account),
+                    onClick = {
+                        val birthDate = birthDateMillis?.let { Date(it) }
+
+                        viewModel.register(
+                            firstName = firstName,
+                            lastName = lastName,
+                            phoneNumber = phoneNumber.ifBlank { null },
+                            birthDate = birthDate
+                        )
+                    },
+                    enabled = firstName.isNotBlank() && lastName.isNotBlank(),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            if (registrationState.errorMessage != null) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = registrationState.errorMessage ?: "",
+                    color = Color.Red
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            MainTextButton(
+                text = stringResource(R.string.back),
+                onClick = onNavigateBack,
+                enabled = !registrationState.isLoading
+            )
+        }
     }
 
     if (showDatePicker) {
@@ -236,4 +247,3 @@ fun PersonalInfoRegistrationScreen(
         }
     }
 }
-
