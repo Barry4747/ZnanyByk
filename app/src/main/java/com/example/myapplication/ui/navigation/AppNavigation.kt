@@ -31,22 +31,8 @@ fun AppNavigation(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    Scaffold(
-        bottomBar = {
-            val route = currentRoute(navController)
-            if (route in listOf(
-                    Destination.HOME.route,
-                    Destination.SCHEDULER.route,
-                    Destination.CHATS.route,
-                    Destination.PROFILE.route
-                )
-            ) {
-                CustomBottomBar(navController = navController)
-            }
-        }
-    ) { innerPadding ->
 
-        Box(modifier = Modifier.padding(innerPadding)) {
+        Box(modifier = Modifier) {
             NavHost(
                 navController = navController,
                 startDestination = Screen.Splash.route,
@@ -187,10 +173,10 @@ fun AppNavigation(
                     /* ChatsScreen() */
                 }
 
-                composable(Destination.PROFILE.route) {
+                composable(Destination.USER.route) {
                     /* ProfileScreen() */
                 }
             }
         }
     }
-}
+
