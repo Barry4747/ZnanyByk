@@ -17,8 +17,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.myapplication.R
 
 private val BUTTON_HEIGHT = 56.dp
 private val BUTTON_CORNER_RADIUS = 4.dp
@@ -81,7 +83,7 @@ fun FormButton(
 fun FormButtonPreview() {
     MaterialTheme {
         FormButton(
-            text = "Wybierz datę urodzenia (opcjonalne)",
+            text = stringResource(R.string.birthday_opt),
             onClick = {}
         )
     }

@@ -66,7 +66,7 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Logowanie",
+            text = stringResource(R.string.signin),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold
         )
@@ -76,7 +76,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email") },
+            label = { Text(stringResource(R.string.email)) },
             enabled = !authState.isLoading,
             modifier = Modifier.fillMaxWidth()
         )
@@ -86,7 +86,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Hasło") },
+            label = { Text(stringResource(R.string.password)) },
             enabled = !authState.isLoading,
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
@@ -98,7 +98,7 @@ fun LoginScreen(
             CircularProgressIndicator()
         } else {
             MainButton(
-                text = stringResource(R.string.logowanie),
+                text = stringResource(R.string.email),
                 onClick = { viewModel.login(email, password) },
                 enabled = email.isNotBlank() && password.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
@@ -107,9 +107,9 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             GoogleAuthButton(
-                text = "Kontynuuj z Google",
+                text = stringResource(R.string.continue_with_google),
                 onClick = { viewModel.signInWithGoogle() },
-                enabled = !authState.isLoading,
+                enabled = true,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -125,7 +125,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         MainTextButton(
-            text = "Nie masz konta? Zarejestruj się",
+            text = stringResource(R.string.dont_have_acc_register),
             onClick = onNavigateToRegister,
             enabled = !authState.isLoading
         )
@@ -133,7 +133,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         MainTextButton(
-            text = "Wróć do ekranu startowego",
+            text = stringResource(R.string.back_to_start_screen),
             onClick = onNavigateBack,
             enabled = !authState.isLoading
         )

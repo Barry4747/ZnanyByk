@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.R
@@ -24,9 +25,9 @@ private val ICON_SPACING = 8.dp
 
 @Composable
 fun GoogleAuthButton(
+    modifier: Modifier = Modifier,
     text: String,
     onClick: () -> Unit = {},
-    modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
     Button(
@@ -42,7 +43,7 @@ fun GoogleAuthButton(
     ) {
         Icon(
             painter = painterResource(id = R.drawable.google__g__logo),
-            contentDescription = "Google logo",
+            contentDescription = stringResource(R.string.google_logo),
             modifier = Modifier.size(ICON_SIZE),
             tint = Color.Unspecified
         )
@@ -55,7 +56,7 @@ fun GoogleAuthButton(
 @Composable
 private fun GoogleAuthButtonPreview() {
     GoogleAuthButton(
-        text = "Kontynuuj z Google",
+        text = stringResource(R.string.continue_with_google),
         onClick = {}
     )
 }

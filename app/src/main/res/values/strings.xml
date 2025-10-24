@@ -1,5 +1,36 @@
 <resources>
     <string name="app_name">My Application</string>
     <string name="default_web_client_id">YOUR_WEB_CLIENT_ID_HERE</string>
-    <string name="logowanie">Logowanie</string>
+    <string name="registration">Rejestracja</string>
+    <string name="email">Email</string>
+    <string name="password">Hasło</string>
+    <string name="continue_msg">Kontynuuj</string>
+    <string name="continue_with_google">Kontynuuj z Google</string>
+    <string name="alr_have_an_acc_login">Masz już konto? Zaloguj się</string>
+    <string name="back_to_start_screen">Wróć do ekranu startowego</string>
+    <string name="signin">Logowanie</string>
+    <string name="dont_have_acc_register">Nie masz konta? Zarejestruj się</string>
+    <string name="personal_info">Dane Personalne</string>
+    <string name="first_name">Imię</string>
+    <string name="last_name">Nazwisko</string>
+    <string name="phone_number_opt">Numer telefonu (opcjonalne)</string>
+    <string name="birthday_opt">Wybierz datę urodzenia (opcjonalne)</string>
+    <string name="create_account">Utwórz konto</string>
+    <string name="back">Wróć</string>
+    <string name="choose_birth_date">Wybierz datę urodzenia</string>
+    <string name="cancel">Anuluj</string>
+    <string name="ok">OK</string>
+    <string name="znany_byk_logo">Znany Byk Logo</string>
+    <string name="loading_message">Loading...</string>
+    <string name="your_schedule">Twój Harmonogram</string>
+    <string name="no_planned_tasks">Brak zaplanowanych zadań.</string>
+    <string name="refresh">Odśwież</string>
+    <string name="hour">Godzina: %1$s</string>
+    <string name="description">Opis: %1$s</string>
+    <string name="find_your_trainer">Znajdź swojego trenera</string>
+    <string name="search">Wyszukaj</string>
+    <string name="search_icon">Search Icon</string>
+    <string name="error">Error</string>
+    <string name="logout">Wyloguj się</string>
+    <string name="google_logo">Google logo</string>
 </resources>

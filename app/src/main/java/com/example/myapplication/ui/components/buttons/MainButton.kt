@@ -7,16 +7,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.myapplication.R
 
 private val BUTTON_CORNER_RADIUS = 8.dp
 
 @Composable
 fun MainButton(
+    modifier: Modifier = Modifier,
     text: String,
     onClick: () -> Unit = {},
-    modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
     Button(
@@ -38,7 +40,7 @@ fun MainButton(
 @Composable
 private fun MainButtonPreview() {
     MainButton(
-        text = "Login",
+        text = stringResource(R.string.signin),
         onClick = {}
     )
 }

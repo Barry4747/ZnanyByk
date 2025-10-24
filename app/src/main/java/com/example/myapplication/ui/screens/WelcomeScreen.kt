@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.R
 import com.example.myapplication.ui.components.buttons.MainButton
@@ -32,7 +33,7 @@ fun WelcomeScreen(
     ) {
         Image(
             painter = painterResource(id = R.drawable.znanybyklogo_transparent),
-            contentDescription = "Znany Byk Logo",
+            contentDescription = stringResource(R.string.znany_byk_logo),
             modifier = Modifier.size(300.dp)
         )
 
@@ -44,13 +45,13 @@ fun WelcomeScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             MainButton(
-                text = "Logowanie",
+                text = stringResource(R.string.signin),
                 onClick = onNavigateToLogin,
                 modifier = Modifier.fillMaxWidth()
             )
 
             MainButton(
-                text = "Rejestracja",
+                text = stringResource(R.string.registration),
                 onClick = onNavigateToRegister,
                 modifier = Modifier.fillMaxWidth()
             )
