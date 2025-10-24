@@ -54,7 +54,7 @@ fun ChatItem(
     onClick: (chatId: String, receiverId: String) -> Unit,
     viewModel: ChatsListViewModel = hiltViewModel()
 ) {
-    val receiverId = chat.users.firstOrNull { it != viewModel.getCurrentUser()} ?: ""
+    val receiverId = chat.users.firstOrNull { it != viewModel.getCurrentUserId()} ?: ""
 
     Row(
         modifier = Modifier

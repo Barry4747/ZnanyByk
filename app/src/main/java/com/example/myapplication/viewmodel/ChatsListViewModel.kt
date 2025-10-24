@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.model.Chat
 import com.example.myapplication.data.model.User
+import com.example.myapplication.data.repository.AuthRepository
 import com.example.myapplication.data.repository.ChatRepository
-import com.example.myapplication.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,18 +22,19 @@ data class ChatsListState(
 @HiltViewModel
 class ChatsListViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
-    private val userRepository: UserRepository
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _chats = MutableStateFlow<ChatsListState>(ChatsListState(isLoading = true))
     val chats: StateFlow<ChatsListState> = _chats
+
     init {
         loadChats()
     }
 
     private fun loadChats() {
         viewModelScope.launch {
-            val currentUserId = userRepository.getCachedUserId()
+            val currentUserId = authRepository.getCurrentUserId()
             if (currentUserId == null) {
                 _chats.value = ChatsListState(
                     isLoading = false,
@@ -63,7 +64,7 @@ class ChatsListViewModel @Inject constructor(
         }
     }
 
-    fun getCurrentUser(): String? {
-        return userRepository.getCachedUserIdSync()
+    fun getCurrentUserId(): String? {
+        return authRepository.getCurrentUserId()
     }
 }

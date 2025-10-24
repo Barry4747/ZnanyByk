@@ -31,14 +31,28 @@ class AuthViewModel @Inject constructor(
     private val _authState = MutableStateFlow(AuthState())
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
 
+    init {
+        // Obserwuj currentUser z AuthRepository
+        viewModelScope.launch {
+            authRepository.currentUser.collect { firebaseUser ->
+                if (firebaseUser == null) {
+                    // Użytkownik się wylogował
+                    authRepository.clearCachedUser()
+                    _authState.value = AuthState()
+                }
+            }
+        }
+    }
+
     fun checkAuthState() {
         viewModelScope.launch {
             _authState.value = _authState.value.copy(isCheckingAuth = true)
 
-            val userId = authRepository.getCurrentUserId()
+            val firebaseUser = authRepository.currentUser.value
 
-            if (userId != null) {
-                val cachedData = userRepository.getCachedUser()
+            if (firebaseUser != null) {
+                val userId = firebaseUser.uid
+                val cachedData = authRepository.getCachedUser()
 
                 if (cachedData != null && cachedData.first == userId) {
                     setSuccess(cachedData.second)
@@ -46,7 +60,7 @@ class AuthViewModel @Inject constructor(
                     loadUserData(userId)
                 }
             } else {
-                userRepository.clearCachedUser()
+                authRepository.clearCachedUser()
                 _authState.value = _authState.value.copy(isCheckingAuth = false)
             }
         }
@@ -77,7 +91,6 @@ class AuthViewModel @Inject constructor(
     fun logout() {
         viewModelScope.launch {
             authRepository.logoutUser()
-            userRepository.clearCachedUser()
             _authState.value = AuthState()
         }
     }
@@ -86,7 +99,7 @@ class AuthViewModel @Inject constructor(
         userRepository.getUser(uid)
             .onSuccess { user ->
                 if (user != null) {
-                    userRepository.saveCachedUser(user, uid)
+                    authRepository.saveCachedUser(user, uid)
                     setSuccess(user)
                 } else {
                     _authState.value = _authState.value.copy(
@@ -102,7 +115,7 @@ class AuthViewModel @Inject constructor(
         userRepository.getUser(uid)
             .onSuccess { user ->
                 if (user != null) {
-                    userRepository.saveCachedUser(user, uid)
+                    authRepository.saveCachedUser(user, uid)
                     setSuccess(user)
                 } else {
                     setError("User data not found")
