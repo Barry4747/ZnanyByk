@@ -163,14 +163,6 @@ fun CredentialsRegistrationScreen(
                 onClick = onNavigateToLogin,
                 enabled = !registrationState.isLoading
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            MainTextButton(
-                text = stringResource(R.string.back_to_start_screen),
-                onClick = onNavigateBack,
-                enabled = !registrationState.isLoading
-            )
         }
     }
 }

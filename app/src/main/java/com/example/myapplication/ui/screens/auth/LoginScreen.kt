@@ -119,7 +119,7 @@ fun LoginScreen(
                 CircularProgressIndicator()
             } else {
                 MainButton(
-                    text = stringResource(R.string.email),
+                    text = stringResource(R.string.signin),
                     onClick = { viewModel.login(email, password) },
                     enabled = email.isNotBlank() && password.isNotBlank(),
                     modifier = Modifier.fillMaxWidth()
@@ -148,14 +148,6 @@ fun LoginScreen(
             MainTextButton(
                 text = stringResource(R.string.dont_have_acc_register),
                 onClick = onNavigateToRegister,
-                enabled = !authState.isLoading
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            MainTextButton(
-                text = stringResource(R.string.back_to_start_screen),
-                onClick = onNavigateBack,
                 enabled = !authState.isLoading
             )
         }

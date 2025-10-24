@@ -36,6 +36,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.commandiron.wheel_picker_compose.WheelDatePicker
 import com.commandiron.wheel_picker_compose.core.WheelPickerDefaults
 import com.example.myapplication.R
+import com.example.myapplication.ui.components.buttons.AlternateButton
 import com.example.myapplication.ui.components.buttons.FormButton
 import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.buttons.MainButton
@@ -156,6 +157,21 @@ fun PersonalInfoRegistrationScreen(
                     enabled = firstName.isNotBlank() && lastName.isNotBlank(),
                     modifier = Modifier.fillMaxWidth()
                 )
+                AlternateButton(
+                    text = stringResource(R.string.want_to_be_trainer),
+                    onClick = {
+                        val birthDate = birthDateMillis?.let { Date(it) }
+
+                        viewModel.register(
+                            firstName = firstName,
+                            lastName = lastName,
+                            phoneNumber = phoneNumber.ifBlank { null },
+                            birthDate = birthDate
+                        )
+                    },
+                    enabled = firstName.isNotBlank() && lastName.isNotBlank(),
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
 
             if (registrationState.errorMessage != null) {
@@ -165,14 +181,6 @@ fun PersonalInfoRegistrationScreen(
                     color = Color.Red
                 )
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            MainTextButton(
-                text = stringResource(R.string.back),
-                onClick = onNavigateBack,
-                enabled = !registrationState.isLoading
-            )
         }
     }
 
