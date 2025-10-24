@@ -56,7 +56,7 @@ fun GoogleAuthButton(
 @Composable
 private fun GoogleAuthButtonPreview() {
     GoogleAuthButton(
-        text = stringResource(R.string.kontynuuj_z_google),
+        text = stringResource(R.string.continue_with_google),
         onClick = {}
     )
 }

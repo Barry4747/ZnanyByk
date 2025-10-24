@@ -1,6 +1,5 @@
 package com.example.myapplication.ui.screens.home
 
-import android.graphics.drawable.Icon
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -58,7 +57,7 @@ fun HomeScreen(
         verticalArrangement = Arrangement.Top
     ) {
         Text(
-            text = stringResource(R.string.znajdz_swojego_trenera),
+            text = stringResource(R.string.find_your_trainer),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold
         )
@@ -68,7 +67,7 @@ fun HomeScreen(
         OutlinedTextField(
             value = searchTrainerText,
             onValueChange = { searchTrainerText = it},
-            label = { Text(stringResource(R.string.wyszukaj)) },
+            label = { Text(stringResource(R.string.search)) },
             modifier = Modifier.fillMaxWidth(),
             leadingIcon = {
             Icon(
@@ -130,7 +129,7 @@ fun HomeScreen(
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(stringResource(R.string.wyloguj_sie))
+            Text(stringResource(R.string.logout))
         }
     }
 

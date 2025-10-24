@@ -45,7 +45,7 @@ fun SchedulerScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(R.string.twoj_harmonogram),
+            text = stringResource(R.string.your_schedule),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold
         )
@@ -60,7 +60,7 @@ fun SchedulerScreen(
                 ErrorCard(errorMessage)
             }
             tasks.isEmpty() -> {
-                Text(stringResource(R.string.brak_zaplanowanych_zadan), style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(R.string.no_planned_tasks), style = MaterialTheme.typography.bodyLarge)
             }
             else -> {
                 LazyColumn(
@@ -80,7 +80,7 @@ fun SchedulerScreen(
             onClick = { viewModel.refreshTasks() },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(stringResource(R.string.odswiez))
+            Text(stringResource(R.string.refresh))
         }
     }
 }
@@ -101,14 +101,14 @@ fun TaskCard(task: Task) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = stringResource(R.string.godzina, task.time),
+                text = stringResource(R.string.hour, task.time),
                 style = MaterialTheme.typography.bodyMedium
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = stringResource(R.string.opis, task.description),
+                text = stringResource(R.string.description, task.description),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.secondary
             )
@@ -130,7 +130,7 @@ fun ErrorCard(message: String) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = stringResource(R.string.blad),
+                text = stringResource(R.string.error),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.error

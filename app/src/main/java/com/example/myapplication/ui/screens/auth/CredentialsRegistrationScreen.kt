@@ -65,7 +65,7 @@ fun CredentialsRegistrationScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(R.string.rejestracja),
+            text = stringResource(R.string.registration),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold
         )
@@ -85,7 +85,7 @@ fun CredentialsRegistrationScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text(stringResource(R.string.has_o)) },
+            label = { Text(stringResource(R.string.password)) },
             enabled = !registrationState.isLoading,
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
@@ -97,7 +97,7 @@ fun CredentialsRegistrationScreen(
             CircularProgressIndicator()
         } else {
             MainButton(
-                text = stringResource(R.string.kontynuuj),
+                text = stringResource(R.string.continue_msg),
                 onClick = {
                     viewModel.saveRegistrationCredentials(email, password)
                     onNavigateToPersonalInfo()
@@ -109,7 +109,7 @@ fun CredentialsRegistrationScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             GoogleAuthButton(
-                text = stringResource(R.string.kontynuuj_z_google),
+                text = stringResource(R.string.continue_with_google),
                 onClick = { viewModel.signUpWithGoogle() },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -118,7 +118,7 @@ fun CredentialsRegistrationScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         MainTextButton(
-            text = stringResource(R.string.masz_ju_konto_zaloguj_si),
+            text = stringResource(R.string.alr_have_an_acc_login),
             onClick = onNavigateToLogin,
             enabled = !registrationState.isLoading
         )
@@ -126,7 +126,7 @@ fun CredentialsRegistrationScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         MainTextButton(
-            text = stringResource(R.string.wr_do_ekranu_startowego),
+            text = stringResource(R.string.back_to_start_screen),
             onClick = onNavigateBack,
             enabled = !registrationState.isLoading
         )

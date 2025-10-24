@@ -66,7 +66,7 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(R.string.logowanie),
+            text = stringResource(R.string.signin),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold
         )
@@ -86,7 +86,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text(stringResource(R.string.has_o)) },
+            label = { Text(stringResource(R.string.password)) },
             enabled = !authState.isLoading,
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
@@ -107,7 +107,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             GoogleAuthButton(
-                text = stringResource(R.string.kontynuuj_z_google),
+                text = stringResource(R.string.continue_with_google),
                 onClick = { viewModel.signInWithGoogle() },
                 enabled = true,
                 modifier = Modifier.fillMaxWidth()
@@ -125,7 +125,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         MainTextButton(
-            text = stringResource(R.string.nie_masz_konta_zarejestruj),
+            text = stringResource(R.string.dont_have_acc_register),
             onClick = onNavigateToRegister,
             enabled = !authState.isLoading
         )
@@ -133,7 +133,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         MainTextButton(
-            text = stringResource(R.string.wr_do_ekranu_startowego),
+            text = stringResource(R.string.back_to_start_screen),
             onClick = onNavigateBack,
             enabled = !authState.isLoading
         )

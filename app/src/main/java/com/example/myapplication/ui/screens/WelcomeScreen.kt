@@ -45,13 +45,13 @@ fun WelcomeScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             MainButton(
-                text = stringResource(R.string.logowanie),
+                text = stringResource(R.string.signin),
                 onClick = onNavigateToLogin,
                 modifier = Modifier.fillMaxWidth()
             )
 
             MainButton(
-                text = stringResource(R.string.rejestracja),
+                text = stringResource(R.string.registration),
                 onClick = onNavigateToRegister,
                 modifier = Modifier.fillMaxWidth()
             )

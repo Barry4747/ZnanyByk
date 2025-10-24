@@ -40,7 +40,7 @@ fun MainButton(
 @Composable
 private fun MainButtonPreview() {
     MainButton(
-        text = stringResource(R.string.login),
+        text = stringResource(R.string.signin),
         onClick = {}
     )
 }
