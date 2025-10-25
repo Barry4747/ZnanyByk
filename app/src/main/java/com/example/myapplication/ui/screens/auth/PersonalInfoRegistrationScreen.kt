@@ -53,6 +53,7 @@ import java.util.Locale
 fun PersonalInfoRegistrationScreen(
     onNavigateBack: () -> Unit,
     onRegistrationSuccess: () -> Unit,
+    onRegistrationSuccessProceedWithTrainer: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: RegistrationViewModel = hiltViewModel()
 ) {
@@ -63,10 +64,15 @@ fun PersonalInfoRegistrationScreen(
     var phoneNumber by remember { mutableStateOf("") }
     var birthDateMillis by remember { mutableStateOf<Long?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
+    var wantsToBeTrainer by remember { mutableStateOf(false) }
     val emailPrefill = registrationState.registrationCredentials.email
 
     if (registrationState.successMessage != null) {
-        onRegistrationSuccess()
+        if (wantsToBeTrainer) {
+            onRegistrationSuccessProceedWithTrainer()
+        } else {
+            onRegistrationSuccess()
+        }
     }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -144,6 +150,7 @@ fun PersonalInfoRegistrationScreen(
                 MainButton(
                     text = stringResource(R.string.create_account),
                     onClick = {
+                        wantsToBeTrainer = false
                         val birthDate = birthDateMillis?.let { Date(it) }
 
                         viewModel.register(
@@ -156,9 +163,13 @@ fun PersonalInfoRegistrationScreen(
                     enabled = firstName.isNotBlank() && lastName.isNotBlank(),
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
                 AlternateButton(
                     text = stringResource(R.string.want_to_be_trainer),
                     onClick = {
+                        wantsToBeTrainer = true
                         val birthDate = birthDateMillis?.let { Date(it) }
 
                         viewModel.register(

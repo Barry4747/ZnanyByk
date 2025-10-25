@@ -1,21 +1,22 @@
 package com.example.myapplication.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.R
 import com.example.myapplication.viewmodel.AuthViewModel
+import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(
@@ -24,18 +25,14 @@ fun SplashScreen(
     onNavigateToHome: () -> Unit
 ) {
     val authState by authViewModel.authState.collectAsState()
-    var hasStartedChecking by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
+        delay(50)
         authViewModel.checkAuthState()
     }
 
     LaunchedEffect(authState.isCheckingAuth, authState.user) {
-        if (authState.isCheckingAuth) {
-            hasStartedChecking = true
-        }
-
-        if (hasStartedChecking && !authState.isCheckingAuth) {
+        if (!authState.isCheckingAuth) {
             if (authState.user != null) {
                 onNavigateToHome()
             } else {
@@ -48,6 +45,10 @@ fun SplashScreen(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = stringResource(R.string.loading_message))
+        Image(
+            painter = painterResource(id = R.drawable.znanybyklogo_transparent),
+            contentDescription = stringResource(R.string.znany_byk_logo),
+            modifier = Modifier.size(120.dp)
+        )
     }
 }

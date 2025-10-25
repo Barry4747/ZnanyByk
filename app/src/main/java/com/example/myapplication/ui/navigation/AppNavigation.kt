@@ -24,6 +24,7 @@ import com.example.myapplication.ui.screens.chats.ChatScreen
 import com.example.myapplication.ui.screens.chats.ChatsListScreen
 import com.example.myapplication.ui.screens.home.HomeScreen
 import com.example.myapplication.ui.screens.scheduler.SchedulerScreen
+import com.example.myapplication.ui.screens.profile.TrainerRegistrationScreen
 import com.example.myapplication.viewmodel.AuthViewModel
 import com.example.myapplication.viewmodel.RegistrationViewModel
 
@@ -159,6 +160,13 @@ fun AppNavigation(
                                     popUpTo(Screen.Welcome.route) { inclusive = true }
                                 }
                             },
+
+                            onRegistrationSuccessProceedWithTrainer = {
+                                sharedRegistrationViewModel.clearPendingGoogleRegistration()
+                                navController.navigate(Screen.RegisterTrainer.route) {
+                                    popUpTo(Screen.Welcome.route) { inclusive = true }
+                                }
+                            },
                             viewModel = sharedRegistrationViewModel
                         )
                     }
@@ -171,6 +179,19 @@ fun AppNavigation(
                             authViewModel.logout()
                             navController.navigate(Screen.Welcome.route) {
                                 popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+                composable(Screen.RegisterTrainer.route) {
+                    TrainerRegistrationScreen(
+                        onNavigateBack = {
+                            navController.popBackStack()
+                        },
+                        onSubmit = {
+                            navController.navigate(Destination.HOME.route) {
+                                popUpTo(Screen.Welcome.route) { inclusive = true }
                             }
                         }
                     )
