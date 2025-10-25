@@ -63,7 +63,8 @@ class TrainerRegistrationViewModel @Inject constructor(
         hourlyRate: String,
         gymId: String?,
         description: String,
-        experienceYears: String
+        experienceYears: String,
+        selectedCategories: List<String>
     ) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, errorMessage = null)
@@ -106,7 +107,7 @@ class TrainerRegistrationViewModel @Inject constructor(
                 pricePerHour = hourlyRateInt!!,
                 experience = experienceInt,
                 location = gymId,
-                specialities = null,
+                categories = selectedCategories,
                 ratings = null,
                 avgRating = null
             )

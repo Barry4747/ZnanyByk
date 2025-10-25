@@ -1,9 +1,25 @@
 package com.example.myapplication.ui.screens.profile
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -15,29 +31,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.R
+import com.example.myapplication.data.model.TrainerCategory
 import com.example.myapplication.ui.components.buttons.FormButton
 import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.buttons.MainButton
+import com.example.myapplication.ui.components.chips.MainCategoryChip
 import com.example.myapplication.ui.components.fields.MainFormTextField
 import com.example.myapplication.viewmodel.TrainerRegistrationViewModel
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.KeyboardType
 
 @Composable
 fun TrainerRegistrationScreen(
+    modifier: Modifier = Modifier,
     onNavigateBack: () -> Unit = {},
     onSubmit: () -> Unit = {},
     viewModel: TrainerRegistrationViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier
 ) {
     var hourlyRate by remember { mutableStateOf("") }
     var selectedGym by remember { mutableStateOf<String?>(null) }
     var description by remember { mutableStateOf("") }
     var experienceYears by remember { mutableStateOf("") }
+    var selectedCategories by remember { mutableStateOf<List<TrainerCategory>>(emptyList()) }
+    var showDialog by remember { mutableStateOf(false) }
 
     val state by viewModel.state.collectAsState()
 
@@ -107,14 +126,19 @@ fun TrainerRegistrationScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = "PLACEHOLDER - ${stringResource(R.string.categories)}",
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.Gray,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            )
+            Box(modifier = Modifier.height(56.dp)) {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(selectedCategories) { category ->
+                        MainCategoryChip(category = category)
+                    }
+                    item {
+                        MainCategoryChip(label = "+", onClick = { showDialog = true })
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -139,7 +163,8 @@ fun TrainerRegistrationScreen(
                             hourlyRate = hourlyRate,
                             gymId = selectedGym,
                             description = description,
-                            experienceYears = experienceYears
+                            experienceYears = experienceYears,
+                            selectedCategories = selectedCategories.map { it.name }
                         )
                         onSubmit()
                     },
@@ -164,6 +189,35 @@ fun TrainerRegistrationScreen(
                 )
             }
         }
+    }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            confirmButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("OK")
+                }
+            },
+            title = { Text("Wybierz kategorie") },
+            text = {
+                LazyColumn {
+                    items(TrainerCategory.values()) { category ->
+                        FilterChip(
+                            selected = category in selectedCategories,
+                            onClick = {
+                                selectedCategories = if (category in selectedCategories) {
+                                    selectedCategories - category
+                                } else {
+                                    selectedCategories + category
+                                }
+                            },
+                            label = { Text(stringResource(category.labelRes)) }
+                        )
+                    }
+                }
+            }
+        )
     }
 }
 
