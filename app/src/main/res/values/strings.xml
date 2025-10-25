@@ -47,6 +47,9 @@
     <string name="confirm_trainer_profile_creation">Zatwierdź profil</string>
     <string name="placeholder_username">User Name</string>
     <string name="want_to_be_trainer">Chcę zostać trenerem</string>
+    <string name="choose_files">Wybierz pliki</string>
+    <string name="trainer_upload_preview">Podgląd pliku</string>
+    <string name="select_categories_label">Wybierz kategorie</string>
 
     <!-- Walidacje / błędy / sukcesy -->
     <string name="validation_hourly_rate_positive">Kwota za godzinę musi być liczbą większą od 0</string>

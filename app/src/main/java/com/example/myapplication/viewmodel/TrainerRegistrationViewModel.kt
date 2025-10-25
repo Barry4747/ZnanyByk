@@ -1,5 +1,7 @@
 package com.example.myapplication.viewmodel
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -60,11 +62,13 @@ class TrainerRegistrationViewModel @Inject constructor(
     }
 
     fun submitTrainerProfile(
+        context: Context,
         hourlyRate: String,
         gymId: String?,
         description: String,
         experienceYears: String,
-        selectedCategories: List<String>
+        selectedCategories: List<String>,
+        images: List<Uri>
     ) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, errorMessage = null)
@@ -98,6 +102,23 @@ class TrainerRegistrationViewModel @Inject constructor(
 
             val experienceInt = experienceYears.toIntOrNull()!!
 
+            val uploadResult = try {
+                trainerRepository.uploadImages(context, currentUserId, images)
+            } catch (e: Exception) {
+                Result.failure<Pair<List<String>, List<Uri>>>(e)
+            }
+
+            if (uploadResult.isFailure) {
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    errorMessage = "Błąd podczas wysyłania zdjęć: ${uploadResult.exceptionOrNull()?.message}"
+                )
+                Log.e("TrainerRegistrationVM", "Upload images failed for user=$currentUserId", uploadResult.exceptionOrNull())
+                return@launch
+            }
+
+            val (uploadedUrls, failedUris) = uploadResult.getOrNull() ?: (emptyList<String>() to emptyList<Uri>())
+
             val trainer = Trainer(
                 email = cachedUser.email,
                 firstName = cachedUser.firstName,
@@ -109,14 +130,21 @@ class TrainerRegistrationViewModel @Inject constructor(
                 location = gymId,
                 categories = selectedCategories,
                 ratings = null,
-                avgRating = null
+                avgRating = null,
+                images = uploadedUrls.ifEmpty { null }
             )
 
             trainerRepository.addTrainer(trainer, currentUserId)
                 .onSuccess { trainerId ->
+                    val successMsg = if (failedUris.isNotEmpty()) {
+                        "Profil trenera utworzony pomyślnie, ale ${failedUris.size} zdjęć nie zostało przesłanych."
+                    } else {
+                        "Profil trenera został utworzony pomyślnie!"
+                    }
+
                     _state.value = _state.value.copy(
                         isLoading = false,
-                        successMessage = "Profil trenera został utworzony pomyślnie!",
+                        successMessage = successMsg,
                         errorMessage = null
                     )
                 }

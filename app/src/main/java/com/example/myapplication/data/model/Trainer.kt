@@ -15,6 +15,7 @@ data class Trainer(
     var avgRating: String? = null,
     val pricePerHour: Int? = null,
     val experience: Int? = null,
+    val images: List<String>? = null,
 )
 
 
