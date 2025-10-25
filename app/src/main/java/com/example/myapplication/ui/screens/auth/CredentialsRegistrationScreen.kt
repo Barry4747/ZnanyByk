@@ -92,6 +92,12 @@ fun CredentialsRegistrationScreen(
                 onValueChange = { viewModel.updateEmail(it) },
                 label = { Text(stringResource(R.string.email)) },
                 enabled = !registrationState.isLoading,
+                isError = registrationState.emailValidationError != null &&
+                        registrationState.registrationCredentials.email.isNotBlank(),
+                supportingText = if (registrationState.emailValidationError != null &&
+                    registrationState.registrationCredentials.email.isNotBlank()) {
+                    { Text(registrationState.emailValidationError ?: "") }
+                } else null,
                 modifier = Modifier.fillMaxWidth()
             )
 

@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,9 +64,11 @@ fun PersonalInfoRegistrationScreen(
     var lastName by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var birthDateMillis by remember { mutableStateOf<Long?>(null) }
-    var showDatePicker by remember { mutableStateOf(false) }
     var wantsToBeTrainer by remember { mutableStateOf(false) }
     val emailPrefill = registrationState.registrationCredentials.email
+
+    var showDatePicker by remember { mutableStateOf(false) }
+    var snappedDate by remember { mutableStateOf(LocalDateTime.now().minusYears(25).toLocalDate()) }
 
     if (registrationState.successMessage != null) {
         if (wantsToBeTrainer) {
@@ -194,11 +197,16 @@ fun PersonalInfoRegistrationScreen(
         }
     }
 
+
+
     if (showDatePicker) {
-        var snappedDate by remember {
-            mutableStateOf(
-                LocalDateTime.now().minusYears(25).toLocalDate()
-            )
+        // Initialize only once when dialog opens
+        LaunchedEffect(showDatePicker) {
+            birthDateMillis?.let {
+                snappedDate = Date(it).toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+            } ?: run {
+                snappedDate = LocalDateTime.now().minusYears(25).toLocalDate()
+            }
         }
 
         Dialog(onDismissRequest = { showDatePicker = false }) {
@@ -223,8 +231,9 @@ fun PersonalInfoRegistrationScreen(
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
+                    // Controlled WheelDatePicker
                     WheelDatePicker(
-                        startDate = LocalDateTime.now().minusYears(25).toLocalDate(),
+                        startDate = snappedDate,
                         minDate = LocalDateTime.of(1900, 1, 1, 0, 0).toLocalDate(),
                         maxDate = LocalDateTime.now().toLocalDate(),
                         size = DpSize(280.dp, 150.dp),
@@ -238,7 +247,7 @@ fun PersonalInfoRegistrationScreen(
                             border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
                         )
                     ) { snappedDateValue ->
-                        snappedDate = snappedDateValue
+                        snappedDate = snappedDateValue // <-- update controlled state
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
