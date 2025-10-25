@@ -113,4 +113,13 @@ class AuthRepository @Inject constructor(
         _currentUser.value = null
         clearCachedUser()
     }
+
+    suspend fun resetPassword(email: String): Result<Unit> {
+        return try {
+            auth.sendPasswordResetEmail(email).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

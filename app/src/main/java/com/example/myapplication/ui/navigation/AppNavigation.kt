@@ -19,6 +19,7 @@ import com.example.myapplication.ui.screens.SplashScreen
 import com.example.myapplication.ui.screens.WelcomeScreen
 import com.example.myapplication.ui.screens.auth.CredentialsRegistrationScreen
 import com.example.myapplication.ui.screens.auth.LoginScreen
+import com.example.myapplication.ui.screens.auth.PasswordResetScreen
 import com.example.myapplication.ui.screens.auth.PersonalInfoRegistrationScreen
 import com.example.myapplication.ui.screens.chats.ChatScreen
 import com.example.myapplication.ui.screens.chats.ChatsListScreen
@@ -96,9 +97,26 @@ fun AppNavigation(
                                 popUpTo(Screen.Welcome.route)
                             }
                         },
+                        onNavigateToPasswordReset = {
+                            navController.navigate(Screen.PasswordReset.route)
+                        },
                         onLoginSuccess = {
                             navController.navigate(Destination.HOME.route) {
                                 popUpTo(Screen.Welcome.route) { inclusive = true }
+                            }
+                        },
+                        viewModel = authViewModel
+                    )
+                }
+
+                composable(Screen.PasswordReset.route) {
+                    val authViewModel: AuthViewModel = hiltViewModel()
+
+                    PasswordResetScreen(
+                        onNavigateBack = {
+                            navController.navigate(Screen.Login.route) {
+                                popUpTo(Screen.Login.route)
+                                launchSingleTop = true
                             }
                         },
                         viewModel = authViewModel
