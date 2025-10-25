@@ -1,6 +1,7 @@
 package com.example.myapplication.viewmodel
 
 import android.content.Context
+import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.R
@@ -31,7 +32,8 @@ data class RegistrationState(
     val user: User? = null,
     val registrationCredentials: RegistrationCredentials = RegistrationCredentials(),
     val pendingGoogleUid: String? = null,
-    val passwordValidationError: String? = null
+    val passwordValidationError: String? = null,
+    val emailValidationError: String? = null
 )
 
 @HiltViewModel
@@ -46,8 +48,10 @@ class RegistrationViewModel @Inject constructor(
     val registrationState: StateFlow<RegistrationState> = _registrationState.asStateFlow()
 
     fun updateEmail(email: String) {
+        val emailError = validateEmail(email)
         _registrationState.value = _registrationState.value.copy(
-            registrationCredentials = _registrationState.value.registrationCredentials.copy(email = email)
+            registrationCredentials = _registrationState.value.registrationCredentials.copy(email = email),
+            emailValidationError = emailError
         )
     }
 
@@ -74,6 +78,10 @@ class RegistrationViewModel @Inject constructor(
             repeatPassword.isNotBlank() && password != repeatPassword -> appContext.getString(R.string.passwords_mismatch)
             else -> null
         }
+    }
+
+    private fun validateEmail(email: String): String? {
+        return if (email.isBlank()) null else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) appContext.getString(R.string.invalid_email_format) else null
     }
 
     fun isFormValid(): Boolean {

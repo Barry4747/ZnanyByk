@@ -47,4 +47,46 @@
     <string name="confirm_trainer_profile_creation">Zatwierdź profil</string>
     <string name="placeholder_username">User Name</string>
     <string name="want_to_be_trainer">Chcę zostać trenerem</string>
+    <string name="choose_files">Wybierz pliki</string>
+    <string name="trainer_upload_preview">Podgląd pliku</string>
+    <string name="select_categories_label">Wybierz kategorie</string>
+
+    <!-- Walidacje / błędy / sukcesy -->
+    <string name="validation_hourly_rate_positive">Kwota za godzinę musi być liczbą większą od 0</string>
+    <string name="validation_experience_non_negative">Doświadczenie musi być liczbą większą lub równą 0</string>
+    <string name="error_no_user_logged_in">Brak zalogowanego użytkownika</string>
+    <string name="error_user_data_not_found">Nie znaleziono danych użytkownika</string>
+    <string name="success_trainer_profile_created">Profil trenera został utworzony pomyślnie!</string>
+    <string name="error_creating_trainer_profile">Błąd podczas tworzenia profilu: %1$s</string>
+    <string name="error_loading_chats">Błąd podczas wczytywania chatów</string>
+    <string name="error_failed_load_user_data">Nie udało się wczytać danych użytkownika</string>
+    <string name="error_loading_trainers">Nie udało się załadować trenerów</string>
+    <string name="invalid_email_format">Błędny format adresu email</string>
+
+
+    <!-- Kategorie trenera -->
+    <string name="category_crossfit">CrossFit</string>
+    <string name="category_powerlifting">Powerlifting</string>
+    <string name="category_yoga">Yoga</string>
+    <string name="category_cardio">Cardio</string>
+    <string name="category_pilates">Pilates</string>
+    <string name="category_bodybuilding">Bodybuilding</string>
+    <string name="category_endurance">Endurance</string>
+    <string name="category_spinning">Spinning</string>
+    <string name="category_martial_arts">Martial Arts</string>
+    <string name="category_aerobics">Aerobics</string>
+    <string name="category_calistenics">Calisthenics</string>
+    <string name="category_rehabilitation">Rehabilitation Training</string>
+    <string name="category_meditation">Meditation</string>
+    <string name="category_zumba">Zumba</string>
+    <string name="category_aqua_fitness">Aqua Fitness</string>
+    <string name="category_stretching">Stretching</string>
+    <string name="category_mobility">Mobility Training</string>
+    <string name="category_gymnastics">Gymnastics</string>
+    <string name="category_track_and_field">Track &amp; Field</string>
+    <string name="category_running">Running</string>
+    <string name="category_swimming">Swimming</string>
+    <string name="category_triathlon">Triathlon</string>
+    <string name="category_sport_specific">Sport-Specific Training</string>
+    <string name="category_outdoor_fitness">Outdoor Fitness</string>
 </resources>

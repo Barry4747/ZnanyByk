@@ -6,6 +6,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
 
 @Composable
 fun MainFormTextField(
@@ -18,7 +20,9 @@ fun MainFormTextField(
     readOnly: Boolean = false,
     isError: Boolean = false,
     supportingText: String? = null,
-    visualTransformation: VisualTransformation = VisualTransformation.None
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default
 ) {
     OutlinedTextField(
         value = value,
@@ -30,6 +34,8 @@ fun MainFormTextField(
         isError = isError,
         supportingText = supportingText?.let { { Text(it) } },
         visualTransformation = visualTransformation,
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
         modifier = modifier.fillMaxWidth()
     )
 }
