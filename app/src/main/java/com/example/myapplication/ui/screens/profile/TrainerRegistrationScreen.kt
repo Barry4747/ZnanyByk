@@ -22,9 +22,10 @@ import com.example.myapplication.R
 import com.example.myapplication.ui.components.buttons.FormButton
 import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.buttons.MainButton
-import com.example.myapplication.ui.components.buttons.MainTextButton
 import com.example.myapplication.ui.components.fields.MainFormTextField
 import com.example.myapplication.viewmodel.TrainerRegistrationViewModel
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 
 @Composable
 fun TrainerRegistrationScreen(
@@ -70,9 +71,10 @@ fun TrainerRegistrationScreen(
         ) {
             MainFormTextField(
                 value = hourlyRate,
-                onValueChange = { hourlyRate = it },
+                onValueChange = { input -> hourlyRate = input.filter { it.isDigit() } },
                 label = stringResource(R.string.hourly_rate),
-                enabled = !state.isLoading
+                enabled = !state.isLoading,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -97,9 +99,10 @@ fun TrainerRegistrationScreen(
 
             MainFormTextField(
                 value = experienceYears,
-                onValueChange = { experienceYears = it },
+                onValueChange = { input -> experienceYears = input.filter { it.isDigit() } },
                 label = stringResource(R.string.how_long_trainer),
-                enabled = !state.isLoading
+                enabled = !state.isLoading,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
             Spacer(modifier = Modifier.height(8.dp))

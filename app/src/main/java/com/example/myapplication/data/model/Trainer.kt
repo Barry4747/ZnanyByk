@@ -1,17 +1,15 @@
 package com.example.myapplication.data.model
 
 data class Trainer(
-    val id: String = "",
-    val name: String = "",
-    val description: String = "",
-    val specialities: List<String> = emptyList(),
-    val location: String = "",
-    val ratings: List<Int> = emptyList(),
-    var avgRating: String = "",
-    val pricePerHour: Int = 0,
-    val experience: Int = 0,
-    val email: String = ""
-) {
-
-    constructor() : this("", "", "", emptyList(), "", emptyList(), "0.00",0, 0, "")
-}
+    val email: String = "",
+    val firstName: String = "",
+    val lastName: String = "",
+    val phoneNumber: String? = null,
+    val description: String? = null,
+    val specialities: List<String>? = null,
+    val location: String? = null,
+    val ratings: List<Int>? = null,
+    var avgRating: String? = null,
+    val pricePerHour: Int? = null,
+    val experience: Int? = null,
+)

@@ -170,7 +170,7 @@ fun TrainerProfileCard(
                 ) {
                 Image(
                     painter = painterResource(id = R.drawable.gym_trainer_example),
-                    contentDescription = "Zdjęcie trenera: ${trainer.name}",
+                    contentDescription = "Zdjęcie trenera: ${trainer.firstName} ${trainer.lastName}",
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp),
@@ -195,8 +195,8 @@ fun TrainerProfileCard(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = trainer.avgRating
-                            ,style = MaterialTheme.typography.bodySmall,
+                            text = trainer.avgRating ?: "0.00",
+                            style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface // Kolor tekstu pasujący do tła
                         )
@@ -214,12 +214,12 @@ fun TrainerProfileCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                 Text(
-                    text = trainer.name,
+                    text = "${trainer.firstName} ${trainer.lastName}",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                 )
                     Text(
-                        text = "${trainer.pricePerHour} zł/h",
+                        text = "${trainer.pricePerHour ?: 0} zł/h",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.tertiary)
@@ -228,7 +228,7 @@ fun TrainerProfileCard(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "${trainer.experience} lata doświadczenia",
+                    text = "${trainer.experience ?: 0} lata doświadczenia",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier
