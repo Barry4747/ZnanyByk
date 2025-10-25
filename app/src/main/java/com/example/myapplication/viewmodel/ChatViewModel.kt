@@ -29,7 +29,7 @@ class ChatViewModel @Inject constructor(
 
     fun init(chatId: String) {
         this.chatId = chatId
-        this.currentUserId = authRepository.getCachedUser().toString()
+        this.currentUserId = authRepository.getCurrentUserId().toString()
         listenForMessages()
     }
 
@@ -45,5 +45,23 @@ class ChatViewModel @Inject constructor(
         viewModelScope.launch {
             chatRepository.sendMessage(chatId, currentUserId, receiverId, text)
         }
+    }
+
+    fun getCurrentUser(): String? {
+        return authRepository.getCurrentUserId()
+    }
+
+    fun getUserLastName(uid: String): String? {
+        return userRepository.getUserSync(uid)?.lastName
+    }
+    fun getUserFirstName(uid: String): String? {
+        return userRepository.getUserSync(uid)?.firstName
+    }
+    fun getUserFullName(uid: String): String? {
+        return getUserFirstName(uid) + " " + getUserLastName(uid)
+    }
+
+    suspend fun markSeen() {
+        chatRepository.markMessagesAsSeen(chatId, currentUserId)
     }
 }

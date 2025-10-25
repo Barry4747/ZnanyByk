@@ -1,72 +1,124 @@
 package com.example.myapplication.ui.screens.chats
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import com.example.myapplication.R
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.example.myapplication.data.model.Message
-import com.example.myapplication.data.repository.ChatRepository
+import com.example.myapplication.ui.components.buttons.MainBackButton
+import com.example.myapplication.ui.components.user_components.ProfileImage
+import com.example.myapplication.utils.shouldShowTimestamp
+import com.example.myapplication.utils.shouldShowProfile
+import com.example.myapplication.utils.formatTimestamp
 import com.example.myapplication.viewmodel.ChatViewModel
-import kotlinx.coroutines.launch
 
 @Composable
 fun ChatScreen(
     chatId: String,
     receiverId: String,
+    onNavigateBack: () -> Unit,
     viewModel: ChatViewModel = hiltViewModel()
 ) {
     LaunchedEffect(Unit) {
         viewModel.init(chatId)
+        viewModel.markSeen()
     }
+
+    val receiverProfileUrl = null
+    val currentUserId = viewModel.getCurrentUser()
     val messages by viewModel.messages.collectAsState()
     var text by remember { mutableStateOf("") }
+    var isFocused by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            MainBackButton(onClick = onNavigateBack)
+            ProfileImage(imageUrl = receiverProfileUrl)
+            Text(text = viewModel.getUserFullName(receiverId).toString(), modifier = Modifier.padding(start = 8.dp))
+        }
+
         LazyColumn(
             modifier = Modifier.weight(1f),
-            reverseLayout = true
+            reverseLayout = true,
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
         ) {
-            items(messages) { message ->
-                Text(
-                    text = "${message.senderId}: ${message.text}",
-                    modifier = Modifier.padding(vertical = 4.dp)
+            itemsIndexed(messages) { index, message ->
+                val isCurrentUser = message.senderId == currentUserId
+                val previousMessage = messages.getOrNull(index - 1)
+
+                val showProfile = shouldShowProfile(index, messages, currentUserId)
+                val showTimestamp = shouldShowTimestamp(message.timestamp, previousMessage?.timestamp)
+                val timestampText = formatTimestamp(message.timestamp, previousMessage?.timestamp)
+
+                MessageItem(
+                    message = message,
+                    isCurrentUser = isCurrentUser,
+                    showProfile = showProfile,
+                    timestamp = if (showTimestamp) timestampText else ""
                 )
             }
         }
 
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
             TextField(
                 value = text,
                 onValueChange = { text = it },
-                modifier = Modifier.weight(1f),
-                placeholder = { Text("Napisz wiadomość...") }
+                placeholder = {
+                    if (!isFocused) Text(
+                        "Napisz wiadomość...",
+                        color = Color.Gray
+                    )
+                },
+                modifier = Modifier
+                    .weight(1f)
+                    .border(1.dp, Color.Black)
+                    .background(Color.White.copy(alpha = 0.0f))
+                    .onFocusChanged { focusState -> isFocused = focusState.isFocused }
+                    .heightIn(min = 56.dp, max = 150.dp),
+                trailingIcon = {
+                    if (isFocused) {
+                        IconButton(onClick = {
+                            if (text.isNotBlank()) {
+                                viewModel.sendMessage(receiverId, text)
+                                text = ""
+                            }
+                        }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.send_arrow),
+                                contentDescription = "Send"
+                            )
+                        }
+                    }
+                },
+                maxLines = 5,
+                textStyle = androidx.compose.ui.text.TextStyle(
+                    color = Color.Black
+                )
             )
-            Button(onClick = {
-                if (text.isNotBlank()) {
-                    viewModel.sendMessage(receiverId, text)
-                    text = ""
-                }
-            }) {
-                Text("Wyślij")
-            }
         }
     }
 }

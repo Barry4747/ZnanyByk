@@ -55,6 +55,7 @@ fun ChatItem(
     viewModel: ChatsListViewModel = hiltViewModel()
 ) {
     val receiverId = chat.users.firstOrNull { it != viewModel.getCurrentUserId()} ?: ""
+    val receiverFirstName = viewModel.getUserFirstName(receiverId)
 
     Row(
         modifier = Modifier
@@ -63,15 +64,16 @@ fun ChatItem(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Chat z: $receiverId",
+                text = "Chat z: $receiverFirstName",
                 style = MaterialTheme.typography.titleMedium
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = chat.lastMessage,
-                style = MaterialTheme.typography.bodyMedium,
+                style = if(chat.lastMessageSeen) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodyLarge,
                 maxLines = 1
             )
         }

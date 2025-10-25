@@ -6,6 +6,7 @@ import com.example.myapplication.data.model.Chat
 import com.example.myapplication.data.model.User
 import com.example.myapplication.data.repository.AuthRepository
 import com.example.myapplication.data.repository.ChatRepository
+import com.example.myapplication.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +23,8 @@ data class ChatsListState(
 @HiltViewModel
 class ChatsListViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _chats = MutableStateFlow<ChatsListState>(ChatsListState(isLoading = true))
@@ -67,4 +69,14 @@ class ChatsListViewModel @Inject constructor(
     fun getCurrentUserId(): String? {
         return authRepository.getCurrentUserId()
     }
+    fun getUserLastName(uid: String): String? {
+        return userRepository.getUserSync(uid)?.lastName
+    }
+    fun getUserFirstName(uid: String): String? {
+        return userRepository.getUserSync(uid)?.firstName
+    }
+    fun getUserFullName(uid: String): String? {
+        return getUserFirstName(uid) + " " + getUserLastName(uid)
+    }
+
 }

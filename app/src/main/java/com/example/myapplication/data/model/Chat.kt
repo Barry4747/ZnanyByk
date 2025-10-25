@@ -4,5 +4,7 @@ data class Chat(
     val id: String = "",
     val users: List<String> = emptyList(),
     val lastMessage: String = "",
-    val lastTimestamp: Long = 0L
+    val lastTimestamp: Long = 0L,
+    val lastMessageSender: String = "",
+    val lastMessageSeen: Boolean = false
 )
