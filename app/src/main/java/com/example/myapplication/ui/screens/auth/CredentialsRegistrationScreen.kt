@@ -76,7 +76,7 @@ fun CredentialsRegistrationScreen(
             Image(
                 painter = painterResource(id = R.drawable.znanybyklogo_transparent),
                 contentDescription = stringResource(R.string.znany_byk_logo),
-                modifier = Modifier.size(150.dp)
+                modifier = Modifier.size(270.dp)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -87,7 +87,7 @@ fun CredentialsRegistrationScreen(
                 fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedTextField(
                 value = registrationState.registrationCredentials.email,

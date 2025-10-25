@@ -8,36 +8,33 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.myapplication.R
+import com.example.myapplication.viewmodel.SplashViewModel
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.myapplication.R
-import com.example.myapplication.viewmodel.AuthViewModel
-import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(
-    authViewModel: AuthViewModel = hiltViewModel(),
+    splashViewModel: SplashViewModel = hiltViewModel(),
     onNavigateToStart: () -> Unit,
     onNavigateToHome: () -> Unit
 ) {
-    val authState by authViewModel.authState.collectAsState()
-
     LaunchedEffect(Unit) {
-        delay(50)
-        authViewModel.checkAuthState()
-    }
+        val hasCachedUser = try {
+            splashViewModel.checkCachedUser()
+        } catch (e: Exception) {
+            false
+        }
 
-    LaunchedEffect(authState.isCheckingAuth, authState.user) {
-        if (!authState.isCheckingAuth) {
-            if (authState.user != null) {
-                onNavigateToHome()
-            } else {
-                onNavigateToStart()
-            }
+        if (hasCachedUser) {
+            onNavigateToHome()
+        } else {
+            onNavigateToStart()
         }
     }
 

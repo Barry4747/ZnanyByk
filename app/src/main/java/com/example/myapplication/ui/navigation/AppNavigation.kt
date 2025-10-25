@@ -205,7 +205,9 @@ fun AppNavigation(
                 composable(Screen.RegisterTrainer.route) {
                     TrainerRegistrationScreen(
                         onNavigateBack = {
-                            navController.popBackStack()
+                            navController.navigate(Destination.HOME.route) {
+                                popUpTo(Destination.HOME.route) { inclusive = true }
+                            }
                         },
                         onSubmit = {
                             navController.navigate(Destination.HOME.route) {

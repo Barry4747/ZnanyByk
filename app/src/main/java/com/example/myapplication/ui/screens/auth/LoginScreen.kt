@@ -84,7 +84,7 @@ fun LoginScreen(
             Image(
                 painter = painterResource(id = R.drawable.znanybyklogo_transparent),
                 contentDescription = stringResource(R.string.znany_byk_logo),
-                modifier = Modifier.size(150.dp)
+                modifier = Modifier.size(270.dp)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -95,7 +95,7 @@ fun LoginScreen(
                 fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedTextField(
                 value = email,
@@ -126,7 +126,7 @@ fun LoginScreen(
                 CircularProgressIndicator()
             } else {
                 MainButton(
-                    text = stringResource(R.string.signin),
+                    text = stringResource(R.string.login_button_message),
                     onClick = { viewModel.login(email, password) },
                     enabled = email.isNotBlank() && password.isNotBlank(),
                     modifier = Modifier.fillMaxWidth()

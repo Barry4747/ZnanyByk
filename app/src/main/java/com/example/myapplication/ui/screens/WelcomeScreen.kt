@@ -34,7 +34,7 @@ fun WelcomeScreen(
         Image(
             painter = painterResource(id = R.drawable.znanybyklogo_transparent),
             contentDescription = stringResource(R.string.znany_byk_logo),
-            modifier = Modifier.size(450.dp)
+            modifier = Modifier.size(500.dp)
         )
 
         Spacer(modifier = Modifier.height(32.dp))
