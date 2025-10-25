@@ -51,8 +51,10 @@ class ChatsListViewModel @Inject constructor(
 
             result.fold(
                 onSuccess = { chatList ->
+                    val sortedChats = chatList.sortedByDescending { it.lastTimestamp }
+
                     _chats.value = ChatsListState(
-                        chats = chatList,
+                        chats = sortedChats,
                         isLoading = false
                     )
                 },

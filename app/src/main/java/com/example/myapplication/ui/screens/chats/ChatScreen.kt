@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -45,15 +46,34 @@ fun ChatScreen(
     var isFocused by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            MainBackButton(onClick = onNavigateBack)
-            ProfileImage(imageUrl = receiverProfileUrl)
-            Text(text = viewModel.getUserFullName(receiverId).toString(), modifier = Modifier.padding(start = 8.dp))
+        Box(modifier = Modifier.fillMaxWidth().height(72.dp)) {
+            Row(
+                modifier = Modifier.padding(8.dp)
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                MainBackButton(onClick = onNavigateBack)
+                ProfileImage(imageUrl = receiverProfileUrl)
+                Text(
+                    text = viewModel.getUserFullName(receiverId).toString(),
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Black.copy(alpha = 0.15f),
+                                Color.Transparent
+                            )
+                        )
+                    )
+            )
         }
 
         LazyColumn(
