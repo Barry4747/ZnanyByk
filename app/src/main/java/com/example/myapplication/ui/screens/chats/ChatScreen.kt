@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.screens.chats
 
+import android.widget.ImageButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import com.example.myapplication.R
@@ -26,6 +27,7 @@ import com.example.myapplication.utils.shouldShowTimestamp
 import com.example.myapplication.utils.shouldShowProfile
 import com.example.myapplication.utils.formatTimestamp
 import com.example.myapplication.viewmodel.ChatViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun ChatScreen(
@@ -34,9 +36,19 @@ fun ChatScreen(
     onNavigateBack: () -> Unit,
     viewModel: ChatViewModel = hiltViewModel()
 ) {
-    LaunchedEffect(Unit) {
+    val coroutineScope = rememberCoroutineScope()
+
+    DisposableEffect(Unit) {
         viewModel.init(chatId)
-        viewModel.markSeen()
+        coroutineScope.launch {
+            viewModel.markSeen()
+        }
+
+        onDispose {
+            coroutineScope.launch {
+                viewModel.markSeen()
+            }
+        }
     }
 
     val receiverProfileUrl = null
@@ -47,18 +59,46 @@ fun ChatScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxWidth().height(72.dp)) {
-            Row(
-                modifier = Modifier.padding(8.dp)
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                MainBackButton(onClick = onNavigateBack)
-                ProfileImage(imageUrl = receiverProfileUrl)
-                Text(
-                    text = viewModel.getUserFullName(receiverId).toString(),
-                    modifier = Modifier.padding(start = 8.dp)
-                )
+            Row(modifier = Modifier.padding(8.dp)
+                .fillMaxWidth()
+                .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    MainBackButton(onClick = onNavigateBack)
+                    ProfileImage(imageUrl = receiverProfileUrl)
+                    Text(
+                        text = viewModel.getUserFullName(receiverId).toString(),
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = {
+                        if (text.isNotBlank()) {
+                            viewModel.sendMessage(receiverId, text)
+                            text = ""
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.phone),
+                            contentDescription = "Send",
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                    IconButton(onClick = {
+                        if (text.isNotBlank()) {
+                            viewModel.sendMessage(receiverId, text)
+                            text = ""
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.video),
+                            contentDescription = "Send",
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                }
             }
             Box(
                 modifier = Modifier

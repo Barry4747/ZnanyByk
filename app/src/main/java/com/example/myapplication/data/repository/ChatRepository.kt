@@ -99,7 +99,8 @@ class ChatRepository @Inject constructor() {
                 batch.update(chatRef, mapOf(
                     "lastMessage" to text,
                     "lastMessageSender" to currentUserId,
-                    "lastTimestamp" to timestamp
+                    "lastTimestamp" to timestamp,
+                    "lastMessageSeen" to false
                 ))
             }.await()
 
