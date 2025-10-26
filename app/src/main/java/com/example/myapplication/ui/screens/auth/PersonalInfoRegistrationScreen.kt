@@ -42,7 +42,7 @@ import com.example.myapplication.ui.components.buttons.FormButton
 import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.ui.components.fields.MainFormTextField
-import com.example.myapplication.viewmodel.RegistrationViewModel
+import com.example.myapplication.viewmodel.registration.RegistrationViewModel
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.ZoneId

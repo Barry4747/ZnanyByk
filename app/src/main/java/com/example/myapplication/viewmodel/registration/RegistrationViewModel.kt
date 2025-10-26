@@ -1,11 +1,11 @@
-package com.example.myapplication.viewmodel
+package com.example.myapplication.viewmodel.registration
 
 import android.content.Context
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.R
-import com.example.myapplication.data.model.User
+import com.example.myapplication.data.model.users.User
 import com.example.myapplication.data.repository.AuthRepository
 import com.example.myapplication.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.Date
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -104,7 +105,7 @@ class RegistrationViewModel @Inject constructor(
         firstName: String,
         lastName: String,
         phoneNumber: String? = null,
-        birthDate: java.util.Date? = null
+        birthDate: Date? = null
     ) {
         viewModelScope.launch {
             setLoading()
@@ -142,7 +143,7 @@ class RegistrationViewModel @Inject constructor(
         firstName: String,
         lastName: String,
         phoneNumber: String?,
-        birthDate: java.util.Date?,
+        birthDate: Date?,
         uid: String
     ) {
         val email = getEmailForGoogleRegistration()
@@ -159,7 +160,7 @@ class RegistrationViewModel @Inject constructor(
         firstName: String,
         lastName: String,
         phoneNumber: String?,
-        birthDate: java.util.Date?
+        birthDate: Date?
     ) {
         val credentials = _registrationState.value.registrationCredentials
 
@@ -229,7 +230,7 @@ class RegistrationViewModel @Inject constructor(
         lastName: String,
         email: String,
         phoneNumber: String?,
-        birthDate: java.util.Date?
+        birthDate: Date?
     ): User {
         return User(
             firstName = firstName,

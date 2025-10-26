@@ -1,11 +1,11 @@
-package com.example.myapplication.viewmodel
+package com.example.myapplication.viewmodel.registration
 
 import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.myapplication.data.model.Trainer
+import com.example.myapplication.data.model.users.Trainer
 import com.example.myapplication.data.repository.AuthRepository
 import com.example.myapplication.data.repository.TrainerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

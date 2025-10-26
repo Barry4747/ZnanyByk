@@ -1,6 +1,6 @@
 package com.example.myapplication.utils
 
-import com.example.myapplication.data.model.Message
+import com.example.myapplication.data.model.chats.Message
 import java.text.SimpleDateFormat
 import java.util.*
 

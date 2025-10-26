@@ -1,4 +1,4 @@
-package com.example.myapplication.data.model
+package com.example.myapplication.data.model.users
 
 import androidx.annotation.StringRes
 import com.example.myapplication.R

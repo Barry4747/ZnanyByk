@@ -1,4 +1,4 @@
-package com.example.myapplication.data.model
+package com.example.myapplication.data.model.chats
 
 data class Chat(
     val id: String = "",

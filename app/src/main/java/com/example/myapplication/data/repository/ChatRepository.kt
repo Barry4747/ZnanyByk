@@ -1,7 +1,7 @@
 package com.example.myapplication.data.repository
 
-import com.example.myapplication.data.model.Chat
-import com.example.myapplication.data.model.Message
+import com.example.myapplication.data.model.chats.Chat
+import com.example.myapplication.data.model.chats.Message
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration

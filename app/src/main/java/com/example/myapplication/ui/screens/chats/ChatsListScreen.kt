@@ -16,9 +16,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.myapplication.data.model.Chat
+import com.example.myapplication.data.model.chats.Chat
 import com.example.myapplication.ui.components.user_components.ProfileImage
-import com.example.myapplication.viewmodel.ChatsListViewModel
+import com.example.myapplication.viewmodel.chats.ChatsListViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.absoluteValue

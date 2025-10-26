@@ -8,7 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.myapplication.data.model.Message
+import com.example.myapplication.data.model.chats.Message
 import com.example.myapplication.ui.components.user_components.ProfileImage
 
 @Composable

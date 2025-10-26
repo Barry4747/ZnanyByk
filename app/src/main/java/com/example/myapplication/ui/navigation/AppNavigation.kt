@@ -13,7 +13,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
-import com.example.myapplication.ui.components.CustomBottomBar
 import com.example.myapplication.ui.components.Destination
 import com.example.myapplication.ui.screens.WelcomeScreen
 import com.example.myapplication.ui.screens.auth.CredentialsRegistrationScreen
@@ -26,7 +25,7 @@ import com.example.myapplication.ui.screens.home.HomeScreen
 import com.example.myapplication.ui.screens.scheduler.SchedulerScreen
 import com.example.myapplication.ui.screens.profile.TrainerRegistrationScreen
 import com.example.myapplication.viewmodel.AuthViewModel
-import com.example.myapplication.viewmodel.RegistrationViewModel
+import com.example.myapplication.viewmodel.registration.RegistrationViewModel
 
 private const val ANIMATION_DURATION = 50
 

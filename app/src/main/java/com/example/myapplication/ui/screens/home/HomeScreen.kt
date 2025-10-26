@@ -46,7 +46,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.R
-import com.example.myapplication.data.model.Trainer
+import com.example.myapplication.data.model.users.Trainer
 import com.example.myapplication.viewmodel.HomeViewModel
 
 

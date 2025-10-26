@@ -3,7 +3,7 @@ package com.example.myapplication.data.repository
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import com.example.myapplication.data.model.Trainer
+import com.example.myapplication.data.model.users.Trainer
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.async

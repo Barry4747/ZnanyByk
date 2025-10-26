@@ -2,8 +2,8 @@ package com.example.myapplication.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.myapplication.data.model.Trainer
-import com.example.myapplication.data.model.User
+import com.example.myapplication.data.model.users.Trainer
+import com.example.myapplication.data.model.users.User
 import com.example.myapplication.data.repository.AuthRepository
 import com.example.myapplication.data.repository.TrainerRepository
 import com.example.myapplication.data.repository.UserRepository

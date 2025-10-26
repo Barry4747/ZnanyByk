@@ -26,7 +26,7 @@ import com.example.myapplication.ui.components.user_components.ProfileImage
 import com.example.myapplication.utils.shouldShowTimestamp
 import com.example.myapplication.utils.shouldShowProfile
 import com.example.myapplication.utils.formatTimestamp
-import com.example.myapplication.viewmodel.ChatViewModel
+import com.example.myapplication.viewmodel.chats.ChatViewModel
 import kotlinx.coroutines.launch
 
 @Composable
