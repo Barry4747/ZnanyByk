@@ -15,10 +15,10 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import com.example.myapplication.ui.components.CustomBottomBar
 import com.example.myapplication.ui.components.Destination
-import com.example.myapplication.ui.screens.SplashScreen
 import com.example.myapplication.ui.screens.WelcomeScreen
 import com.example.myapplication.ui.screens.auth.CredentialsRegistrationScreen
 import com.example.myapplication.ui.screens.auth.LoginScreen
+import com.example.myapplication.ui.screens.auth.PasswordResetScreen
 import com.example.myapplication.ui.screens.auth.PersonalInfoRegistrationScreen
 import com.example.myapplication.ui.screens.chats.ChatScreen
 import com.example.myapplication.ui.screens.chats.ChatsListScreen
@@ -33,35 +33,20 @@ private const val ANIMATION_DURATION = 50
 @Composable
 fun AppNavigation(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    startDestination: String
 ) {
 
         Box(modifier = Modifier) {
             NavHost(
                 navController = navController,
-                startDestination = Screen.Splash.route,
+                startDestination = startDestination,
                 modifier = modifier,
                 enterTransition = { fadeIn(animationSpec = androidx.compose.animation.core.tween(ANIMATION_DURATION)) },
                 exitTransition = { fadeOut(animationSpec = androidx.compose.animation.core.tween(ANIMATION_DURATION)) },
                 popEnterTransition = { fadeIn(animationSpec = androidx.compose.animation.core.tween(ANIMATION_DURATION)) },
                 popExitTransition = { fadeOut(animationSpec = androidx.compose.animation.core.tween(ANIMATION_DURATION)) }
             ) {
-
-                composable(Screen.Splash.route) {
-                    SplashScreen(
-                        onNavigateToStart = {
-                            navController.navigate(Screen.Welcome.route) {
-                                popUpTo(Screen.Splash.route) { inclusive = true }
-                            }
-                        },
-                        onNavigateToHome = {
-                            navController.navigate(Destination.HOME.route) {
-                                popUpTo(Screen.Splash.route) { inclusive = true }
-                            }
-                        }
-                    )
-                }
-
 
                 composable(Screen.Welcome.route) {
                     WelcomeScreen(
@@ -96,9 +81,26 @@ fun AppNavigation(
                                 popUpTo(Screen.Welcome.route)
                             }
                         },
+                        onNavigateToPasswordReset = {
+                            navController.navigate(Screen.PasswordReset.route)
+                        },
                         onLoginSuccess = {
                             navController.navigate(Destination.HOME.route) {
                                 popUpTo(Screen.Welcome.route) { inclusive = true }
+                            }
+                        },
+                        viewModel = authViewModel
+                    )
+                }
+
+                composable(Screen.PasswordReset.route) {
+                    val authViewModel: AuthViewModel = hiltViewModel()
+
+                    PasswordResetScreen(
+                        onNavigateBack = {
+                            navController.navigate(Screen.Login.route) {
+                                popUpTo(Screen.Login.route)
+                                launchSingleTop = true
                             }
                         },
                         viewModel = authViewModel
@@ -187,7 +189,9 @@ fun AppNavigation(
                 composable(Screen.RegisterTrainer.route) {
                     TrainerRegistrationScreen(
                         onNavigateBack = {
-                            navController.popBackStack()
+                            navController.navigate(Destination.HOME.route) {
+                                popUpTo(Destination.HOME.route) { inclusive = true }
+                            }
                         },
                         onSubmit = {
                             navController.navigate(Destination.HOME.route) {
@@ -230,3 +234,4 @@ fun AppNavigation(
             }
         }
     }
+

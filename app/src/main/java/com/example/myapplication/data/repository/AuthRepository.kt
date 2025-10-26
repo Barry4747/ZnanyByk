@@ -8,6 +8,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,12 +27,44 @@ data class GoogleSignInResult(
 class AuthRepository @Inject constructor(
     private val auth: FirebaseAuth,
     @param:ApplicationContext private val context: Context
+    ,
+    private val firestore: FirebaseFirestore
 ) {
     private val _currentUser = MutableStateFlow(auth.currentUser)
     val currentUser: StateFlow<FirebaseUser?> = _currentUser.asStateFlow()
 
     @Volatile
     private var cachedUserData: Pair<String, User>? = null
+
+
+    suspend fun updateCachedUserFromFirebaseAuth(): Boolean {
+        val firebaseUser = auth.currentUser
+        if (firebaseUser == null) {
+            cachedUserData = null
+            return false
+        }
+
+        val uid = firebaseUser.uid
+        return try {
+            val doc = firestore.collection("users").document(uid).get().await()
+            if (doc.exists()) {
+                val user = doc.toObject(User::class.java)
+                if (user != null) {
+                    cachedUserData = Pair(uid, user)
+                    true
+                } else {
+                    cachedUserData = null
+                    false
+                }
+            } else {
+                cachedUserData = null
+                false
+            }
+        } catch (e: Exception) {
+            cachedUserData = null
+            false
+        }
+    }
 
     suspend fun registerUser(email: String, password: String): Result<String> {
         return try {
@@ -112,5 +145,14 @@ class AuthRepository @Inject constructor(
         auth.signOut()
         _currentUser.value = null
         clearCachedUser()
+    }
+
+    suspend fun resetPassword(email: String): Result<Unit> {
+        return try {
+            auth.sendPasswordResetEmail(email).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

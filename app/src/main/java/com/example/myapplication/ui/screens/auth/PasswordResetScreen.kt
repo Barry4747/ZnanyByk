@@ -16,12 +16,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,42 +27,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.myapplication.R
-import com.example.myapplication.ui.components.buttons.GoogleAuthButton
 import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.buttons.MainButton
-import com.example.myapplication.ui.components.buttons.MainTextButton
 import com.example.myapplication.viewmodel.AuthViewModel
 
 @Composable
-fun LoginScreen(
+fun PasswordResetScreen(
     onNavigateBack: () -> Unit,
-    onNavigateToRegister: () -> Unit,
-    onNavigateToPersonalInfo: () -> Unit,
-    onNavigateToPasswordReset: () -> Unit,
-    onLoginSuccess: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val authState by viewModel.authState.collectAsState()
-
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-
-    LaunchedEffect(authState.user) {
-        if (authState.user != null) {
-            onLoginSuccess()
-        }
-    }
-
-    LaunchedEffect(authState.pendingGoogleUid) {
-        if (authState.pendingGoogleUid != null) {
-            onNavigateToPersonalInfo()
-        }
-    }
+    val emailState = remember { mutableStateOf("") }
 
     Box(modifier = modifier.fillMaxSize()) {
         MainBackButton(
@@ -90,7 +67,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = stringResource(R.string.signin),
+                text = "Resetowanie hasła",
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -98,26 +75,12 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
+                value = emailState.value,
+                onValueChange = { emailState.value = it },
                 label = { Text(stringResource(R.string.email)) },
                 enabled = !authState.isLoading,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text(stringResource(R.string.password)) },
-                enabled = !authState.isLoading,
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    autoCorrectEnabled = false
-                ),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -126,18 +89,9 @@ fun LoginScreen(
                 CircularProgressIndicator()
             } else {
                 MainButton(
-                    text = stringResource(R.string.login_button_message),
-                    onClick = { viewModel.login(email, password) },
-                    enabled = email.isNotBlank() && password.isNotBlank(),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                GoogleAuthButton(
-                    text = stringResource(R.string.continue_with_google),
-                    onClick = { viewModel.signInWithGoogle() },
-                    enabled = true,
+                    text = "Wyślij emaila o reset hasła",
+                    onClick = { viewModel.resetPassword(emailState.value) },
+                    enabled = emailState.value.isNotBlank(),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -150,20 +104,15 @@ fun LoginScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            MainTextButton(
-                text = stringResource(R.string.dont_have_acc_register),
-                onClick = onNavigateToRegister,
-                enabled = !authState.isLoading
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            MainTextButton(
-                text = "Zapomniałeś hasła?",
-                onClick = {onNavigateToPasswordReset()}
-            )
+            if (authState.passwordResetMessage != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = authState.passwordResetMessage ?: "",
+                    color = Color(0xFF388E3C),
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
     }
 }
+

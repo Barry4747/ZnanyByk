@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -18,7 +20,8 @@ data class AuthState(
     val errorMessage: String? = null,
     val user: User? = null,
     val pendingGoogleUid: String? = null,
-    val isCheckingAuth: Boolean = false
+    val isCheckingAuth: Boolean = false,
+    val passwordResetMessage: String? = null
 )
 
 @HiltViewModel
@@ -32,11 +35,9 @@ class AuthViewModel @Inject constructor(
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
 
     init {
-        // Obserwuj currentUser z AuthRepository
         viewModelScope.launch {
             authRepository.currentUser.collect { firebaseUser ->
                 if (firebaseUser == null) {
-                    // Użytkownik się wylogował
                     authRepository.clearCachedUser()
                     _authState.value = AuthState()
                 }
@@ -93,6 +94,30 @@ class AuthViewModel @Inject constructor(
             authRepository.logoutUser()
             _authState.value = AuthState()
         }
+    }
+
+    fun resetPassword(email: String) {
+        viewModelScope.launch {
+            _authState.value = _authState.value.copy(isLoading = true, errorMessage = null, passwordResetMessage = null)
+            authRepository.resetPassword(email)
+                .onSuccess {
+                    _authState.value = _authState.value.copy(
+                        isLoading = false,
+                        passwordResetMessage = "Link do resetowania hasła został wysłany na podany adres e-mail."
+                    )
+                }
+                .onFailure { e ->
+                    _authState.value = _authState.value.copy(
+                        isLoading = false,
+                        errorMessage = "Nie udało się wysłać linku: ${e.message}",
+                        passwordResetMessage = null
+                    )
+                }
+        }
+    }
+
+    fun clearPasswordResetMessage() {
+        _authState.value = _authState.value.copy(passwordResetMessage = null)
     }
 
     private suspend fun handleGoogleSignInResult(uid: String) {

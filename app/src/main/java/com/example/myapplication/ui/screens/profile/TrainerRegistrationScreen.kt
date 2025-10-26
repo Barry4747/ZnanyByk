@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -34,6 +35,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,7 +56,14 @@ import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.ui.components.chips.MainCategoryChip
 import com.example.myapplication.ui.components.fields.MainFormTextField
 import com.example.myapplication.viewmodel.TrainerRegistrationViewModel
-
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.unit.dp
 @Composable
 fun TrainerRegistrationScreen(
     modifier: Modifier = Modifier,
@@ -76,7 +85,6 @@ fun TrainerRegistrationScreen(
 
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
-    var navigated by remember { mutableStateOf(false) }
 
     Box(modifier = modifier.fillMaxSize()) {
         Row(
@@ -106,6 +114,13 @@ fun TrainerRegistrationScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            Text(
+                text = "Uzupełnij swój profil trenera",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
             MainFormTextField(
                 value = hourlyRate,
                 onValueChange = { input -> hourlyRate = input.filter { it.isDigit() } },
@@ -144,21 +159,24 @@ fun TrainerRegistrationScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            Text(
+                text = stringResource(R.string.select_images_label),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 8.dp, bottom = 4.dp)
+            )
             Box(modifier = Modifier.height(140.dp)) {
                 Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    FormButton(
-                        text = stringResource(R.string.choose_files),
-                        onClick = { launcher.launch("image/*") },
-                        enabled = !state.isLoading,
-                        modifier = Modifier.fillMaxWidth()
-                    )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Box(modifier = Modifier.height(80.dp)) {
                         LazyRow(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             items(selectedFiles) { uri ->
                                 AsyncImage(
@@ -171,22 +189,27 @@ fun TrainerRegistrationScreen(
                                     modifier = Modifier.size(76.dp)
                                 )
                             }
+                            item {
+                                MainCategoryChip(label = "+", onClick = { launcher.launch("image/*") })
+                            }
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
             Text(
                 text = stringResource(R.string.select_categories_label),
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 8.dp, bottom = 4.dp)
             )
             Box(modifier = Modifier.height(56.dp)) {
                 LazyRow(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     items(selectedCategories) { category ->
                         MainCategoryChip(category = category)
@@ -238,15 +261,16 @@ fun TrainerRegistrationScreen(
         }
     }
 
-    // navigate only after success to avoid leaving screen before upload finishes
-    if (state.successMessage != null && !navigated) {
-        navigated = true
-        onSubmit()
+    LaunchedEffect(key1 = state.successMessage) {
+        if (state.successMessage != null) {
+            onSubmit()
+        }
     }
 
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
+            modifier = Modifier.widthIn(min = 360.dp, max = 600.dp),
             confirmButton = {
                 TextButton(onClick = { showDialog = false }) {
                     Text("OK")
@@ -254,19 +278,28 @@ fun TrainerRegistrationScreen(
             },
             title = { Text("Wybierz kategorie") },
             text = {
-                LazyColumn {
-                    items(TrainerCategory.entries.toList()) { category ->
-                        FilterChip(
-                            selected = category in selectedCategories,
-                            onClick = {
-                                selectedCategories = if (category in selectedCategories) {
-                                    selectedCategories - category
-                                } else {
-                                    selectedCategories + category
-                                }
-                            },
-                            label = { Text(stringResource(category.labelRes)) }
-                        )
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(12.dp)
+                ) {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        TrainerCategory.entries.forEach { category ->
+                            FilterChip(
+                                selected = category in selectedCategories,
+                                onClick = {
+                                    selectedCategories = if (category in selectedCategories) {
+                                        selectedCategories - category
+                                    } else {
+                                        selectedCategories + category
+                                    }
+                                },
+                                label = { Text(stringResource(category.labelRes)) }
+                            )
+                        }
                     }
                 }
             }

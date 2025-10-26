@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Splash theme used while the app starts -->
+    <style name="Theme.Splash" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+        <!-- Optional: keep status bar matching background -->
+        <item name="android:statusBarColor">@color/splash_background</item>
+    </style>
+
     <style name="Theme.MyApplication" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>

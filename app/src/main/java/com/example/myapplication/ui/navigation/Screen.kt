@@ -10,4 +10,5 @@ sealed class Screen(val route: String) {
     object Scheduler : Screen("scheduler")
     object RegisterTrainer : Screen("register_trainer")
     object RegistrationFlow : Screen("registration_flow")
+    object PasswordReset : Screen("password_reset")
 }
