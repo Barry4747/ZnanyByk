@@ -2,6 +2,7 @@ package com.example.myapplication.data.repository
 
 import com.example.myapplication.data.model.Chat
 import com.example.myapplication.data.model.Message
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
@@ -81,6 +82,7 @@ class ChatRepository @Inject constructor() {
         text: String
     ): Result<Unit> {
         return try {
+            val timestamp = System.currentTimeMillis()
             val message = Message(
                 chatId = chatId,
                 senderId = currentUserId,
@@ -94,7 +96,12 @@ class ChatRepository @Inject constructor() {
                 val msgRef = chatRef.collection("messages").document()
                 batch.set(msgRef, message)
 
-
+                batch.update(chatRef, mapOf(
+                    "lastMessage" to text,
+                    "lastMessageSender" to currentUserId,
+                    "lastTimestamp" to timestamp,
+                    "lastMessageSeen" to false
+                ))
             }.await()
 
             Result.success(Unit)
@@ -130,5 +137,32 @@ class ChatRepository @Inject constructor() {
             Result.failure(e)
         }
     }
+
+    suspend fun markMessagesAsSeen(chatId: String, currentUserId: String) {
+        val chatRef = chatsCollection.document(chatId)
+
+        val messagesSnapshot = chatRef
+            .collection("messages")
+            .whereNotEqualTo("senderId", currentUserId)
+            .get()
+            .await()
+
+        val batch = db.batch()
+
+        for (doc in messagesSnapshot.documents) {
+            val seen = doc.get("seen") as? Boolean ?: false
+            if (!seen) {
+                batch.update(doc.reference, "seenBy", true)
+            }
+        }
+
+        batch.update(chatRef, mapOf(
+            "lastMessageSeen" to true
+        ))
+
+        batch.commit().await()
+    }
+
+
 
 }

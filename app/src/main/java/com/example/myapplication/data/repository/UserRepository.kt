@@ -69,4 +69,15 @@ class UserRepository @Inject constructor() {
             Result.failure(e)
         }
     }
+    fun getUserSync(uid: String): User? {
+        return try {
+            kotlinx.coroutines.runBlocking {
+                val doc = usersCollection.document(uid).get().await()
+                doc.toObject(User::class.java)
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
 }

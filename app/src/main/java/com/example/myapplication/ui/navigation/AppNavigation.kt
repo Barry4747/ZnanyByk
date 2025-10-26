@@ -223,7 +223,13 @@ fun AppNavigation(
                     val chatId = backStackEntry.arguments?.getString("chatId") ?: return@composable
                     val receiverId = backStackEntry.arguments?.getString("receiverId") ?: return@composable
 
-                    ChatScreen(chatId = chatId, receiverId = receiverId)
+                    ChatScreen(
+                        chatId = chatId,
+                        receiverId = receiverId,
+                        onNavigateBack = {navController.navigate(Destination.CHATS.route) {
+                            popUpTo(Screen.Home.route) { inclusive = true }
+                        }}
+                        )
                 }
 
 
