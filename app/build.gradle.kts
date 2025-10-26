@@ -6,7 +6,8 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     id("com.google.gms.google-services")
-    id("kotlin-kapt")
+
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -21,6 +22,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "MAPS_API_KEY", "\"YOUR_API_KEY_HERE\"")
     }
 
     buildTypes {
@@ -44,13 +47,17 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
+}
+
+tasks.register("testClasses") {
+    dependsOn("compileDebugUnitTestKotlin")
 }
 
 dependencies {
     implementation(libs.androidx.core.ktx)
-    // SplashScreen API
-    implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -64,7 +71,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 
     implementation(platform(libs.firebase.bom))
@@ -76,9 +82,11 @@ dependencies {
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
 
-
     implementation(libs.wheelpickercompose)
     implementation(libs.coil.compose)
+
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("com.google.android.libraries.places:places:3.4.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -88,5 +96,5 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    implementation("io.coil-kt:coil-compose:2.7.0")
+    ksp(libs.hilt.compiler)
 }

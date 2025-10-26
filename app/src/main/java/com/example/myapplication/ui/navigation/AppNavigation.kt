@@ -22,9 +22,11 @@ import com.example.myapplication.ui.screens.auth.PersonalInfoRegistrationScreen
 import com.example.myapplication.ui.screens.chats.ChatScreen
 import com.example.myapplication.ui.screens.chats.ChatsListScreen
 import com.example.myapplication.ui.screens.home.HomeScreen
-import com.example.myapplication.ui.screens.scheduler.SchedulerScreen
+import com.example.myapplication.ui.screens.profile.ProfileScreen
 import com.example.myapplication.ui.screens.profile.TrainerRegistrationScreen
-import com.example.myapplication.viewmodel.AuthViewModel
+import com.example.myapplication.ui.screens.scheduler.SchedulerScreen
+import com.example.myapplication.viewmodel.profile.ProfileViewModel
+import com.example.myapplication.viewmodel.registration.AuthViewModel
 import com.example.myapplication.viewmodel.registration.RegistrationViewModel
 
 private const val ANIMATION_DURATION = 50
@@ -233,10 +235,27 @@ fun AppNavigation(
 
 
                 composable(Destination.USER.route) {
-                    /* ProfileScreen() */
+                    val profileViewModel: ProfileViewModel = hiltViewModel()
+                    ProfileScreen(
+                        viewModel = profileViewModel,
+                        onEditLocation = {
+                            navController.navigate(Screen.LocationOnboarding.route) {
+                                launchSingleTop = true
+                            }
+                        }
+                    )
                 }
 
+                composable(Screen.LocationOnboarding.route) {
+                    val LocationOnboardingViewModel: com.example.myapplication.viewmodel.profile.LocationOnboardingViewModel = hiltViewModel()
+                    com.example.myapplication.ui.screens.profile.LocationOnboardingScreen(
+                        viewModel = LocationOnboardingViewModel,
+                        onNavigateToDashboard = {
+                            navController.navigate(Destination.HOME.route) {
+                                popUpTo(Screen.Welcome.route) { inclusive = true }
+                            }
+                        })
+                }
             }
         }
-    }
-
+}

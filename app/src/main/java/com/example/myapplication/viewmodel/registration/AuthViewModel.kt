@@ -1,4 +1,4 @@
-package com.example.myapplication.viewmodel
+package com.example.myapplication.viewmodel.registration
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

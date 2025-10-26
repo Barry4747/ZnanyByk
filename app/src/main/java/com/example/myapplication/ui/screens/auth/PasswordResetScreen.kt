@@ -32,7 +32,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.myapplication.R
 import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.buttons.MainButton
-import com.example.myapplication.viewmodel.AuthViewModel
+import com.example.myapplication.viewmodel.registration.AuthViewModel
 
 @Composable
 fun PasswordResetScreen(
