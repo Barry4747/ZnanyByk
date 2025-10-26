@@ -15,7 +15,6 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import com.example.myapplication.ui.components.CustomBottomBar
 import com.example.myapplication.ui.components.Destination
-import com.example.myapplication.ui.screens.SplashScreen
 import com.example.myapplication.ui.screens.WelcomeScreen
 import com.example.myapplication.ui.screens.auth.CredentialsRegistrationScreen
 import com.example.myapplication.ui.screens.auth.LoginScreen
@@ -34,35 +33,20 @@ private const val ANIMATION_DURATION = 50
 @Composable
 fun AppNavigation(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    startDestination: String
 ) {
 
         Box(modifier = Modifier) {
             NavHost(
                 navController = navController,
-                startDestination = Screen.Splash.route,
+                startDestination = startDestination,
                 modifier = modifier,
                 enterTransition = { fadeIn(animationSpec = androidx.compose.animation.core.tween(ANIMATION_DURATION)) },
                 exitTransition = { fadeOut(animationSpec = androidx.compose.animation.core.tween(ANIMATION_DURATION)) },
                 popEnterTransition = { fadeIn(animationSpec = androidx.compose.animation.core.tween(ANIMATION_DURATION)) },
                 popExitTransition = { fadeOut(animationSpec = androidx.compose.animation.core.tween(ANIMATION_DURATION)) }
             ) {
-
-                composable(Screen.Splash.route) {
-                    SplashScreen(
-                        onNavigateToStart = {
-                            navController.navigate(Screen.Welcome.route) {
-                                popUpTo(Screen.Splash.route) { inclusive = true }
-                            }
-                        },
-                        onNavigateToHome = {
-                            navController.navigate(Destination.HOME.route) {
-                                popUpTo(Screen.Splash.route) { inclusive = true }
-                            }
-                        }
-                    )
-                }
-
 
                 composable(Screen.Welcome.route) {
                     WelcomeScreen(
@@ -250,3 +234,4 @@ fun AppNavigation(
             }
         }
     }
+
