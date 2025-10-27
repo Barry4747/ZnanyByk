@@ -1,4 +1,4 @@
-package com.example.yourapp.repository
+package com.example.myapplication.data.repository
 
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -45,12 +45,13 @@ class ScheduleRepository @Inject constructor() {
             }
     }
 
-    fun setWeeklySchedule(trainerId: String, schedule: WeeklySchedule) {
+    fun setWeeklySchedule(trainerId: String?, schedule: WeeklySchedule) {
         db.collection("trainerSchedules")
-            .document(trainerId)
+            .document(trainerId.toString())
             .set(schedule)
             .addOnSuccessListener {
                 Log.d("ScheduleRepository", "Terminarz zapisany/aktualizowany")
+                _weeklySchedule.value = schedule
             }
             .addOnFailureListener { e ->
                 Log.e("ScheduleRepository", "Błąd zapisu terminarza", e)

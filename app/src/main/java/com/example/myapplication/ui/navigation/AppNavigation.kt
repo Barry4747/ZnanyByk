@@ -24,6 +24,7 @@ import com.example.myapplication.ui.screens.chats.ChatsListScreen
 import com.example.myapplication.ui.screens.home.HomeScreen
 import com.example.myapplication.ui.screens.scheduler.SchedulerScreen
 import com.example.myapplication.ui.screens.profile.TrainerRegistrationScreen
+import com.example.myapplication.ui.screens.scheduler.TrainerScheduleScreen
 import com.example.myapplication.viewmodel.AuthViewModel
 import com.example.myapplication.viewmodel.registration.RegistrationViewModel
 
@@ -201,7 +202,7 @@ fun AppNavigation(
                 }
 
                 composable(Destination.SCHEDULER.route) {
-                    SchedulerScreen()
+                    TrainerScheduleScreen()
                 }
 
                 composable("chats") {
