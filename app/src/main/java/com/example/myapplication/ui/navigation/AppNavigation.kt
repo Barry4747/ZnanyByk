@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.navigation
 
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
@@ -7,12 +8,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
+import androidx.navigation.navigation
 import com.example.myapplication.ui.components.CustomBottomBar
 import com.example.myapplication.ui.components.Destination
 import com.example.myapplication.ui.screens.SplashScreen
@@ -23,9 +26,13 @@ import com.example.myapplication.ui.screens.auth.PersonalInfoRegistrationScreen
 import com.example.myapplication.ui.screens.chats.ChatScreen
 import com.example.myapplication.ui.screens.chats.ChatsListScreen
 import com.example.myapplication.ui.screens.home.HomeScreen
+import com.example.myapplication.ui.screens.home.FilterScreen
+import com.example.myapplication.ui.screens.home.SortScreen
 import com.example.myapplication.ui.screens.scheduler.SchedulerScreen
 import com.example.myapplication.ui.screens.profile.TrainerRegistrationScreen
 import com.example.myapplication.viewmodel.AuthViewModel
+import com.example.myapplication.viewmodel.TrainersViewModel
+import com.example.myapplication.viewmodel.HomeViewModel
 import com.example.myapplication.viewmodel.RegistrationViewModel
 
 private const val ANIMATION_DURATION = 50
@@ -41,10 +48,10 @@ fun AppNavigation(
                 navController = navController,
                 startDestination = Screen.Splash.route,
                 modifier = modifier,
-                enterTransition = { fadeIn(animationSpec = androidx.compose.animation.core.tween(ANIMATION_DURATION)) },
-                exitTransition = { fadeOut(animationSpec = androidx.compose.animation.core.tween(ANIMATION_DURATION)) },
-                popEnterTransition = { fadeIn(animationSpec = androidx.compose.animation.core.tween(ANIMATION_DURATION)) },
-                popExitTransition = { fadeOut(animationSpec = androidx.compose.animation.core.tween(ANIMATION_DURATION)) }
+                enterTransition = { fadeIn(animationSpec = tween(ANIMATION_DURATION)) },
+                exitTransition = { fadeOut(animationSpec = tween(ANIMATION_DURATION)) },
+                popEnterTransition = { fadeIn(animationSpec = tween(ANIMATION_DURATION)) },
+                popExitTransition = { fadeOut(animationSpec = tween(ANIMATION_DURATION)) }
             ) {
 
                 composable(Screen.Splash.route) {
@@ -172,17 +179,63 @@ fun AppNavigation(
                     }
                 }
 
-                composable(Destination.HOME.route) {
-                    val authViewModel: AuthViewModel = hiltViewModel()
-                    HomeScreen(
-                        onLogout = {
-                            authViewModel.logout()
-                            navController.navigate(Screen.Welcome.route) {
-                                popUpTo(0) { inclusive = true }
-                            }
+                navigation(
+                    startDestination = Destination.HOME.route,
+                    route = "home_flow"
+                ) {
+                    composable(Screen.Home.route) { backStackEntry ->
+                        val parentEntry = remember(backStackEntry) {
+                            navController.getBackStackEntry("home_flow")
                         }
-                    )
+                        val homeViewModel: HomeViewModel = hiltViewModel(parentEntry)
+                        val trainersViewModel:TrainersViewModel = hiltViewModel(parentEntry)
+
+
+                        HomeScreen(
+                            viewModel = homeViewModel,
+                            trainersViewModel = trainersViewModel,
+
+                            onLogout = {
+                                navController.navigate(Screen.Welcome.route) {
+                                    popUpTo(0) { inclusive = true }
+                                }
+                            },
+                            goToFilter = {
+                                navController.navigate(Screen.Filter.route)
+                            },
+                            goToSort = {
+                                navController.navigate(Screen.Sort.route)
+                            }
+                        )
+                    }
+
+                    composable(Screen.Filter.route) { backStackEntry ->
+                        // 1. Pobierz TEGO SAMEGO "rodzica"
+                        val parentEntry = remember(backStackEntry) {
+                            navController.getBackStackEntry("home_flow")
+                        }
+                        // 2. Hilt dostarczy TĘ SAMĄ instancję TrainersViewModel, bo rodzic jest ten sam
+                        val trainersViewModel: TrainersViewModel = hiltViewModel(parentEntry)
+
+                        FilterScreen(
+                            onNavigateBack = {
+                                navController.popBackStack()
+                            },
+                            viewModel = trainersViewModel
+                        )
+                    }
+
+                    composable(Screen.Sort.route) {
+                        SortScreen(
+                            onNavigateBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    }
                 }
+
+
+
 
                 composable(Screen.RegisterTrainer.route) {
                     TrainerRegistrationScreen(
