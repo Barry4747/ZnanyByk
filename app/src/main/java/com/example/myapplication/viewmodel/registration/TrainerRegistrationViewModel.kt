@@ -170,6 +170,9 @@ class TrainerRegistrationViewModel @Inject constructor(
             .onSuccess { trainerId ->
                 userRepository.updateUserRole(authRepository.getCurrentUserId()!!, Role.TRAINER)
 
+                val updatedUser = cachedUser.copy(role = Role.TRAINER)
+                authRepository.saveCachedUser(updatedUser, authRepository.getCurrentUserId()!!)
+
                 val successMsg = if (failedUris.isNotEmpty()) {
                     "Profil trenera utworzony pomyślnie, ale ${failedUris.size} zdjęć nie zostało przesłanych."
                 } else {

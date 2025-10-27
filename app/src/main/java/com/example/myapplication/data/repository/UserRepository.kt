@@ -111,4 +111,8 @@ class UserRepository @Inject constructor() {
             Result.failure(e)
         }
     }
+
+    suspend fun getUserLocation(uid: String): Result<UserLocation?> {
+        return getUser(uid).map { it?.location }
+    }
 }
