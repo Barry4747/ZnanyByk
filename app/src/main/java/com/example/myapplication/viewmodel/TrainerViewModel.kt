@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
-import com.example.myapplication.data.model.Trainer
+import com.example.myapplication.data.model.users.Trainer
 import com.example.myapplication.data.repository.TrainerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject

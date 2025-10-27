@@ -95,7 +95,7 @@ fun AppNavigation(
                             navController.navigate(Screen.PasswordReset.route)
                         },
                         onLoginSuccess = {
-                            navController.navigate(Destination.HOME.route) {
+                            navController.navigate("home_flow") {
                                 popUpTo(Screen.Welcome.route) { inclusive = true }
                             }
                         },
@@ -147,7 +147,7 @@ fun AppNavigation(
                             },
                             onGoogleSignInSuccess = {
                                 sharedRegistrationViewModel.clearPendingGoogleRegistration()
-                                navController.navigate(Destination.HOME.route) {
+                                navController.navigate("home_flow") {
                                     popUpTo(Screen.Welcome.route) { inclusive = true }
                                 }
                             },
@@ -168,7 +168,7 @@ fun AppNavigation(
                             },
                             onRegistrationSuccess = {
                                 sharedRegistrationViewModel.clearPendingGoogleRegistration()
-                                navController.navigate(Destination.HOME.route) {
+                                navController.navigate("home_flow") {
                                     popUpTo(Screen.Welcome.route) { inclusive = true }
                                 }
                             },
@@ -185,7 +185,7 @@ fun AppNavigation(
                 }
 
                 navigation(
-                    startDestination = Destination.HOME.route,
+                    startDestination = Screen.Home.route,
                     route = "home_flow"
                 ) {
                     composable(Screen.Home.route) { backStackEntry ->
@@ -245,12 +245,12 @@ fun AppNavigation(
                 composable(Screen.RegisterTrainer.route) {
                     TrainerRegistrationScreen(
                         onNavigateBack = {
-                            navController.navigate(Destination.HOME.route) {
-                                popUpTo(Destination.HOME.route) { inclusive = true }
+                            navController.navigate("home_flow") {
+                                popUpTo("home_flow") { inclusive = true }
                             }
                         },
                         onSubmit = {
-                            navController.navigate(Destination.HOME.route) {
+                            navController.navigate("home_flow") {
                                 popUpTo(Screen.Welcome.route) { inclusive = true }
                             }
                         }
@@ -283,7 +283,7 @@ fun AppNavigation(
                         chatId = chatId,
                         receiverId = receiverId,
                         onNavigateBack = {navController.navigate(Destination.CHATS.route) {
-                            popUpTo(Screen.Home.route) { inclusive = true }
+                            popUpTo("home_flow") { inclusive = true }
                         }}
                         )
                 }
@@ -306,7 +306,7 @@ fun AppNavigation(
                     com.example.myapplication.ui.screens.profile.LocationOnboardingScreen(
                         viewModel = LocationOnboardingViewModel,
                         onNavigateToDashboard = {
-                            navController.navigate(Destination.HOME.route) {
+                            navController.navigate("home_flow") {
                                 popUpTo(Screen.Welcome.route) { inclusive = true }
                             }
                         })

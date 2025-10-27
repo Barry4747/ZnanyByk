@@ -72,7 +72,7 @@ fun HomeScreen(
 
 
     val user = homeState.user
-    val trainers = trainersState.trainers
+    val trainers: List<Trainer> = trainersState.trainers
     val errorMessage = homeState.errorMessage
 
     var searchTrainerText by remember { mutableStateOf("") }
