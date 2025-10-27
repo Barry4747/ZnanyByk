@@ -1,10 +1,13 @@
 package com.example.myapplication.data.repository
 
+import android.content.Context
+import android.net.Uri
+import com.example.myapplication.data.model.users.Role
 import com.example.myapplication.data.model.users.User
 import com.example.myapplication.data.model.users.UserLocation
-import com.example.myapplication.data.model.users.Role
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -92,6 +95,7 @@ class UserRepository @Inject constructor() {
             Result.failure(e)
         }
     }
+
     fun getUserSync(uid: String): User? {
         return try {
             kotlinx.coroutines.runBlocking {
@@ -114,5 +118,35 @@ class UserRepository @Inject constructor() {
 
     suspend fun getUserLocation(uid: String): Result<UserLocation?> {
         return getUser(uid).map { it?.location }
+    }
+
+    suspend fun uploadAvatar(context: Context, userId: String, uri: Uri): Result<String> {
+        return try {
+            val storageRef = FirebaseStorage.getInstance().reference
+            val user = getUser(userId).getOrNull()
+            if (user?.avatarUrl != null) {
+                // Delete previous avatar
+                val previousRef = FirebaseStorage.getInstance().getReferenceFromUrl(user.avatarUrl!!)
+                previousRef.delete().await()
+            }
+            // Upload new avatar
+            val filename = "avatar.jpg"
+            val avatarRef = storageRef.child("users/$userId/avatar/$filename")
+            val inputStream = context.contentResolver.openInputStream(uri)
+            inputStream?.use { stream ->
+                avatarRef.putStream(stream).await()
+            }
+            val downloadUrl = avatarRef.downloadUrl.await().toString()
+            // Update user with new avatarUrl
+            val updatedUser = user?.copy(avatarUrl = downloadUrl) ?: User(avatarUrl = downloadUrl)
+            updateUser(userId, updatedUser)
+            Result.success(downloadUrl)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getAvatarUrl(userId: String): Result<String?> {
+        return getUser(userId).map { it?.avatarUrl }
     }
 }

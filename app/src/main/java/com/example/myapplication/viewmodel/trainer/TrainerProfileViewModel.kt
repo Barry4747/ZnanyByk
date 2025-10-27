@@ -1,4 +1,4 @@
-package com.example.myapplication.viewmodel.registration
+package com.example.myapplication.viewmodel.trainer
 
 import android.content.Context
 import android.net.Uri
@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.model.users.Role
 import com.example.myapplication.data.model.users.Trainer
+import com.example.myapplication.data.model.users.TrainerCategory
+import com.example.myapplication.data.model.users.User
 import com.example.myapplication.data.repository.AuthRepository
 import com.example.myapplication.data.repository.TrainerRepository
 import com.example.myapplication.data.repository.UserRepository
@@ -17,25 +19,33 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class TrainerRegistrationState(
+data class TrainerProfileState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val successMessage: String? = null,
-    val userName: String = ""
+    val userName: String = "",
+    val hourlyRate: String = "",
+    val selectedGym: String? = null,
+    val description: String = "",
+    val experienceYears: String = "",
+    val selectedCategories: List<TrainerCategory> = emptyList(),
+    val selectedFiles: List<Uri> = emptyList(),
+    val existingImages: List<String> = emptyList()
 )
 
 @HiltViewModel
-class TrainerRegistrationViewModel @Inject constructor(
+class TrainerProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val trainerRepository: TrainerRepository,
     private val userRepository: UserRepository
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(TrainerRegistrationState())
-    val state: StateFlow<TrainerRegistrationState> = _state.asStateFlow()
+    private val _state = MutableStateFlow(TrainerProfileState())
+    val state: StateFlow<TrainerProfileState> = _state.asStateFlow()
 
     init {
         loadUserName()
+        loadTrainerProfile()
     }
 
     private fun loadUserName() {
@@ -45,6 +55,31 @@ class TrainerRegistrationViewModel @Inject constructor(
             else -> authRepository.getCurrentUserEmail() ?: ""
         }
         _state.value = _state.value.copy(userName = userName)
+    }
+
+    private fun loadTrainerProfile() {
+        viewModelScope.launch {
+            val currentUserId = authRepository.getCurrentUserId()
+            Log.d("TrainerProfileVM", "Loading trainer profile for userId: $currentUserId")
+            if (currentUserId == null) {
+                Log.e("TrainerProfileVM", "Current user ID is null")
+                return@launch
+            }
+            trainerRepository.getTrainerById(currentUserId).onSuccess { trainer ->
+                Log.d("TrainerProfileVM", "Successfully loaded trainer: ${trainer.firstName} ${trainer.lastName}")
+                _state.value = _state.value.copy(
+                    hourlyRate = trainer.pricePerHour?.toString() ?: "",
+                    selectedGym = trainer.location,
+                    description = trainer.description ?: "",
+                    experienceYears = trainer.experience?.toString() ?: "",
+                    selectedCategories = trainer.categories?.mapNotNull { try { TrainerCategory.valueOf(it) } catch (e: Exception) { Log.e("TrainerProfileVM", "Invalid category: $it"); null } } ?: emptyList(),
+                    selectedFiles = emptyList(),
+                    existingImages = trainer.images ?: emptyList()
+                )
+            }.onFailure { exception ->
+                Log.e("TrainerProfileVM", "Failed to load trainer profile: ${exception.message}", exception)
+            }
+        }
     }
 
     private fun validateTrainerInput(
@@ -64,7 +99,7 @@ class TrainerRegistrationViewModel @Inject constructor(
         return hourlyRateInt to null
     }
 
-    fun submitTrainerProfile(
+    fun updateTrainerProfile(
         context: Context,
         hourlyRate: String,
         gymId: String?,
@@ -83,7 +118,6 @@ class TrainerRegistrationViewModel @Inject constructor(
             val (uploadedUrls, failedUris) = uploadImages(context, currentUserId, images) ?: return@launch
 
             addTrainer(cachedUser, description, hourlyRateInt, experienceInt, gymId, selectedCategories, uploadedUrls, failedUris)
-            //DO IT HERE
         }
     }
 
@@ -98,7 +132,7 @@ class TrainerRegistrationViewModel @Inject constructor(
         return currentUserId
     }
 
-    private fun getCachedUser(): com.example.myapplication.data.model.users.User? {
+    private fun getCachedUser(): User? {
         val cachedUser = authRepository.getCachedUser()?.second
         if (cachedUser == null) {
             _state.value = _state.value.copy(
@@ -142,7 +176,7 @@ class TrainerRegistrationViewModel @Inject constructor(
     }
 
     private suspend fun addTrainer(
-        cachedUser: com.example.myapplication.data.model.users.User,
+        cachedUser: User,
         description: String,
         hourlyRateInt: Int,
         experienceInt: Int,
@@ -163,7 +197,7 @@ class TrainerRegistrationViewModel @Inject constructor(
             categories = selectedCategories,
             ratings = null,
             avgRating = null,
-            images = uploadedUrls.ifEmpty { null }
+            images = (uploadedUrls + _state.value.existingImages).ifEmpty { null }
         )
 
         trainerRepository.addTrainer(trainer, authRepository.getCurrentUserId()!!)

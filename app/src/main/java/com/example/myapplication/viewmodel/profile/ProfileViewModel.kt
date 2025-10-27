@@ -1,5 +1,7 @@
 package com.example.myapplication.viewmodel.profile
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.repository.AuthRepository
@@ -17,7 +19,8 @@ data class ProfileState(
     val successMessage: String? = null,
     val userName: String = "",
     val userAddress: String = "",
-    val userRole: String = ""
+    val userRole: String = "",
+    val avatarUrl: String? = null
 )
 
 
@@ -32,6 +35,7 @@ class ProfileViewModel @Inject constructor(
     init {
         loadUserData()
         loadUserAddress()
+        loadAvatar()
     }
 
     private fun loadUserData() {
@@ -51,6 +55,28 @@ class ProfileViewModel @Inject constructor(
                 userRepository.getUserLocation(uid).onSuccess { location ->
                     val locationString = location?.fullAddress ?: ""
                     _state.value = _state.value.copy(userAddress = locationString)
+                }
+            }
+        }
+    }
+
+    private fun loadAvatar() {
+        viewModelScope.launch {
+            val uid = authRepository.getCurrentUserId()
+            if (uid != null) {
+                userRepository.getAvatarUrl(uid).onSuccess { url ->
+                    _state.value = _state.value.copy(avatarUrl = url)
+                }
+            }
+        }
+    }
+
+    fun addAvatar(context: Context, uri: Uri) {
+        viewModelScope.launch {
+            val uid = authRepository.getCurrentUserId()
+            if (uid != null) {
+                userRepository.uploadAvatar(context, uid, uri).onSuccess {
+                    _state.value = _state.value.copy(avatarUrl = it)
                 }
             }
         }

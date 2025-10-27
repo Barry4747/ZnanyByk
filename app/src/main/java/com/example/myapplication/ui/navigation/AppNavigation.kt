@@ -25,6 +25,7 @@ import com.example.myapplication.ui.screens.home.HomeScreen
 import com.example.myapplication.ui.screens.profile.LocationOnboardingScreen
 import com.example.myapplication.ui.screens.profile.PersonalInfoEditScreen
 import com.example.myapplication.ui.screens.profile.ProfileScreen
+import com.example.myapplication.ui.screens.profile.TrainerEditScreen
 import com.example.myapplication.ui.screens.profile.TrainerRegistrationScreen
 import com.example.myapplication.ui.screens.scheduler.SchedulerScreen
 import com.example.myapplication.viewmodel.profile.LocationOnboardingViewModel
@@ -206,6 +207,21 @@ fun AppNavigation(
                     )
                 }
 
+                composable(Screen.TrainerProfileEdit.route) {
+                    TrainerEditScreen(
+                        onNavigateBack = {
+                            navController.navigate(Destination.USER.route) {
+                                popUpTo(Destination.USER.route) { inclusive = true }
+                            }
+                        },
+                        onSubmit = {
+                            navController.navigate(Destination.USER.route) {
+                                popUpTo(Destination.USER.route) { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
                 composable(Destination.SCHEDULER.route) {
                     SchedulerScreen()
                 }
@@ -252,6 +268,11 @@ fun AppNavigation(
                                 launchSingleTop = true
                             }
                         },
+                        onEditTrainerProfile = {
+                            navController.navigate(Screen.TrainerProfileEdit.route) {
+                                launchSingleTop = true
+                            }
+                        },
                         onBecomeTrainer = {
                             navController.navigate(Screen.RegisterTrainer.route) {
                                 launchSingleTop = true
@@ -262,7 +283,7 @@ fun AppNavigation(
 
                 composable(Screen.LocationOnboarding.route) {
                     val locationOnboardingViewModel: LocationOnboardingViewModel = hiltViewModel()
-                    com.example.myapplication.ui.screens.profile.LocationOnboardingScreen(
+                    LocationOnboardingScreen(
                         viewModel = locationOnboardingViewModel,
                         onNavigateToDashboard = {
                             navController.navigate(Destination.HOME.route) {
@@ -277,13 +298,13 @@ fun AppNavigation(
                     PersonalInfoEditScreen(
                         viewModel = pInfoEditViewModel,
                         onNavigateBack = {
-                            navController.navigate(Destination.USER.route){
-                                popUpTo(Destination.USER.route)
+                            navController.navigate(Destination.USER.route) {
+                                popUpTo(Destination.USER.route) { inclusive = true }
                             }
                         },
                         onEditSuccess = {
                             navController.navigate(Destination.USER.route) {
-                                popUpTo(Destination.USER.route)
+                                popUpTo(Destination.USER.route) { inclusive = true }
                             }
                         }
                     )

@@ -1,7 +1,11 @@
 package com.example.myapplication.ui.screens.profile
 
 import FormButtonWithDetail
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,9 +31,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.example.myapplication.R
 import com.example.myapplication.ui.components.buttons.AlternateButton
 import com.example.myapplication.ui.components.buttons.MainButton
@@ -46,6 +52,11 @@ fun ProfileScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { viewModel.addAvatar(context, it) }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -55,10 +66,11 @@ fun ProfileScreen(
     ) {
 
         Box(contentAlignment = Alignment.Center) {
-            Image(
-                painter = painterResource(id = R.drawable.user_active),
+            AsyncImage(
+                model = state.avatarUrl,
                 contentDescription = "Profile Picture",
-                modifier = Modifier.size(120.dp)
+                modifier = Modifier.size(120.dp),
+                error = painterResource(R.drawable.user_active)
             )
             Icon(
                 imageVector = Icons.Default.AddCircleOutline,
@@ -66,7 +78,8 @@ fun ProfileScreen(
                 modifier = Modifier
                     .size(48.dp)
                     .align(Alignment.BottomEnd)
-                    .offset(x = 8.dp, y = 8.dp),
+                    .offset(x = 8.dp, y = 8.dp)
+                    .clickable { launcher.launch("image/*") },
                 tint = Color.Gray.copy(alpha = 0.6f)
             )
         }
