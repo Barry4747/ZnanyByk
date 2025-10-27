@@ -22,8 +22,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
-import com.google.android.libraries.places.api.Places
-import com.example.myapplication.BuildConfig
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -36,14 +34,7 @@ class MainActivity : ComponentActivity() {
         val keepOn = AtomicBoolean(true)
         splash.setKeepOnScreenCondition { keepOn.get() }
 
-
         super.onCreate(savedInstanceState)
-
-        //move up??
-        if (!Places.isInitialized()) {
-            Places.initialize(this, BuildConfig.MAPS_API_KEY)
-        }
-
 
         lifecycleScope.launch {
             val hasCached = try {

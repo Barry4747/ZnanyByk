@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,7 +18,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
@@ -25,13 +28,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -51,18 +54,25 @@ import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.ui.components.chips.MainCategoryChip
 import com.example.myapplication.ui.components.fields.MainFormTextField
-import com.example.myapplication.viewmodel.trainer.TrainerRegistrationViewModel
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.layout.FlowRow
+import com.example.myapplication.viewmodel.trainer.TrainerProfileViewModel
 
 @Composable
-fun TrainerRegistrationScreen(
+fun TrainerEditScreen(
     modifier: Modifier = Modifier,
     onNavigateBack: () -> Unit = {},
     onSubmit: () -> Unit = {},
-    viewModel: TrainerRegistrationViewModel = hiltViewModel(),
+    viewModel: TrainerProfileViewModel = hiltViewModel(),
 ) {
+    val state by viewModel.state.collectAsState()
+
+    val selectedFiles = remember { mutableStateListOf<Uri>() }
+    LaunchedEffect(Unit) {
+        selectedFiles.addAll(state.selectedFiles)
+    }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris: List<Uri>? ->
+        if (!uris.isNullOrEmpty()) selectedFiles.addAll(uris)
+    }
+
     var hourlyRate by remember { mutableStateOf("") }
     var selectedGym by remember { mutableStateOf<String?>(null) }
     var description by remember { mutableStateOf("") }
@@ -70,12 +80,22 @@ fun TrainerRegistrationScreen(
     var selectedCategories by remember { mutableStateOf<List<TrainerCategory>>(emptyList()) }
     var showDialog by remember { mutableStateOf(false) }
 
-    val selectedFiles = remember { mutableStateListOf<Uri>() }
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris: List<Uri>? ->
-        if (!uris.isNullOrEmpty()) selectedFiles.addAll(uris)
+    LaunchedEffect(state.hourlyRate) {
+        hourlyRate = state.hourlyRate
+    }
+    LaunchedEffect(state.selectedGym) {
+        selectedGym = state.selectedGym
+    }
+    LaunchedEffect(state.description) {
+        description = state.description
+    }
+    LaunchedEffect(state.experienceYears) {
+        experienceYears = state.experienceYears
+    }
+    LaunchedEffect(state.selectedCategories) {
+        selectedCategories = state.selectedCategories
     }
 
-    val state by viewModel.state.collectAsState()
     val context = LocalContext.current
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -170,6 +190,17 @@ fun TrainerRegistrationScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            items(state.existingImages) { url ->
+                                AsyncImage(
+                                    model = ImageRequest.Builder(context)
+                                        .data(url)
+                                        .crossfade(true)
+                                        .size(76)
+                                        .build(),
+                                    contentDescription = stringResource(R.string.trainer_upload_preview),
+                                    modifier = Modifier.size(76.dp)
+                                )
+                            }
                             items(selectedFiles) { uri ->
                                 AsyncImage(
                                     model = ImageRequest.Builder(context)
@@ -218,9 +249,9 @@ fun TrainerRegistrationScreen(
                 CircularProgressIndicator()
             } else {
                 MainButton(
-                    text = stringResource(R.string.confirm_trainer_profile_creation),
+                    text = "Zapisz zmiany",
                     onClick = {
-                        viewModel.submitTrainerProfile(
+                        viewModel.updateTrainerProfile(
                             context = context,
                             hourlyRate = hourlyRate,
                             gymId = selectedGym,
@@ -301,6 +332,6 @@ fun TrainerRegistrationScreen(
 
 @Preview(showBackground = true)
 @Composable
-private fun TrainerRegistrationScreenPreview() {
-    TrainerRegistrationScreen()
+private fun TrainerEditScreenPreview() {
+    TrainerEditScreen()
 }

@@ -79,6 +79,22 @@ class TrainerRepository @Inject constructor() {
         }
     }
 
+    suspend fun getTrainerById(trainerId: String): Result<Trainer> {
+        return try {
+            val doc = trainerCollection.document(trainerId).get().await()
+            val trainer = doc.toObject(Trainer::class.java)
+            if (trainer != null) {
+                val avgRating = getTrainerAvgRating(trainer)
+                trainer.avgRating = avgRating
+                Result.success(trainer)
+            } else {
+                Result.failure(Exception("Trainer not found"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun getAllTrainers(): Result<List<Trainer>> {
         return try {
             val snapshot = trainerCollection.get().await()
