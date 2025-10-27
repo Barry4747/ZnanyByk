@@ -3,6 +3,8 @@ package com.example.myapplication.data.repository
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.compose.foundation.gestures.forEach
+import androidx.compose.foundation.layout.size
 import com.example.myapplication.data.model.users.Trainer
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -93,6 +95,38 @@ class TrainerRepository @Inject constructor() {
 
             Result.success(trainers)
         } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getFilteredTrainers(
+        query: String,
+        minRating: Float,
+        minPrice: Int,
+        maxPrice: Int,
+        categories: Set<String>
+    ): Result<List<Trainer>> {
+        return try {
+            val snapshot = trainerCollection.get().await()
+            var trainers = snapshot.toObjects(Trainer::class.java)
+
+            if (categories.isNotEmpty()) {
+                trainers = trainers.filter { trainer ->
+                    trainer.categories?.any { it in categories } == true
+                }
+            }
+
+            trainers = trainers.filter {
+                val price = it.pricePerHour ?: 0
+                price in minPrice..maxPrice
+            }
+
+            Log.d("TRAINER_REPO", "📊 Znaleziono ${trainers.size} przefiltrowanych trenerów.")
+
+            Result.success(trainers)
+        }
+        catch (e: Exception) {
+            Log.e("TRAINER_REPO", "Błąd podczas pobierania lub filtrowania trenerów", e)
             Result.failure(e)
         }
     }
