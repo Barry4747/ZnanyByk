@@ -22,9 +22,14 @@ import com.example.myapplication.ui.screens.auth.PersonalInfoRegistrationScreen
 import com.example.myapplication.ui.screens.chats.ChatScreen
 import com.example.myapplication.ui.screens.chats.ChatsListScreen
 import com.example.myapplication.ui.screens.home.HomeScreen
+import com.example.myapplication.ui.screens.profile.LocationOnboardingScreen
+import com.example.myapplication.ui.screens.profile.PersonalInfoEditScreen
 import com.example.myapplication.ui.screens.profile.ProfileScreen
+import com.example.myapplication.ui.screens.profile.TrainerEditScreen
 import com.example.myapplication.ui.screens.profile.TrainerRegistrationScreen
 import com.example.myapplication.ui.screens.scheduler.SchedulerScreen
+import com.example.myapplication.viewmodel.profile.LocationOnboardingViewModel
+import com.example.myapplication.viewmodel.profile.PInfoEditViewModel
 import com.example.myapplication.viewmodel.profile.ProfileViewModel
 import com.example.myapplication.viewmodel.registration.AuthViewModel
 import com.example.myapplication.viewmodel.registration.RegistrationViewModel
@@ -202,6 +207,21 @@ fun AppNavigation(
                     )
                 }
 
+                composable(Screen.TrainerProfileEdit.route) {
+                    TrainerEditScreen(
+                        onNavigateBack = {
+                            navController.navigate(Destination.USER.route) {
+                                popUpTo(Destination.USER.route) { inclusive = true }
+                            }
+                        },
+                        onSubmit = {
+                            navController.navigate(Destination.USER.route) {
+                                popUpTo(Destination.USER.route) { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
                 composable(Destination.SCHEDULER.route) {
                     SchedulerScreen()
                 }
@@ -242,19 +262,52 @@ fun AppNavigation(
                             navController.navigate(Screen.LocationOnboarding.route) {
                                 launchSingleTop = true
                             }
+                        },
+                        onEditProfile = {
+                            navController.navigate(Screen.PersonalInfoEdit.route) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onEditTrainerProfile = {
+                            navController.navigate(Screen.TrainerProfileEdit.route) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onBecomeTrainer = {
+                            navController.navigate(Screen.RegisterTrainer.route) {
+                                launchSingleTop = true
+                            }
                         }
                     )
                 }
 
                 composable(Screen.LocationOnboarding.route) {
-                    val LocationOnboardingViewModel: com.example.myapplication.viewmodel.profile.LocationOnboardingViewModel = hiltViewModel()
-                    com.example.myapplication.ui.screens.profile.LocationOnboardingScreen(
-                        viewModel = LocationOnboardingViewModel,
+                    val locationOnboardingViewModel: LocationOnboardingViewModel = hiltViewModel()
+                    LocationOnboardingScreen(
+                        viewModel = locationOnboardingViewModel,
                         onNavigateToDashboard = {
                             navController.navigate(Destination.HOME.route) {
                                 popUpTo(Screen.Welcome.route) { inclusive = true }
                             }
-                        })
+                        }
+                    )
+                }
+
+                composable(Screen.PersonalInfoEdit.route) {
+                    val pInfoEditViewModel: PInfoEditViewModel = hiltViewModel()
+                    PersonalInfoEditScreen(
+                        viewModel = pInfoEditViewModel,
+                        onNavigateBack = {
+                            navController.navigate(Destination.USER.route) {
+                                popUpTo(Destination.USER.route) { inclusive = true }
+                            }
+                        },
+                        onEditSuccess = {
+                            navController.navigate(Destination.USER.route) {
+                                popUpTo(Destination.USER.route) { inclusive = true }
+                            }
+                        }
+                    )
                 }
             }
         }

@@ -3,7 +3,9 @@ package com.example.myapplication.viewmodel.profile
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.maps.model.LatLng
+import com.example.myapplication.data.model.users.UserLocation
+import com.example.myapplication.data.repository.AuthRepository
+import com.example.myapplication.data.repository.UserRepository
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
@@ -20,6 +22,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import android.util.Log
 
 data class LocationUiState(
     val query: String = "",
@@ -32,7 +35,9 @@ data class LocationUiState(
 
 @HiltViewModel
 class LocationOnboardingViewModel @Inject constructor(
-    application: Application
+    application: Application,
+    private val authRepository: AuthRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LocationUiState())
@@ -69,6 +74,7 @@ class LocationOnboardingViewModel @Inject constructor(
             _uiState.update { it.copy(predictions = response.autocompletePredictions) }
 
         } catch (e: Exception) {
+            Log.e("PlacesError", "Failed to fetch predictions", e)
             _uiState.update { it.copy(error = "Could not load suggestions") }
         }
     }
@@ -103,57 +109,57 @@ class LocationOnboardingViewModel @Inject constructor(
         }
     }
 
- //   fun onSaveLocation() {
-//        val place = _uiState.value.selectedPlace ?: return
-//        val userId = TODO("Get current user ID")
-//
-//        if (userId == null) {
-//            _uiState.update { it.copy(error = "User not logged in.") }
-//            return
-//        }
-//
-//        _uiState.update { it.copy(isLoading = true) }
-//
-//        val userLocation = parsePlaceToUserLocation(place)
-//
-//        viewModelScope.launch {
-//            // val result = TODO("Update user location")
-//
-//            if (result.isSuccess) {
-//                _uiState.update { it.copy(isLoading = false, isSaveComplete = true) }
-//            } else {
-//                _uiState.update {
-//                    it.copy(
-//                        isLoading = false,
-//                        error = result.exceptionOrNull()?.message ?: "Failed to save location"
-//                    )
-//                }
-//            }
-//        }
-//    }
-//
-//    private fun parsePlaceToUserLocation(place: Place): UserLocation {
-//        var city: String? = null
-//        var postalCode: String? = null
-//        var country: String? = null
-//
-//        place.addressComponents?.asList()?.forEach { component ->
-//            when {
-//                component.types.contains("locality") -> city = component.name
-//                component.types.contains("postal_code") -> postalCode = component.name
-//                component.types.contains("country") -> country = component.shortName
-//            }
-//        }
-//
-//        return UserLocation(
-//            latitude = place.latLng!!.latitude,
-//            longitude = place.latLng!!.longitude,
-//            fullAddress = place.address.toString(),
-//            city = city,
-//            postalCode = postalCode,
-//            country = country
-//        )
-//    }
+    fun onSaveLocation() {
+        val place = _uiState.value.selectedPlace ?: return
+        val userId = authRepository.getCachedUser()?.first
+
+        if (userId == null) {
+            _uiState.update { it.copy(error = "User not logged in.") }
+            return
+        }
+
+        _uiState.update { it.copy(isLoading = true) }
+
+        val userLocation = parsePlaceToUserLocation(place)
+
+        viewModelScope.launch {
+            val result = userRepository.updateUserLocation(userId, userLocation)
+
+            if (result.isSuccess) {
+                _uiState.update { it.copy(isLoading = false, isSaveComplete = true) }
+            } else {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = result.exceptionOrNull()?.message ?: "Failed to save location"
+                    )
+                }
+            }
+        }
+    }
+
+    private fun parsePlaceToUserLocation(place: Place): UserLocation {
+        var city: String? = null
+        var postalCode: String? = null
+        var country: String? = null
+
+        place.addressComponents?.asList()?.forEach { component ->
+            when {
+                component.types.contains("locality") -> city = component.name
+                component.types.contains("postal_code") -> postalCode = component.name
+                component.types.contains("country") -> country = component.shortName
+            }
+        }
+
+        return UserLocation(
+            latitude = place.latLng?.latitude ?: 0.0,
+            longitude = place.latLng?.longitude ?: 0.0,
+            fullAddress = place.address ?: "",
+            city = city,
+            postalCode = postalCode,
+            country = country
+        )
+    }
 
     fun clearError() {
         _uiState.update { it.copy(error = null) }
