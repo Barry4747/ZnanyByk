@@ -20,7 +20,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,13 +27,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.myapplication.viewmodel.profile.LocationOnboardingViewModel
-import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 
 @Composable
@@ -42,13 +38,6 @@ fun LocationOnboardingScreen(
     viewModel: LocationOnboardingViewModel = hiltViewModel(),
     onNavigateToDashboard: () -> Unit
 ) {
-    val context = LocalContext.current
-    LaunchedEffect(key1 = Unit) {
-        if (!Places.isInitialized()) {
-            Places.initialize(context, "YOUR_API_KEY_HERE")
-        }
-    }
-
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -62,7 +51,6 @@ fun LocationOnboardingScreen(
         }
     }
 
-    // --- Navigation on Success ---
     LaunchedEffect(uiState.isSaveComplete) {
         if (uiState.isSaveComplete) {
             onNavigateToDashboard()
@@ -90,10 +78,8 @@ fun LocationOnboardingScreen(
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
-            // --- Search Box and Predictions ---
             Box {
                 Column {
-                    // 1. The Search Text Field
                     OutlinedTextField(
                         value = uiState.query,
                         onValueChange = viewModel::onQueryChanged,
@@ -102,7 +88,6 @@ fun LocationOnboardingScreen(
                         singleLine = true
                     )
 
-                    // 2. The Predictions Dropdown
                     if (uiState.predictions.isNotEmpty()) {
                         LazyColumn(
                             modifier = Modifier
@@ -129,8 +114,8 @@ fun LocationOnboardingScreen(
                 CircularProgressIndicator()
             } else {
                 Button(
-                    onClick = {}, // onClick = viewModel::onSaveLocation,
-                    enabled = uiState.selectedPlace != null, // Only enable if a place is selected
+                    onClick = viewModel::onSaveLocation,
+                    enabled = uiState.selectedPlace != null,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp)
@@ -154,15 +139,4 @@ private fun PredictionItem(
             .clickable { onClick() }
             .padding(vertical = 16.dp, horizontal = 12.dp)
     )
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun LocationOnboardingScreenPreview() {
-    MaterialTheme {
-        Surface(color = MaterialTheme.colorScheme.background) {
-            LocationOnboardingScreen(onNavigateToDashboard = {})
-        }
-    }
 }

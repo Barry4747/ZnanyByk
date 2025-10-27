@@ -9,6 +9,7 @@ data class User(
     val role: Role = Role.CLIENT,
     val birthDate: Date? = null,
     val phoneNumber: String? = null,
+    val location: UserLocation? = null,
 )
 
 enum class Role {

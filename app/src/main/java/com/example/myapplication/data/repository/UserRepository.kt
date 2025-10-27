@@ -1,7 +1,10 @@
 package com.example.myapplication.data.repository
 
 import com.example.myapplication.data.model.users.User
+import com.example.myapplication.data.model.users.UserLocation
+import com.example.myapplication.data.model.users.Role
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -51,6 +54,26 @@ class UserRepository @Inject constructor() {
         }
     }
 
+    suspend fun updateUserLocation(uid: String, location: UserLocation): Result<Unit> {
+        return try {
+            val locationMap = mapOf(
+                "latitude" to location.latitude,
+                "longitude" to location.longitude,
+                "fullAddress" to location.fullAddress,
+                "city" to location.city,
+                "postalCode" to location.postalCode,
+                "country" to location.country
+            )
+            usersCollection
+                .document(uid)
+                .set(mapOf("location" to locationMap), SetOptions.merge())
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun deleteUser(uid: String): Result<Unit> {
         return try {
             usersCollection.document(uid).delete().await()
@@ -80,4 +103,12 @@ class UserRepository @Inject constructor() {
         }
     }
 
+    suspend fun updateUserRole(uid: String, role: Role): Result<Unit> {
+        return try {
+            usersCollection.document(uid).set(mapOf("role" to role), SetOptions.merge()).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
