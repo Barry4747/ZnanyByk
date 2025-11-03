@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.screens.profile
 
+import MainProgressIndicator
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,7 +23,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -242,7 +242,7 @@ fun TrainerRegistrationScreen(
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    CircularProgressIndicator()
+                    MainProgressIndicator()
                     if (state.isUploadingImages) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(

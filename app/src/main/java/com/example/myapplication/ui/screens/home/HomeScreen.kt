@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.screens.home
 
+import MainProgressIndicator
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -200,12 +201,9 @@ fun HomeScreen(
                 }
             }
 
-            if (homeState.isLoading) {
-                CircularProgressIndicator()
-            }
-        }
-
-        if (errorMessage != null && !homeState.isLoading) {
+        if (homeState.isLoading) {
+            MainProgressIndicator()
+        }  else if (errorMessage != null) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),

@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.screens.profile
 
+import MainProgressIndicator
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,7 +37,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.commandiron.wheel_picker_compose.WheelDatePicker
 import com.commandiron.wheel_picker_compose.core.WheelPickerDefaults
 import com.example.myapplication.R
-import com.example.myapplication.ui.components.buttons.AlternateButton
 import com.example.myapplication.ui.components.buttons.FormButton
 import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.buttons.MainButton
@@ -144,7 +143,7 @@ fun PersonalInfoEditScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             if (personalInfoState.isLoading) {
-                CircularProgressIndicator()
+                MainProgressIndicator()
             } else {
                 MainButton(
                     text = "Zapisz zmiany",

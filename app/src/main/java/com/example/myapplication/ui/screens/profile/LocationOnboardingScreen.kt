@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.screens.profile
 
+import MainProgressIndicator
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -124,7 +124,7 @@ fun LocationOnboardingScreen(
             Spacer(Modifier.weight(1f))
 
             if (uiState.isLoading) {
-                CircularProgressIndicator()
+                MainProgressIndicator()
             } else {
                 MainButton(
                     text = "Zapisz i kontynuuj",
