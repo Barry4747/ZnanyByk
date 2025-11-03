@@ -1,6 +1,8 @@
 package com.example.myapplication.data.repository
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.gestures.forEach
@@ -12,6 +14,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.tasks.await
+import java.io.File
+import java.io.FileOutputStream
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -41,9 +45,31 @@ class TrainerRepository @Inject constructor() {
             val rawName = uri.lastPathSegment?.substringAfterLast('/')?.takeIf { it.isNotBlank() }
             val filename = rawName ?: "${UUID.randomUUID()}.$extension"
 
+            // Compress the image
+            val bitmap = BitmapFactory.decodeStream(context.contentResolver.openInputStream(uri))
+            if (bitmap == null) {
+                throw IllegalArgumentException("Failed to decode image")
+            }
+
+            val tempFile = File.createTempFile("compressed", ".$extension", context.cacheDir)
+            val outputStream = FileOutputStream(tempFile)
+            val compressFormat = when (mimeType) {
+                "image/jpeg" -> Bitmap.CompressFormat.JPEG
+                "image/png" -> Bitmap.CompressFormat.PNG
+                "image/webp" -> Bitmap.CompressFormat.WEBP
+                else -> Bitmap.CompressFormat.JPEG
+            }
+            val quality = if (mimeType == "image/png") 100 else 80
+            bitmap.compress(compressFormat, quality, outputStream)
+            outputStream.close()
+            bitmap.recycle()
+
             val fileRef = storageRef.child("users/$userId/$filename")
-            fileRef.putFile(uri).await()
+            fileRef.putFile(Uri.fromFile(tempFile)).await()
             val url = fileRef.downloadUrl.await().toString()
+
+            // Clean up temp file
+            tempFile.delete()
 
             Result.success(url)
         } catch (e: Exception) {

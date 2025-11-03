@@ -1,8 +1,7 @@
 package com.example.myapplication.ui.screens.profile
 
-import android.net.Uri
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,7 +30,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -57,7 +55,7 @@ import com.example.myapplication.ui.components.buttons.RemoveButton
 import com.example.myapplication.ui.components.chips.MainCategoryChip
 import com.example.myapplication.ui.components.fields.MainFormTextField
 import com.example.myapplication.viewmodel.trainer.TrainerProfileViewModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 
 @Composable
 fun TrainerEditScreen(
@@ -67,7 +65,6 @@ fun TrainerEditScreen(
     viewModel: TrainerProfileViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
-    val selectedFiles = remember { mutableStateListOf<Uri>() }
     var hourlyRate by remember { mutableStateOf("") }
     var selectedGym by remember { mutableStateOf<String?>(null) }
     var description by remember { mutableStateOf("") }
@@ -93,7 +90,7 @@ fun TrainerEditScreen(
 
     val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
-        selectedFiles.addAll(uris)
+        if (!uris.isNullOrEmpty()) viewModel.uploadImages(context, uris)
     }
     val scope = rememberCoroutineScope()
 
@@ -205,7 +202,7 @@ fun TrainerEditScreen(
                                     )
                                 }
                             }
-                            items(selectedFiles) { uri ->
+                            items(state.selectedImages) { uri ->
                                 Box(modifier = Modifier.size(76.dp)) {
                                     AsyncImage(
                                         model = ImageRequest.Builder(context)
@@ -217,7 +214,24 @@ fun TrainerEditScreen(
                                         modifier = Modifier.fillMaxSize()
                                     )
                                     RemoveButton(
-                                        onClick = { selectedFiles.remove(uri) },
+                                        onClick = { viewModel.removeSelectedImage(uri) },
+                                        modifier = Modifier.align(Alignment.TopEnd)
+                                    )
+                                }
+                            }
+                            items(state.uploadedImages) { url ->
+                                Box(modifier = Modifier.size(76.dp)) {
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(context)
+                                            .data(url)
+                                            .crossfade(true)
+                                            .size(76)
+                                            .build(),
+                                        contentDescription = stringResource(R.string.trainer_upload_preview),
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                    RemoveButton(
+                                        onClick = { viewModel.removeUploadedImage(url) },
                                         modifier = Modifier.align(Alignment.TopEnd)
                                     )
                                 }
@@ -255,8 +269,27 @@ fun TrainerEditScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            if (state.isLoading) {
-                CircularProgressIndicator()
+            if (state.isLoading || state.isUploadingImages) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    CircularProgressIndicator()
+                    if (state.isUploadingImages) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Uploading images...",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Loading...",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
             } else {
                 MainButton(
                     text = "Zapisz zmiany",
@@ -268,10 +301,10 @@ fun TrainerEditScreen(
                             description = description,
                             experienceYears = experienceYears,
                             selectedCategories = selectedCategories.map { it.name },
-                            images = selectedFiles.toList()
+                            images = state.existingImages + state.uploadedImages
                         )
                     },
-                    enabled = hourlyRate.isNotBlank() && description.isNotBlank() && experienceYears.isNotBlank(),
+                    enabled = hourlyRate.isNotBlank() && description.isNotBlank() && experienceYears.isNotBlank() && !state.isUploadingImages,
                     modifier = Modifier.fillMaxWidth()
                 )
             }

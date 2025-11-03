@@ -22,7 +22,10 @@ data class TrainerRegistrationState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val successMessage: String? = null,
-    val userName: String = ""
+    val userName: String = "",
+    val selectedImages: List<Uri> = emptyList(),
+    val uploadedImages: List<String> = emptyList(),
+    val isUploadingImages: Boolean = false
 )
 
 @HiltViewModel
@@ -72,18 +75,15 @@ class TrainerRegistrationViewModel @Inject constructor(
         description: String,
         experienceYears: String,
         selectedCategories: List<String>,
-        images: List<Uri>
+        images: List<String>
     ) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, errorMessage = null)
 
-            val currentUserId = getCurrentUserId() ?: return@launch
             val cachedUser = getCachedUser() ?: return@launch
             val (hourlyRateInt, experienceInt) = validateAndParseInput(hourlyRate, experienceYears) ?: return@launch
 
-            val (uploadedUrls, failedUris) = uploadImages(context, currentUserId, images) ?: return@launch
-
-            addTrainer(cachedUser, description, hourlyRateInt, experienceInt, gymId, selectedCategories, uploadedUrls, failedUris)
+            addTrainer(cachedUser, description, hourlyRateInt, experienceInt, gymId, selectedCategories, images, emptyList())
         }
     }
 
@@ -120,25 +120,6 @@ class TrainerRegistrationViewModel @Inject constructor(
         }
         val experienceInt = experienceYears.toIntOrNull()!!
         return Pair(hourlyRateInt!!, experienceInt)
-    }
-
-    private suspend fun uploadImages(context: Context, currentUserId: String, images: List<Uri>): Pair<List<String>, List<Uri>>? {
-        val uploadResult = try {
-            trainerRepository.uploadImages(context, currentUserId, images)
-        } catch (e: Exception) {
-            Result.failure<Pair<List<String>, List<Uri>>>(e)
-        }
-
-        if (uploadResult.isFailure) {
-            _state.value = _state.value.copy(
-                isLoading = false,
-                errorMessage = "Błąd podczas wysyłania zdjęć: ${uploadResult.exceptionOrNull()?.message}"
-            )
-            Log.e("TrainerRegistrationVM", "Upload images failed for user=$currentUserId", uploadResult.exceptionOrNull())
-            return null
-        }
-
-        return uploadResult.getOrNull() ?: (emptyList<String>() to emptyList<Uri>())
     }
 
     private suspend fun addTrainer(
@@ -192,5 +173,37 @@ class TrainerRegistrationViewModel @Inject constructor(
                 )
                 Log.e("TrainerRegistration", "Błąd dodawania trenera dla userId=${authRepository.getCurrentUserId()}", exception)
             }
+    }
+
+    fun uploadImages(context: Context, uris: List<Uri>) {
+        val currentUserId = getCurrentUserId() ?: return
+        _state.value = _state.value.copy(selectedImages = _state.value.selectedImages + uris, isUploadingImages = true)
+        viewModelScope.launch {
+            val result = trainerRepository.uploadImages(context, currentUserId, uris)
+            result.onSuccess { (successfulUrls, _) ->
+                _state.value = _state.value.copy(
+                    selectedImages = _state.value.selectedImages - uris,
+                    uploadedImages = _state.value.uploadedImages + successfulUrls,
+                    isUploadingImages = false
+                )
+            }.onFailure {
+                _state.value = _state.value.copy(
+                    selectedImages = _state.value.selectedImages - uris,
+                    isUploadingImages = false,
+                    errorMessage = "Błąd podczas wysyłania zdjęć"
+                )
+            }
+        }
+    }
+
+    fun removeSelectedImage(uri: Uri) {
+        _state.value = _state.value.copy(selectedImages = _state.value.selectedImages - uri)
+    }
+
+    fun removeUploadedImage(url: String) {
+        _state.value = _state.value.copy(uploadedImages = _state.value.uploadedImages.filter { it != url })
+        viewModelScope.launch {
+            trainerRepository.deleteImageByUrl(url)
+        }
     }
 }
