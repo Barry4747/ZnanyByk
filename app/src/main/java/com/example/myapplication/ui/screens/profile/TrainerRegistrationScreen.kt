@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,7 +18,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
@@ -25,13 +28,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,12 +52,10 @@ import com.example.myapplication.data.model.users.TrainerCategory
 import com.example.myapplication.ui.components.buttons.FormButton
 import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.buttons.MainButton
+import com.example.myapplication.ui.components.buttons.RemoveButton
 import com.example.myapplication.ui.components.chips.MainCategoryChip
 import com.example.myapplication.ui.components.fields.MainFormTextField
 import com.example.myapplication.viewmodel.trainer.TrainerRegistrationViewModel
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.layout.FlowRow
 
 @Composable
 fun TrainerRegistrationScreen(
@@ -171,15 +172,21 @@ fun TrainerRegistrationScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             items(selectedFiles) { uri ->
-                                AsyncImage(
-                                    model = ImageRequest.Builder(context)
-                                        .data(uri)
-                                        .crossfade(true)
-                                        .size(76)
-                                        .build(),
-                                    contentDescription = stringResource(R.string.trainer_upload_preview),
-                                    modifier = Modifier.size(76.dp)
-                                )
+                                Box(modifier = Modifier.size(76.dp)) {
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(context)
+                                            .data(uri)
+                                            .crossfade(true)
+                                            .size(76)
+                                            .build(),
+                                        contentDescription = stringResource(R.string.trainer_upload_preview),
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                    RemoveButton(
+                                        onClick = { selectedFiles.remove(uri) },
+                                        modifier = Modifier.align(Alignment.TopEnd)
+                                    )
+                                }
                             }
                             item {
                                 MainCategoryChip(label = "+", onClick = { launcher.launch("image/*") })

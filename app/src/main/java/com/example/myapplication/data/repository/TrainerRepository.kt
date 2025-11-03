@@ -70,6 +70,16 @@ class TrainerRepository @Inject constructor() {
         }
     }
 
+    suspend fun deleteImageByUrl(imageUrl: String): Result<Unit> {
+        return try {
+            val storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imageUrl)
+            storageRef.delete().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun addTrainer(trainer: Trainer, uid: String): Result<String> {
         return try {
             trainerCollection.document(uid).set(trainer).await()
@@ -173,3 +183,4 @@ class TrainerRepository @Inject constructor() {
             "0.00"
         }
     }
+}

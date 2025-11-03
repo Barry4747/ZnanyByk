@@ -82,6 +82,50 @@ class TrainerProfileViewModel @Inject constructor(
         }
     }
 
+    suspend fun removeImage(imageUrl: String) {
+        // Immediately update the UI by removing the image from the list
+        val currentImages = _state.value.existingImages
+        val updatedImages = currentImages.filter { it != imageUrl }
+        _state.value = _state.value.copy(existingImages = updatedImages)
+
+        // Perform the deletion asynchronously in the background
+        viewModelScope.launch {
+            _state.value = _state.value.copy(errorMessage = null)
+
+            val currentUserId = authRepository.getCurrentUserId() ?: run {
+                _state.value = _state.value.copy(errorMessage = "Brak zalogowanego użytkownika")
+                return@launch
+            }
+
+            trainerRepository.deleteImageByUrl(imageUrl).onFailure { e ->
+                _state.value = _state.value.copy(errorMessage = "Błąd podczas usuwania zdjęcia: ${e.message}")
+                // Optionally, add the image back if deletion failed
+                val restoredImages = (_state.value.existingImages + imageUrl).distinct()
+                _state.value = _state.value.copy(existingImages = restoredImages)
+                return@launch
+            }
+
+            trainerRepository.getTrainerById(currentUserId).onSuccess { trainer ->
+                val finalImages = trainer.images?.filter { it != imageUrl }
+                val updatedTrainer = trainer.copy(images = finalImages?.ifEmpty { null })
+                trainerRepository.addTrainer(updatedTrainer, currentUserId).onSuccess {
+                    // Ensure the state is updated with the final list
+                    _state.value = _state.value.copy(existingImages = finalImages ?: emptyList())
+                }.onFailure { e ->
+                    _state.value = _state.value.copy(errorMessage = "Błąd podczas aktualizacji profilu: ${e.message}")
+                    // Restore the image if update failed
+                    val restoredImages = (_state.value.existingImages + imageUrl).distinct()
+                    _state.value = _state.value.copy(existingImages = restoredImages)
+                }
+            }.onFailure { e ->
+                _state.value = _state.value.copy(errorMessage = "Błąd podczas pobierania profilu: ${e.message}")
+                // Restore the image
+                val restoredImages = (_state.value.existingImages + imageUrl).distinct()
+                _state.value = _state.value.copy(existingImages = restoredImages)
+            }
+        }
+    }
+
     private fun validateTrainerInput(
         hourlyRate: String,
         experienceYears: String
