@@ -100,8 +100,8 @@ class ScheduleViewModel @Inject constructor(
         repository.addAppointment(appointment)
     }
 
-    fun loadAppointmentsForDay(dayOfWeek: String) {
-        repository.getAppointmentsForDay(currentUserId.toString(), dayOfWeek)
+    fun loadAppointmentsForMonthYear(month: Int, year: Int) {
+        repository.getAppointmentsForMonthYear(currentUserId.toString(), month = month, year = year)
     }
 
     private fun List<TrainingSlot>.sortedByTime(): List<TrainingSlot> {

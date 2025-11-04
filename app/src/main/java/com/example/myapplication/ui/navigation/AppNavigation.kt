@@ -22,7 +22,7 @@ import com.example.myapplication.ui.screens.auth.PersonalInfoRegistrationScreen
 import com.example.myapplication.ui.screens.chats.ChatScreen
 import com.example.myapplication.ui.screens.chats.ChatsListScreen
 import com.example.myapplication.ui.screens.home.HomeScreen
-import com.example.myapplication.ui.screens.scheduler.SchedulerScreen
+import com.example.myapplication.ui.screens.scheduler.AppointmentsScreen
 import com.example.myapplication.ui.screens.profile.TrainerRegistrationScreen
 import com.example.myapplication.ui.screens.scheduler.TrainerScheduleScreen
 import com.example.myapplication.viewmodel.AuthViewModel
@@ -202,7 +202,7 @@ fun AppNavigation(
                 }
 
                 composable(Destination.SCHEDULER.route) {
-                    TrainerScheduleScreen()
+                    AppointmentsScreen()
                 }
 
                 composable("chats") {

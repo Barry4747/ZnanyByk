@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.data.model.trainings.TrainingSlot
+import com.example.myapplication.ui.components.buttons.RoundAddButton
 
 @Composable
 fun ScheduleCard(
@@ -92,25 +93,9 @@ private fun SlotColumn(
         }
 
         if (showAddButton) {
-            AddButton(onAddClick)
+            RoundAddButton(onAddClick)
         }
     }
 }
 
-@Composable
-private fun AddButton(onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .size(32.dp)
-            .background(Color.White, CircleShape)
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            Icons.Default.Add,
-            contentDescription = "Add",
-            tint = Color.Black,
-            modifier = Modifier.size(20.dp)
-        )
-    }
-}
+
