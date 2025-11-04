@@ -7,12 +7,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
+import androidx.navigation.navigation
+import com.example.myapplication.ui.components.CustomBottomBar
 import com.example.myapplication.ui.components.Destination
 import com.example.myapplication.ui.screens.WelcomeScreen
 import com.example.myapplication.ui.screens.auth.CredentialsRegistrationScreen
@@ -23,10 +26,22 @@ import com.example.myapplication.ui.screens.chats.ChatScreen
 import com.example.myapplication.ui.screens.chats.ChatsListScreen
 import com.example.myapplication.ui.screens.home.HomeScreen
 import com.example.myapplication.ui.screens.scheduler.AppointmentsScreen
+import com.example.myapplication.ui.screens.profile.LocationOnboardingScreen
+import com.example.myapplication.ui.screens.profile.PersonalInfoEditScreen
+import com.example.myapplication.ui.screens.profile.ProfileScreen
+import com.example.myapplication.ui.screens.profile.TrainerEditScreen
+import com.example.myapplication.ui.screens.home.FilterScreen
+import com.example.myapplication.ui.screens.home.SortScreen
 import com.example.myapplication.ui.screens.profile.TrainerRegistrationScreen
 import com.example.myapplication.ui.screens.scheduler.TrainerScheduleScreen
-import com.example.myapplication.viewmodel.AuthViewModel
+import com.example.myapplication.ui.screens.scheduler.TrainerScheduleScreen
+import com.example.myapplication.viewmodel.profile.LocationOnboardingViewModel
+import com.example.myapplication.viewmodel.profile.PInfoEditViewModel
+import com.example.myapplication.viewmodel.profile.ProfileViewModel
+import com.example.myapplication.viewmodel.registration.AuthViewModel
 import com.example.myapplication.viewmodel.registration.RegistrationViewModel
+import com.example.myapplication.viewmodel.TrainersViewModel
+import com.example.myapplication.viewmodel.HomeViewModel
 
 private const val ANIMATION_DURATION = 50
 
@@ -85,7 +100,7 @@ fun AppNavigation(
                             navController.navigate(Screen.PasswordReset.route)
                         },
                         onLoginSuccess = {
-                            navController.navigate(Destination.HOME.route) {
+                            navController.navigate("home_flow") {
                                 popUpTo(Screen.Welcome.route) { inclusive = true }
                             }
                         },
@@ -137,7 +152,7 @@ fun AppNavigation(
                             },
                             onGoogleSignInSuccess = {
                                 sharedRegistrationViewModel.clearPendingGoogleRegistration()
-                                navController.navigate(Destination.HOME.route) {
+                                navController.navigate("home_flow") {
                                     popUpTo(Screen.Welcome.route) { inclusive = true }
                                 }
                             },
@@ -158,7 +173,7 @@ fun AppNavigation(
                             },
                             onRegistrationSuccess = {
                                 sharedRegistrationViewModel.clearPendingGoogleRegistration()
-                                navController.navigate(Destination.HOME.route) {
+                                navController.navigate("home_flow") {
                                     popUpTo(Screen.Welcome.route) { inclusive = true }
                                 }
                             },
@@ -174,28 +189,86 @@ fun AppNavigation(
                     }
                 }
 
-                composable(Destination.HOME.route) {
-                    val authViewModel: AuthViewModel = hiltViewModel()
-                    HomeScreen(
-                        onLogout = {
-                            authViewModel.logout()
-                            navController.navigate(Screen.Welcome.route) {
-                                popUpTo(0) { inclusive = true }
-                            }
+                navigation(
+                    startDestination = Screen.Home.route,
+                    route = "home_flow"
+                ) {
+                    composable(Screen.Home.route) { backStackEntry ->
+                        val parentEntry = remember(backStackEntry) {
+                            navController.getBackStackEntry("home_flow")
                         }
-                    )
+                        val homeViewModel: HomeViewModel = hiltViewModel(parentEntry)
+                        val trainersViewModel:TrainersViewModel = hiltViewModel(parentEntry)
+
+
+                        HomeScreen(
+                            viewModel = homeViewModel,
+                            trainersViewModel = trainersViewModel,
+
+                            onLogout = {
+                                navController.navigate(Screen.Welcome.route) {
+                                    popUpTo(0) { inclusive = true }
+                                }
+                            },
+                            goToFilter = {
+                                navController.navigate(Screen.Filter.route)
+                            },
+                            goToSort = {
+                                navController.navigate(Screen.Sort.route)
+                            }
+                        )
+                    }
+
+                    composable(Screen.Filter.route) { backStackEntry ->
+                        // 1. Pobierz TEGO SAMEGO "rodzica"
+                        val parentEntry = remember(backStackEntry) {
+                            navController.getBackStackEntry("home_flow")
+                        }
+                        // 2. Hilt dostarczy TĘ SAMĄ instancję TrainersViewModel, bo rodzic jest ten sam
+                        val trainersViewModel: TrainersViewModel = hiltViewModel(parentEntry)
+
+                        FilterScreen(
+                            onNavigateBack = {
+                                navController.popBackStack()
+                            },
+                            viewModel = trainersViewModel
+                        )
+                    }
+
+                    composable(Screen.Sort.route) {
+                        SortScreen(
+                            onNavigateBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    }
                 }
 
                 composable(Screen.RegisterTrainer.route) {
                     TrainerRegistrationScreen(
                         onNavigateBack = {
-                            navController.navigate(Destination.HOME.route) {
-                                popUpTo(Destination.HOME.route) { inclusive = true }
+                            navController.navigate("home_flow") {
+                                popUpTo("home_flow") { inclusive = true }
                             }
                         },
                         onSubmit = {
-                            navController.navigate(Destination.HOME.route) {
+                            navController.navigate("home_flow") {
                                 popUpTo(Screen.Welcome.route) { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+                composable(Screen.TrainerProfileEdit.route) {
+                    TrainerEditScreen(
+                        onNavigateBack = {
+                            navController.navigate(Destination.USER.route) {
+                                popUpTo(Destination.USER.route) { inclusive = true }
+                            }
+                        },
+                        onSubmit = {
+                            navController.navigate(Destination.USER.route) {
+                                popUpTo(Destination.USER.route) { inclusive = true }
                             }
                         }
                     )
@@ -227,17 +300,67 @@ fun AppNavigation(
                         chatId = chatId,
                         receiverId = receiverId,
                         onNavigateBack = {navController.navigate(Destination.CHATS.route) {
-                            popUpTo(Screen.Home.route) { inclusive = true }
+                            popUpTo("home_flow") { inclusive = true }
                         }}
                         )
                 }
 
 
                 composable(Destination.USER.route) {
-                    /* ProfileScreen() */
+                    val profileViewModel: ProfileViewModel = hiltViewModel()
+                    ProfileScreen(
+                        viewModel = profileViewModel,
+                        onEditLocation = {
+                            navController.navigate(Screen.LocationOnboarding.route) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onEditProfile = {
+                            navController.navigate(Screen.PersonalInfoEdit.route) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onEditTrainerProfile = {
+                            navController.navigate(Screen.TrainerProfileEdit.route) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onBecomeTrainer = {
+                            navController.navigate(Screen.RegisterTrainer.route) {
+                                launchSingleTop = true
+                            }
+                        }
+                    )
                 }
 
+                composable(Screen.LocationOnboarding.route) {
+                    val locationOnboardingViewModel: LocationOnboardingViewModel = hiltViewModel()
+                    LocationOnboardingScreen(
+                        viewModel = locationOnboardingViewModel,
+                        onNavigateToDashboard = {
+                            navController.navigate("home_flow") {
+                                popUpTo(Screen.Welcome.route) { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+                composable(Screen.PersonalInfoEdit.route) {
+                    val pInfoEditViewModel: PInfoEditViewModel = hiltViewModel()
+                    PersonalInfoEditScreen(
+                        viewModel = pInfoEditViewModel,
+                        onNavigateBack = {
+                            navController.navigate(Destination.USER.route) {
+                                popUpTo(Destination.USER.route) { inclusive = true }
+                            }
+                        },
+                        onEditSuccess = {
+                            navController.navigate(Destination.USER.route) {
+                                popUpTo(Destination.USER.route) { inclusive = true }
+                            }
+                        }
+                    )
+                }
             }
         }
-    }
-
+}

@@ -37,7 +37,7 @@ import com.example.myapplication.ui.components.buttons.GoogleAuthButton
 import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.ui.components.buttons.MainTextButton
-import com.example.myapplication.viewmodel.AuthViewModel
+import com.example.myapplication.viewmodel.registration.AuthViewModel
 
 @Composable
 fun LoginScreen(

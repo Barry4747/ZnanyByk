@@ -4,9 +4,11 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.forEach
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,7 +21,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -27,9 +32,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,20 +55,31 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.R
 import com.example.myapplication.data.model.users.Trainer
 import com.example.myapplication.viewmodel.HomeViewModel
+import com.example.myapplication.viewmodel.TrainersViewModel
 
 
 @Composable
 fun HomeScreen(
     onLogout: () -> Unit,
+    goToFilter: () -> Unit,
+    goToSort: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    trainersViewModel: TrainersViewModel = hiltViewModel()
 ) {
     val homeState by viewModel.homeState.collectAsState()
+    val trainersState by trainersViewModel.trainersState.collectAsState()
+
+
     val user = homeState.user
-    val trainers = homeState.trainers
+    val trainers: List<Trainer> = trainersState.trainers
     val errorMessage = homeState.errorMessage
 
     var searchTrainerText by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        trainersViewModel.loadInitialTrainers()
+    }
 
     Column(
         modifier = modifier
@@ -90,20 +108,66 @@ fun HomeScreen(
         }, singleLine = true
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        LazyColumn(
-            modifier = Modifier.weight(1f), // weight(1f) sprawia, że lista zajmie całą dostępną przestrzeń
-            verticalArrangement = Arrangement.spacedBy(12.dp) // Odstęp między elementami
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(trainers) { trainer ->
-                TrainerProfileCard(trainer = trainer, onClick = { /* TODO: Obsłuż kliknięcie */ })
+            OutlinedButton(
+                onClick = {goToFilter()},
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.FilterList,
+                    contentDescription = "Filtruj",
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = "Filtruj")
+            }
+            OutlinedButton(
+                onClick = { goToSort()
+                          Log.d("Filtry", trainersState.toString())},
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Sort,
+                    contentDescription = "Sortuj",
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = "Sortuj")
             }
         }
 
-        if (homeState.isLoading) {
-            CircularProgressIndicator()
-        }  else if (errorMessage != null) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Box(
+            modifier = Modifier.weight(1f),
+            contentAlignment = Alignment.Center // Wycentruje wskaźnik ładowania
+        ) {
+            // LazyColumn jest zawsze w Box, ale jest widoczny tylko gdy nie ma ładowania
+            if (!homeState.isLoading) {
+                LazyColumn(
+                    // Nie potrzebuje już modyfikatora weight, bo jest w Box, który go ma
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(trainers) { trainer ->
+                        TrainerProfileCard(trainer = trainer, onClick = { /* TODO: Obsłuż kliknięcie */ })
+                    }
+                }
+            }
+
+            // Wskaźnik ładowania jest w tym samym Box i wyświetla się na środku
+            if (homeState.isLoading) {
+                CircularProgressIndicator()
+            }
+        }
+
+        if (errorMessage != null && !homeState.isLoading) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -236,6 +300,35 @@ fun TrainerProfileCard(
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp), // Odstęp poziomy między pigułkami
+                    verticalArrangement = Arrangement.spacedBy(8.dp) // Odstęp pionowy, gdy pigułki się zawiną
+                ) {
+                    trainer.categories?.forEach { speciality ->
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    color = MaterialTheme.colorScheme.secondaryContainer, // Szary kolor tła
+                                    shape = RoundedCornerShape(12.dp) // Zaokrąglone rogi
+                                )
+                                .padding(horizontal = 12.dp, vertical = 6.dp) // Wewnętrzny padding
+                        ) {
+                            Text(
+                                text = speciality,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                }
+                // --- KONIEC NOWEJ SEKCJI ---
 
                 Spacer(modifier = Modifier.height(16.dp))
             }

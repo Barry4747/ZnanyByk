@@ -34,9 +34,7 @@ class MainActivity : ComponentActivity() {
         val keepOn = AtomicBoolean(true)
         splash.setKeepOnScreenCondition { keepOn.get() }
 
-
         super.onCreate(savedInstanceState)
-
 
         lifecycleScope.launch {
             val hasCached = try {
@@ -68,7 +66,7 @@ class MainActivity : ComponentActivity() {
                         AppNavigation(
                             navController = navController,
                             modifier = Modifier.padding(innerPadding),
-                            startDestination = if (hasCached) Destination.HOME.route else Screen.Welcome.route
+                            startDestination = if (hasCached) "home_flow" else Screen.Welcome.route
                         )
                     }
                 }

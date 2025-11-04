@@ -1,4 +1,4 @@
-package com.example.myapplication.ui.screens.auth
+package com.example.myapplication.ui.screens.profile
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -42,7 +42,7 @@ import com.example.myapplication.ui.components.buttons.FormButton
 import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.ui.components.fields.MainFormTextField
-import com.example.myapplication.viewmodel.registration.RegistrationViewModel
+import com.example.myapplication.viewmodel.profile.PInfoEditViewModel
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -51,30 +51,26 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PersonalInfoRegistrationScreen(
+fun PersonalInfoEditScreen(
     onNavigateBack: () -> Unit,
-    onRegistrationSuccess: () -> Unit,
-    onRegistrationSuccessProceedWithTrainer: () -> Unit,
+    onEditSuccess: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: RegistrationViewModel = hiltViewModel()
+    viewModel: PInfoEditViewModel = hiltViewModel()
 ) {
-    val registrationState by viewModel.registrationState.collectAsState()
+    val personalInfoState by viewModel.state.collectAsState()
 
-    var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
-    var phoneNumber by remember { mutableStateOf("") }
-    var birthDateMillis by remember { mutableStateOf<Long?>(null) }
-    var wantsToBeTrainer by remember { mutableStateOf(false) }
-    val emailPrefill = registrationState.registrationCredentials.email
+    var firstName by remember { mutableStateOf(personalInfoState.firstName) }
+    var lastName by remember { mutableStateOf(personalInfoState.lastName) }
+    var phoneNumber by remember { mutableStateOf(personalInfoState.phoneNumber) }
+    var birthDateMillis by remember { mutableStateOf(personalInfoState.birthDate?.time) }
+    val emailPrefill = personalInfoState.email
 
     var showDatePicker by remember { mutableStateOf(false) }
     var snappedDate by remember { mutableStateOf(LocalDateTime.now().minusYears(25).toLocalDate()) }
 
-    if (registrationState.successMessage != null) {
-        if (wantsToBeTrainer) {
-            onRegistrationSuccessProceedWithTrainer()
-        } else {
-            onRegistrationSuccess()
+    LaunchedEffect(personalInfoState.successMessage) {
+        if (personalInfoState.successMessage != null) {
+            onEditSuccess()
         }
     }
 
@@ -94,7 +90,7 @@ fun PersonalInfoRegistrationScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = stringResource(R.string.personal_info),
+                text = stringResource(R.string.edit_personal_info),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -105,7 +101,7 @@ fun PersonalInfoRegistrationScreen(
                 value = firstName,
                 onValueChange = { firstName = it },
                 label = stringResource(R.string.first_name),
-                enabled = !registrationState.isLoading
+                enabled = false,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -114,7 +110,7 @@ fun PersonalInfoRegistrationScreen(
                 value = lastName,
                 onValueChange = { lastName = it },
                 label = stringResource(R.string.last_name),
-                enabled = !registrationState.isLoading
+                enabled = false,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -132,7 +128,7 @@ fun PersonalInfoRegistrationScreen(
                 value = phoneNumber,
                 onValueChange = { phoneNumber = it },
                 label = stringResource(R.string.phone_number_opt),
-                enabled = !registrationState.isLoading
+                enabled = !personalInfoState.isLoading
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -142,55 +138,26 @@ fun PersonalInfoRegistrationScreen(
                     SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date(it))
                 } ?: stringResource(R.string.birthday_opt),
                 onClick = { showDatePicker = true },
-                enabled = !registrationState.isLoading
+                enabled = !personalInfoState.isLoading
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (registrationState.isLoading) {
+            if (personalInfoState.isLoading) {
                 CircularProgressIndicator()
             } else {
                 MainButton(
-                    text = stringResource(R.string.create_account),
-                    onClick = {
-                        wantsToBeTrainer = false
-                        val birthDate = birthDateMillis?.let { Date(it) }
-
-                        viewModel.register(
-                            firstName = firstName,
-                            lastName = lastName,
-                            phoneNumber = phoneNumber.ifBlank { null },
-                            birthDate = birthDate
-                        )
-                    },
-                    enabled = firstName.isNotBlank() && lastName.isNotBlank(),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                AlternateButton(
-                    text = stringResource(R.string.want_to_be_trainer),
-                    onClick = {
-                        wantsToBeTrainer = true
-                        val birthDate = birthDateMillis?.let { Date(it) }
-
-                        viewModel.register(
-                            firstName = firstName,
-                            lastName = lastName,
-                            phoneNumber = phoneNumber.ifBlank { null },
-                            birthDate = birthDate
-                        )
-                    },
+                    text = "Zapisz zmiany",
+                    onClick = { viewModel.saveChanges(firstName, lastName, phoneNumber, birthDateMillis?.let { Date(it) }, personalInfoState.location, personalInfoState.email) },
                     enabled = firstName.isNotBlank() && lastName.isNotBlank(),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
 
-            if (registrationState.errorMessage != null) {
+            if (personalInfoState.errorMessage != null) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = registrationState.errorMessage ?: "",
+                    text = personalInfoState.errorMessage ?: "",
                     color = Color.Red
                 )
             }
@@ -245,7 +212,7 @@ fun PersonalInfoRegistrationScreen(
                             border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
                         )
                     ) { snappedDateValue ->
-                        snappedDate = snappedDateValue // <-- update controlled state
+                        snappedDate = snappedDateValue
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
