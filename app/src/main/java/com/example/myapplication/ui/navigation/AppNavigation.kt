@@ -1,6 +1,5 @@
 package com.example.myapplication.ui.navigation
 
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
@@ -26,15 +25,16 @@ import com.example.myapplication.ui.screens.auth.PersonalInfoRegistrationScreen
 import com.example.myapplication.ui.screens.chats.ChatScreen
 import com.example.myapplication.ui.screens.chats.ChatsListScreen
 import com.example.myapplication.ui.screens.home.HomeScreen
+import com.example.myapplication.ui.screens.scheduler.AppointmentsScreen
 import com.example.myapplication.ui.screens.profile.LocationOnboardingScreen
 import com.example.myapplication.ui.screens.profile.PersonalInfoEditScreen
 import com.example.myapplication.ui.screens.profile.ProfileScreen
 import com.example.myapplication.ui.screens.profile.TrainerEditScreen
 import com.example.myapplication.ui.screens.home.FilterScreen
 import com.example.myapplication.ui.screens.home.SortScreen
-import com.example.myapplication.ui.screens.scheduler.SchedulerScreen
 import com.example.myapplication.ui.screens.profile.TrainerRegistrationScreen
-import com.example.myapplication.ui.screens.scheduler.SchedulerScreen
+import com.example.myapplication.ui.screens.scheduler.TrainerScheduleScreen
+import com.example.myapplication.ui.screens.scheduler.TrainerScheduleScreen
 import com.example.myapplication.viewmodel.profile.LocationOnboardingViewModel
 import com.example.myapplication.viewmodel.profile.PInfoEditViewModel
 import com.example.myapplication.viewmodel.profile.ProfileViewModel
@@ -275,7 +275,7 @@ fun AppNavigation(
                 }
 
                 composable(Destination.SCHEDULER.route) {
-                    SchedulerScreen()
+                    AppointmentsScreen()
                 }
 
                 composable("chats") {

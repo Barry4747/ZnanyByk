@@ -106,5 +106,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
+    implementation("androidx.compose.runtime:runtime-livedata:1.6.0")
     ksp(libs.hilt.compiler)
 }
