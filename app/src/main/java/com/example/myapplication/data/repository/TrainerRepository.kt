@@ -116,35 +116,50 @@ class TrainerRepository @Inject constructor() {
     }
 
     suspend fun getFilteredTrainers(
-        query: String,
-        minRating: Float,
-        minPrice: Int,
-        maxPrice: Int,
-        categories: Set<String>
+        query: String = "",
+        minRating: Float = 0.0f,
+        minPrice: Int = 0,
+        maxPrice: Int = 500,
+        categories: Set<String> = emptySet()
     ): Result<List<Trainer>> {
         return try {
             val snapshot = trainerCollection.get().await()
             var trainers = snapshot.toObjects(Trainer::class.java)
 
+            // Filtrowanie po query (nazwa, opis, kategorie, etc.)
+            if (query.isNotBlank()) {
+                val lowerQuery = query.lowercase()
+                trainers = trainers.filter { trainer ->
+                    trainer.firstName?.lowercase()?.contains(lowerQuery) == true ||
+                            trainer.lastName?.lowercase()?.contains(lowerQuery) == true
+
+                }
+            }
+
+            // Filtrowanie po kategoriach
             if (categories.isNotEmpty()) {
                 trainers = trainers.filter { trainer ->
                     trainer.categories?.any { it in categories } == true
                 }
             }
 
+            // Filtrowanie po cenie
             trainers = trainers.filter {
                 val price = it.pricePerHour ?: 0
                 price in minPrice..maxPrice
             }
 
-            Log.d("TRAINER_REPO", "📊 Znaleziono ${trainers.size} przefiltrowanych trenerów.")
+
+            Log.d("TRAINER_REPO", "📊 Znaleziono ${trainers.size} przefiltrowanych trenerów. " +
+                    "Query: '$query', MinRating: $minRating, Price: $minPrice-$maxPrice, " +
+                    "Categories: ${categories.size}")
 
             Result.success(trainers)
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             Log.e("TRAINER_REPO", "Błąd podczas pobierania lub filtrowania trenerów", e)
             Result.failure(e)
         }
+    }
     }
 
     suspend fun getTrainerAvgRating(trainer: Trainer): String {
@@ -154,4 +169,3 @@ class TrainerRepository @Inject constructor() {
             "0.00"
         }
     }
-}

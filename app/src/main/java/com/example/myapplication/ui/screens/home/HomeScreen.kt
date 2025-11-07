@@ -20,12 +20,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -35,6 +38,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -49,12 +53,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.values
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.R
 import com.example.myapplication.data.model.users.Trainer
 import com.example.myapplication.viewmodel.HomeViewModel
+import com.example.myapplication.viewmodel.SortOption
 import com.example.myapplication.viewmodel.TrainersViewModel
 
 
@@ -62,7 +69,6 @@ import com.example.myapplication.viewmodel.TrainersViewModel
 fun HomeScreen(
     onLogout: () -> Unit,
     goToFilter: () -> Unit,
-    goToSort: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     trainersViewModel: TrainersViewModel = hiltViewModel()
@@ -75,6 +81,7 @@ fun HomeScreen(
     val trainers: List<Trainer> = trainersState.trainers
     val errorMessage = homeState.errorMessage
 
+    var showSortDialog by remember { mutableStateOf(false) }
     var searchTrainerText by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
@@ -105,7 +112,13 @@ fun HomeScreen(
                 imageVector = Icons.Default.Search,
                 contentDescription = stringResource(R.string.search_icon)
             )
-        }, singleLine = true
+        }, singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(
+                onSearch = {
+                    trainersViewModel.searchTrainers(searchTrainerText)
+                }
+            )
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -128,7 +141,7 @@ fun HomeScreen(
                 Text(text = "Filtruj")
             }
             OutlinedButton(
-                onClick = { goToSort()
+                onClick = { showSortDialog=true
                           Log.d("Filtry", trainersState.toString())},
                 modifier = Modifier.weight(1f)
             ) {
@@ -139,6 +152,15 @@ fun HomeScreen(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(text = "Sortuj")
+            }
+            if (showSortDialog) {
+                SortDialog(
+                    onDismiss = { showSortDialog = false }, // Zamknij dialog
+                    onSortSelected = { sortOption ->
+                        trainersViewModel.onSortOptionSelected(sortOption)
+                        showSortDialog = false // Zamknij dialog po wyborze
+                    }
+                )
             }
         }
 
@@ -337,17 +359,32 @@ fun TrainerProfileCard(
 }
 
 @Composable
-fun UserDataRow(label: String, value: String) {
-    Column {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.secondary
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium
-        )
-    }
+fun SortDialog(
+    onDismiss: () -> Unit,
+    onSortSelected: (SortOption) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Sortuj według") },
+        text = {
+            Column {
+                SortOption.values().forEach { option ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSortSelected(option) }
+                            .padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(option.displayName)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Anuluj")
+            }
+        }
+    )
 }

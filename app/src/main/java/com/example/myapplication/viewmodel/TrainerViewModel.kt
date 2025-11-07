@@ -2,6 +2,7 @@ package com.example.myapplication.viewmodel
 
 import androidx.activity.result.launch
 import androidx.compose.animation.core.copy
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
@@ -17,6 +18,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.concurrent.atomics.update
 
+enum class SortOption(val displayName: String) {
+    PRICE_ASC("Cena: Rosnąco"),
+    PRICE_DESC("Cena: Malejąco"),
+    RATING_DESC("Ocena: Malejąco")
+}
+
 data class TrainersState(
     val trainers: List<Trainer> = emptyList(),
     val isLoading: Boolean = false,
@@ -24,7 +31,9 @@ data class TrainersState(
     val priceMin: Int = 0,
     val priceMax: Int = 500,
     val selectedCategories: Set<String> = emptySet(),
-    val minRating: Float = 0.0f
+    val minRating: Float = 0.0f,
+    val sortBy: SortOption = SortOption.RATING_DESC,
+    val searchQuery: String = ""
 )
 
 @HiltViewModel
@@ -32,16 +41,19 @@ class TrainersViewModel @Inject constructor(
     private val trainerRepository: TrainerRepository
 ) : ViewModel() {
 
+
+
     private val _trainersState = MutableStateFlow(TrainersState())
     val trainersState: StateFlow<TrainersState> = _trainersState.asStateFlow()
 
     fun loadInitialTrainers() {
-        // Sprawdzamy, czy lista nie została już załadowana, aby uniknąć zbędnych zapytań
         if (trainersState.value.trainers.isNotEmpty() || trainersState.value.isLoading) {
             return
         }
-        applyFiltersAndLoad() // Wywołujemy główną funkcję z domyślnymi filtrami
+        applyFiltersAndLoad()
     }
+
+
 
     fun applyFiltersAndLoad() {
         viewModelScope.launch {
@@ -67,6 +79,11 @@ class TrainersViewModel @Inject constructor(
             }
         }
     }
+
+    fun onSearchQueryChanged(query: String) {
+        _trainersState.update { it.copy(searchQuery = query) }
+    }
+
     fun onPriceRangeChanged(min: Int, max: Int) {
         _trainersState.update { it.copy(priceMin = min, priceMax = max) }
     }
@@ -94,6 +111,36 @@ class TrainersViewModel @Inject constructor(
                 selectedCategories = emptySet(),
                 minRating = 0.0f
             )
+        }
+    }
+
+    fun onSortOptionSelected(sortOption: SortOption) {
+        // 1. Zaktualizuj stan, aby UI wiedziało, co jest wybrane
+        _trainersState.update { it.copy(sortBy = sortOption) }
+
+        // 2. Posortuj istniejącą listę lub załaduj ją na nowo z opcją sortowania
+        // Poniżej prostsza opcja - sortowanie w pamięci
+        _trainersState.update { currentState ->
+            val sortedList = when (sortOption) {
+                SortOption.PRICE_ASC -> currentState.trainers.sortedBy { it.pricePerHour }
+                SortOption.PRICE_DESC -> currentState.trainers.sortedByDescending { it.pricePerHour }
+                SortOption.RATING_DESC -> currentState.trainers.sortedByDescending { it.avgRating }
+            }
+            currentState.copy(trainers = sortedList)
+        }
+    }
+
+    fun searchTrainers(query: String) {
+        _trainersState.update { it.copy(searchQuery = query) }
+
+        viewModelScope.launch {
+            try {
+                val trainersList = trainerRepository.getFilteredTrainers(query).getOrThrow()
+                _trainersState.update { it.copy(trainers = trainersList) }
+            } catch (e: Exception) {
+            } finally {
+                _trainersState.update { it.copy(isLoading = false) }
+            }
         }
     }
 }

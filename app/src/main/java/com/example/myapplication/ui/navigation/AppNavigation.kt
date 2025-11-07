@@ -213,9 +213,7 @@ fun AppNavigation(
                             goToFilter = {
                                 navController.navigate(Screen.Filter.route)
                             },
-                            goToSort = {
-                                navController.navigate(Screen.Sort.route)
-                            }
+
                         )
                     }
 
