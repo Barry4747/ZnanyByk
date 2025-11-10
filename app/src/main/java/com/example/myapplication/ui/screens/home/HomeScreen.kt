@@ -50,25 +50,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.values
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.imageLoader
+import coil.request.ImageRequest
 import com.example.myapplication.R
 import com.example.myapplication.data.model.users.Trainer
 import com.example.myapplication.viewmodel.HomeViewModel
 import com.example.myapplication.viewmodel.SortOption
 import com.example.myapplication.viewmodel.TrainersViewModel
+import kotlinx.coroutines.delay
 
 
 @Composable
 fun HomeScreen(
     onLogout: () -> Unit,
     goToFilter: () -> Unit,
+    goToTrainerProfileCard: (Trainer) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     trainersViewModel: TrainersViewModel = hiltViewModel()
@@ -80,6 +86,8 @@ fun HomeScreen(
     val user = homeState.user
     val trainers: List<Trainer> = trainersState.trainers
     val errorMessage = homeState.errorMessage
+    val context = LocalContext.current
+    val imageLoader = context.imageLoader
 
     var showSortDialog by remember { mutableStateOf(false) }
     var searchTrainerText by remember { mutableStateOf("") }
@@ -178,12 +186,23 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(trainers) { trainer ->
-                        TrainerProfileCard(trainer = trainer, onClick = { /* TODO: Obsłuż kliknięcie */ })
+                        TrainerProfileCard(trainer = trainer, onClick = {
+                            if (trainer.images?.isNotEmpty() == true) {
+                                val imageUrl = trainer.images[0]
+                                // 2. Zbuduj zapytanie do Coila, aby "podgrzać" cache
+                                val request = ImageRequest.Builder(context)
+                                    .data(imageUrl)
+                                    // Opcjonalnie: nie musisz czekać na wynik, robisz to w tle
+                                    .build()
+                                // 3. Zleć Coilowi wykonanie zapytania w tle
+                                imageLoader.enqueue(request)
+                            }
+                            trainersViewModel.selectTrainer(trainer)
+                            goToTrainerProfileCard(trainer)})
                     }
                 }
             }
 
-            // Wskaźnik ładowania jest w tym samym Box i wyświetla się na środku
             if (homeState.isLoading) {
                 CircularProgressIndicator()
             }
@@ -240,8 +259,20 @@ fun TrainerProfileCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Log.d("TRAINER_OBJECT", "Trener: ${trainer}")
+    val context = LocalContext.current
+    val imageLoader = context.imageLoader
 
+    LaunchedEffect(key1 = trainer) {
+
+        delay(250)
+
+        trainer.images?.forEach { imageUrl ->
+            val request = ImageRequest.Builder(context)
+                .data(imageUrl)
+                .build()
+            imageLoader.enqueue(request) // Zleć ładowanie do cache'u w tle
+        }
+    }
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -262,31 +293,16 @@ fun TrainerProfileCard(
                         .height(180.dp),
                     contentScale = ContentScale.Crop
                 )
-                    Row(
-                        modifier = Modifier
+                    RatingIndicator(rating=trainer.avgRating ?: "0.0", modifier = Modifier
                             .align(Alignment.TopEnd) // Przyklej do prawego górnego rogu Box
                             .padding(8.dp) // Odsuń lekko od krawędzi
                             .background(
                                 color = MaterialTheme.colorScheme.surface, // Biały kolor tła
                                 shape = RoundedCornerShape(16.dp) // Zaokrąglone rogi
                             )
-                            .padding(horizontal = 8.dp, vertical = 4.dp), // Wewnętrzny padding etykiety
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Star, // Ikona gwiazdki
-                            contentDescription = "Rating star",
-                            tint = Color(0xFFFFC107), // Żółty/złoty kolor gwiazdki
-                            modifier = Modifier.size(16.dp) // Mały rozmiar ikonki
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = trainer.avgRating ?: "0.00",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface // Kolor tekstu pasujący do tła
-                        )
-                    }
+                            .padding(horizontal = 8.dp, vertical = 4.dp)) // Wewnętrzny padding etykiety
+
+
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -388,3 +404,30 @@ fun SortDialog(
         }
     )
 }
+
+@Composable
+fun RatingIndicator(
+    rating: String,
+    modifier: Modifier = Modifier,
+    size: Dp = 16.dp
+) {
+        Row(
+            modifier = modifier,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Star,
+                contentDescription = "Rating star",
+                tint = Color(0xFFFFC107),
+                modifier = Modifier.size(size)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = rating,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+}
+

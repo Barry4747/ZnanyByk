@@ -93,7 +93,7 @@ fun FilterScreen(
                 onValueChange = { range ->
                     viewModel.onPriceRangeChanged(range.start.toInt(), range.endInclusive.toInt())
                 },
-                valueRange = 0f..500f, // Całkowity możliwy zakres
+                valueRange = 0f..10000f, // Całkowity możliwy zakres
                 steps = 49 // (500-0)/10 - 1 = 49 kroków co 10 zł
             )
 

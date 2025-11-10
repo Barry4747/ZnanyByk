@@ -119,7 +119,7 @@ class TrainerRepository @Inject constructor() {
         query: String = "",
         minRating: Float = 0.0f,
         minPrice: Int = 0,
-        maxPrice: Int = 500,
+        maxPrice: Int = 8000,
         categories: Set<String> = emptySet()
     ): Result<List<Trainer>> {
         return try {
@@ -130,12 +130,16 @@ class TrainerRepository @Inject constructor() {
             if (query.isNotBlank()) {
                 val lowerQuery = query.lowercase()
                 trainers = trainers.filter { trainer ->
-                    trainer.firstName?.lowercase()?.contains(lowerQuery) == true ||
-                            trainer.lastName?.lowercase()?.contains(lowerQuery) == true
+                    val firstName = trainer.firstName?.lowercase() ?: ""
+                    val lastName = trainer.lastName?.lowercase() ?: ""
+                    val fullName = "$firstName $lastName"
 
+                    // Sprawdź, czy query pasuje do imienia, nazwiska LUB pełnej nazwy
+                    firstName.contains(lowerQuery) ||
+                            lastName.contains(lowerQuery) ||
+                            fullName.contains(lowerQuery)
                 }
             }
-
             // Filtrowanie po kategoriach
             if (categories.isNotEmpty()) {
                 trainers = trainers.filter { trainer ->

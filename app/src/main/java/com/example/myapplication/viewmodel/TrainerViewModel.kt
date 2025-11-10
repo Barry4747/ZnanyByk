@@ -26,10 +26,11 @@ enum class SortOption(val displayName: String) {
 
 data class TrainersState(
     val trainers: List<Trainer> = emptyList(),
+    val selectedTrainer: Trainer? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val priceMin: Int = 0,
-    val priceMax: Int = 500,
+    val priceMax: Int = 8000,
     val selectedCategories: Set<String> = emptySet(),
     val minRating: Float = 0.0f,
     val sortBy: SortOption = SortOption.RATING_DESC,
@@ -142,5 +143,9 @@ class TrainersViewModel @Inject constructor(
                 _trainersState.update { it.copy(isLoading = false) }
             }
         }
+    }
+
+    fun selectTrainer(trainer: Trainer) {
+        _trainersState.update { it.copy(selectedTrainer = trainer) }
     }
 }

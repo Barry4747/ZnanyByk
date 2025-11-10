@@ -16,6 +16,7 @@ data class Trainer(
     val pricePerHour: Int? = null,
     val experience: Int? = null,
     val images: List<String>? = null,
+    val profileImage: String? = null
 )
 
 

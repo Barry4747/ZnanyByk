@@ -32,6 +32,7 @@ import com.example.myapplication.ui.screens.profile.ProfileScreen
 import com.example.myapplication.ui.screens.profile.TrainerEditScreen
 import com.example.myapplication.ui.screens.home.FilterScreen
 import com.example.myapplication.ui.screens.home.SortScreen
+import com.example.myapplication.ui.screens.home.TrainerDetailScreen
 import com.example.myapplication.ui.screens.profile.TrainerRegistrationScreen
 import com.example.myapplication.ui.screens.scheduler.TrainerScheduleScreen
 import com.example.myapplication.ui.screens.scheduler.TrainerScheduleScreen
@@ -41,6 +42,7 @@ import com.example.myapplication.viewmodel.profile.ProfileViewModel
 import com.example.myapplication.viewmodel.registration.AuthViewModel
 import com.example.myapplication.viewmodel.registration.RegistrationViewModel
 import com.example.myapplication.viewmodel.TrainersViewModel
+import com.example.myapplication.viewmodel.TrainerDetailViewModel
 import com.example.myapplication.viewmodel.HomeViewModel
 
 private const val ANIMATION_DURATION = 50
@@ -201,6 +203,7 @@ fun AppNavigation(
                         val trainersViewModel:TrainersViewModel = hiltViewModel(parentEntry)
 
 
+
                         HomeScreen(
                             viewModel = homeViewModel,
                             trainersViewModel = trainersViewModel,
@@ -213,16 +216,17 @@ fun AppNavigation(
                             goToFilter = {
                                 navController.navigate(Screen.Filter.route)
                             },
+                            goToTrainerProfileCard = {
+                                navController.navigate(Screen.Trainer.route)
+                            }
 
                         )
                     }
 
                     composable(Screen.Filter.route) { backStackEntry ->
-                        // 1. Pobierz TEGO SAMEGO "rodzica"
                         val parentEntry = remember(backStackEntry) {
                             navController.getBackStackEntry("home_flow")
                         }
-                        // 2. Hilt dostarczy TĘ SAMĄ instancję TrainersViewModel, bo rodzic jest ten sam
                         val trainersViewModel: TrainersViewModel = hiltViewModel(parentEntry)
 
                         FilterScreen(
@@ -235,6 +239,22 @@ fun AppNavigation(
 
                     composable(Screen.Sort.route) {
                         SortScreen(
+                            onNavigateBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    }
+
+                    composable(Screen.Trainer.route) { backStackEntry -> // Prosta ścieżka bez argumentów
+                        // Pobierz tego samego "rodzica"
+                        val parentEntry = remember(backStackEntry) {
+                            navController.getBackStackEntry("home_flow")
+                        }
+                        // Hilt dostarczy TĘ SAMĄ instancję TrainersViewModel
+                        val trainersViewModel: TrainersViewModel = hiltViewModel(parentEntry)
+
+                        TrainerDetailScreen(
+                            viewModel = trainersViewModel,
                             onNavigateBack = {
                                 navController.popBackStack()
                             }
