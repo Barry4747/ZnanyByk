@@ -4,16 +4,19 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.example.myapplication.data.model.trainings.Appointment
 import com.example.myapplication.data.model.trainings.TrainingSlot
+import com.example.myapplication.data.model.users.User
 import com.example.myapplication.data.model.trainings.WeeklySchedule
 import com.example.myapplication.data.repository.AuthRepository
 import com.example.myapplication.data.repository.ScheduleRepository
+import com.example.myapplication.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class ScheduleViewModel @Inject constructor(
     private val repository: ScheduleRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     private val currentUserId = authRepository.getCurrentUserId()
@@ -102,6 +105,11 @@ class ScheduleViewModel @Inject constructor(
 
     fun loadAppointmentsForMonthYear(month: Int, year: Int) {
         repository.getAppointmentsForMonthYear(currentUserId.toString(), month = month, year = year)
+    }
+
+
+    fun getUserById(id: String): User? {
+        return userRepository.getUserSync(id)
     }
 
     private fun List<TrainingSlot>.sortedByTime(): List<TrainingSlot> {
