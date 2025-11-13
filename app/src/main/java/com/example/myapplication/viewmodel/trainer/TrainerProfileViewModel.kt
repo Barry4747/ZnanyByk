@@ -72,7 +72,7 @@ class TrainerProfileViewModel @Inject constructor(
                 Log.d("TrainerProfileVM", "Successfully loaded trainer: ${trainer.firstName} ${trainer.lastName}")
                 _state.value = _state.value.copy(
                     hourlyRate = trainer.pricePerHour?.toString() ?: "",
-                    selectedGym = trainer.location,
+                    selectedGym = trainer.gymId,
                     description = trainer.description ?: "",
                     experienceYears = trainer.experience?.toString() ?: "",
                     selectedCategories = trainer.categories?.mapNotNull { try { TrainerCategory.valueOf(it) } catch (e: Exception) { Log.e("TrainerProfileVM", "Invalid category: $it"); null } } ?: emptyList(),
@@ -217,7 +217,7 @@ class TrainerProfileViewModel @Inject constructor(
             description = description.ifBlank { null },
             pricePerHour = hourlyRateInt,
             experience = experienceInt,
-            location = gymId,
+            gymId = gymId,
             categories = selectedCategories,
             ratings = null,
             avgRating = null,

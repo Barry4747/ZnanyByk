@@ -5,10 +5,12 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myapplication.data.model.gyms.Gym
 import com.example.myapplication.data.model.users.Role
 import com.example.myapplication.data.model.users.Trainer
 import com.example.myapplication.data.model.users.User
 import com.example.myapplication.data.repository.AuthRepository
+import com.example.myapplication.data.repository.GymRepository
 import com.example.myapplication.data.repository.TrainerRepository
 import com.example.myapplication.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,14 +27,16 @@ data class TrainerRegistrationState(
     val userName: String = "",
     val selectedImages: List<Uri> = emptyList(),
     val uploadedImages: List<String> = emptyList(),
-    val isUploadingImages: Boolean = false
+    val isUploadingImages: Boolean = false,
+    val gyms: List<Gym> = emptyList()
 )
 
 @HiltViewModel
 class TrainerRegistrationViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val trainerRepository: TrainerRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val gymRepository: GymRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TrainerRegistrationState())
@@ -40,6 +44,19 @@ class TrainerRegistrationViewModel @Inject constructor(
 
     init {
         loadUserName()
+        loadGyms()
+    }
+
+    private fun loadGyms() {
+        viewModelScope.launch {
+            gymRepository.getAllGyms()
+                .onSuccess { gyms ->
+                    _state.value = _state.value.copy(gyms = gyms)
+                }
+                .onFailure { exception ->
+                    Log.e("TrainerRegistrationVM", "Failed to load gyms", exception)
+                }
+        }
     }
 
     private fun loadUserName() {
@@ -140,7 +157,7 @@ class TrainerRegistrationViewModel @Inject constructor(
             description = description.ifBlank { null },
             pricePerHour = hourlyRateInt,
             experience = experienceInt,
-            location = gymId,
+            gymId = gymId,
             categories = selectedCategories,
             ratings = null,
             avgRating = null,
