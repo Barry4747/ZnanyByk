@@ -161,7 +161,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             MainTextButton(
-                text = "Zapomniałeś hasła?",
+                text = stringResource(R.string.forgot_password),
                 onClick = {onNavigateToPasswordReset()}
             )
         }

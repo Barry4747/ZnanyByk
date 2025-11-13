@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
@@ -69,7 +70,7 @@ fun ProfileScreen(
         Box(contentAlignment = Alignment.Center) {
             AsyncImage(
                 model = state.avatarUrl,
-                contentDescription = "Profile Picture",
+                contentDescription = stringResource(R.string.profile_picture),
                 modifier = Modifier
                     .size(120.dp)
                     .clip(CircleShape),
@@ -77,7 +78,7 @@ fun ProfileScreen(
             )
             Icon(
                 imageVector = Icons.Default.AddCircleOutline,
-                contentDescription = "Add",
+                contentDescription = stringResource(R.string.add),
                 modifier = Modifier
                     .size(48.dp)
                     .align(Alignment.BottomEnd)
@@ -102,19 +103,19 @@ fun ProfileScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 MainButton(
-                    text = "Edytuj profil",
+                    text = stringResource(R.string.edytuj_profil_button_text),
                     onClick = { onEditProfile() },
                     modifier = Modifier.weight(1f)
                 )
                 MainButton(
-                    text = "Edytuj profil trenera",
+                    text = stringResource(R.string.edit_profile_button_text),
                     onClick = { onEditTrainerProfile() },
                     modifier = Modifier.weight(1f)
                 )
             }
         } else {
             MainButton(
-                text = "Edytuj profil",
+                text = stringResource(R.string.edytuj_profil_button_text),
                 onClick = { onEditProfile() },
                 modifier = Modifier.fillMaxWidth(0.6f)
             )
@@ -130,10 +131,10 @@ fun ProfileScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Chcesz zostać trenerem?",
+                    text = stringResource(R.string.want_to_become_trainer),
                     style = MaterialTheme.typography.bodyLarge
                 )
-                AlternateButton(text = "Dołącz do nas!", onClick = { onBecomeTrainer() })
+                AlternateButton(text = stringResource(R.string.join_us), onClick = { onBecomeTrainer() })
             }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -142,29 +143,29 @@ fun ProfileScreen(
 
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             FormButtonWithDetail(
-                text = "Język",
-                detail = "Polski",
+                text = stringResource(R.string.language),
+                detail = stringResource(R.string.polish),
                 enabled = false,
                 onClick = { /* No logic */ }
             )
 
             FormButtonWithDetail(
-                text = "Lokalizacja",
-                detail = state.userAddress.ifEmpty { "Brak podanego adresu" },
+                text = stringResource(R.string.localization),
+                detail = state.userAddress.ifEmpty { stringResource(R.string.no_given_address) },
                 onClick = { onEditLocation() }
             )
 
             if (state.userRole == "TRAINER") {
                 FormButtonWithDetail(
-                    text = "Moja siłownia",
-                    detail = "Nazwa siłowni",
+                    text = stringResource(R.string.my_gym),
+                    detail = stringResource(R.string.gym_name),
                     enabled = false,
                     onClick = { /* No logic */ }
                 )
             }
 
             FormButtonWithDetail(
-                text = "Waluta",
+                text = stringResource(R.string.currency),
                 detail = "PLN, zł",
                 enabled = false,
                 onClick = { /* No logic */ }
@@ -173,8 +174,8 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             FormButtonWithDetail(
-                text = "Wsparcie klienta",
-                detail = "Rozwiąż swój problem",
+                text = stringResource(R.string.customer_support),
+                detail = stringResource(R.string.solve_your_problems),
                 enabled = false,
                 onClick = { /* No logic */ }
             )

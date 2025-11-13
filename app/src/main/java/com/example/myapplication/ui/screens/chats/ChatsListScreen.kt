@@ -28,9 +28,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.myapplication.R
 import com.example.myapplication.data.model.chats.Chat
 import com.example.myapplication.ui.components.user_components.ProfileImage
 import com.example.myapplication.viewmodel.chats.ChatsListViewModel
@@ -46,15 +48,18 @@ fun ChatsListScreen(
 ) {
     val state by viewModel.chats.collectAsState()
     Column {
-        Box(modifier = Modifier.fillMaxWidth().height(72.dp)) {
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .height(72.dp)) {
             Row(
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier
+                    .padding(8.dp)
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.surface)
                     .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "Czaty", style = MaterialTheme.typography.titleLarge)
+                Text(text = stringResource(R.string.chats), style = MaterialTheme.typography.titleLarge)
             }
 
             Box(
@@ -62,9 +67,11 @@ fun ChatsListScreen(
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .height(8.dp)
-                    .background(brush = Brush.verticalGradient(
-                        listOf(Color.Black.copy(alpha = 0.15f), Color.Transparent)
-                    ))
+                    .background(
+                        brush = Brush.verticalGradient(
+                            listOf(Color.Black.copy(alpha = 0.15f), Color.Transparent)
+                        )
+                    )
             )
         }
 

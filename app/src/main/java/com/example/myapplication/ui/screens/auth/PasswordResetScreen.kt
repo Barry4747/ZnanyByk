@@ -89,7 +89,7 @@ fun PasswordResetScreen(
                 MainProgressIndicator()
             } else {
                 MainButton(
-                    text = "Wyślij emaila o reset hasła",
+                    text = stringResource(R.string.send_password_reset_email),
                     onClick = { viewModel.resetPassword(emailState.value) },
                     enabled = emailState.value.isNotBlank(),
                     modifier = Modifier.fillMaxWidth()

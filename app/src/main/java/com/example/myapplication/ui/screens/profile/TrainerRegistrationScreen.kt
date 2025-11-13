@@ -106,7 +106,7 @@ fun TrainerRegistrationScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Uzupełnij swój profil trenera",
+                text = stringResource(R.string.fillout_trainer_profile),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 12.dp)
@@ -204,7 +204,7 @@ fun TrainerRegistrationScreen(
                                 }
                             }
                             item {
-                                MainCategoryChip(label = "+", onClick = { launcher.launch("image/*") })
+                                MainCategoryChip(label = stringResource(R.string.add_button_plus), onClick = { launcher.launch("image/*") })
                             }
                         }
                     }
@@ -229,7 +229,7 @@ fun TrainerRegistrationScreen(
                         MainCategoryChip(category = category)
                     }
                     item {
-                        MainCategoryChip(label = "+", onClick = { showDialog = true })
+                        MainCategoryChip(label = stringResource(R.string.add_button_plus), onClick = { showDialog = true })
                     }
                 }
             }
@@ -246,13 +246,13 @@ fun TrainerRegistrationScreen(
                     if (state.isUploadingImages) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Uploading images...",
+                            text = stringResource(R.string.uploading_images),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     } else {
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Loading...",
+                            text = stringResource(R.string.loading),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -306,10 +306,10 @@ fun TrainerRegistrationScreen(
             modifier = Modifier.widthIn(min = 360.dp, max = 600.dp),
             confirmButton = {
                 TextButton(onClick = { showDialog = false }) {
-                    Text("OK")
+                    Text(stringResource(R.string.ok))
                 }
             },
-            title = { Text("Wybierz kategorie") },
+            title = { Text(stringResource(R.string.choose_category)) },
             text = {
                 Column(
                     modifier = Modifier

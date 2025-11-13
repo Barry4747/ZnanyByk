@@ -19,6 +19,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.myapplication.ui.components.buttons.MainBackButton
@@ -58,8 +59,11 @@ fun ChatScreen(
     var isFocused by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        Box(modifier = Modifier.fillMaxWidth().height(72.dp)) {
-            Row(modifier = Modifier.padding(8.dp)
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .height(72.dp)) {
+            Row(modifier = Modifier
+                .padding(8.dp)
                 .fillMaxWidth()
                 .padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -82,7 +86,7 @@ fun ChatScreen(
                     }) {
                         Icon(
                             painter = painterResource(id = R.drawable.phone),
-                            contentDescription = "Send",
+                            contentDescription = stringResource(R.string.send),
                             modifier = Modifier.size(32.dp)
                         )
                     }
@@ -94,7 +98,7 @@ fun ChatScreen(
                     }) {
                         Icon(
                             painter = painterResource(id = R.drawable.video),
-                            contentDescription = "Send",
+                            contentDescription = stringResource(R.string.send),
                             modifier = Modifier.size(32.dp)
                         )
                     }
@@ -149,7 +153,7 @@ fun ChatScreen(
                 onValueChange = { text = it },
                 placeholder = {
                     if (!isFocused) Text(
-                        "Napisz wiadomość...",
+                        stringResource(R.string.write_message),
                         color = Color.Gray
                     )
                 },
@@ -169,7 +173,7 @@ fun ChatScreen(
                         }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.send_arrow),
-                                contentDescription = "Send"
+                                contentDescription = stringResource(R.string.send)
                             )
                         }
                     }

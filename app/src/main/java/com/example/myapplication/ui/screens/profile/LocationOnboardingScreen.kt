@@ -27,9 +27,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.myapplication.R
 import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.viewmodel.profile.LocationOnboardingViewModel
@@ -81,12 +83,12 @@ fun LocationOnboardingScreen(
             }
 
             Text(
-                text = "Gdzie się znajdujesz?",
+                text = stringResource(R.string.where_are_you),
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
             Text(
-                text = "To pomaga nam znaleźć trenerów w Twojej okolicy.",
+                text = stringResource(R.string.this_helps_us_find_trainers),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
@@ -96,7 +98,7 @@ fun LocationOnboardingScreen(
                     OutlinedTextField(
                         value = uiState.query,
                         onValueChange = viewModel::onQueryChanged,
-                        label = { Text("Wprowadź swój adres lub miasto") },
+                        label = { Text(stringResource(R.string.enter_your_address)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -127,7 +129,7 @@ fun LocationOnboardingScreen(
                 MainProgressIndicator()
             } else {
                 MainButton(
-                    text = "Zapisz i kontynuuj",
+                    text = stringResource(R.string.save_changes_and_continue),
                     onClick = viewModel::onSaveLocation,
                     enabled = uiState.selectedPlace != null,
                     modifier = Modifier.fillMaxWidth()

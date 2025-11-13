@@ -146,7 +146,7 @@ fun PersonalInfoEditScreen(
                 MainProgressIndicator()
             } else {
                 MainButton(
-                    text = "Zapisz zmiany",
+                    text = stringResource(R.string.save_changes),
                     onClick = { viewModel.saveChanges(firstName, lastName, phoneNumber, birthDateMillis?.let { Date(it) }, personalInfoState.location, personalInfoState.email) },
                     enabled = firstName.isNotBlank() && lastName.isNotBlank(),
                     modifier = Modifier.fillMaxWidth()

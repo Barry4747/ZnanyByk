@@ -14,8 +14,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.myapplication.R
 import com.example.myapplication.viewmodel.trainer.ScheduleViewModel
 import com.example.myapplication.ui.components.buttons.FormButton
 import com.example.myapplication.ui.components.scheduler.AppointmentCard
@@ -51,7 +53,7 @@ fun AppointmentsScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Moje treningi",
+                    text = stringResource(R.string.my_workouts),
                     style = MaterialTheme.typography.titleLarge
                 )
             }
@@ -85,7 +87,7 @@ fun AppointmentsScreen(
         Box(modifier = Modifier.fillMaxSize()) {
             if (appointments.isEmpty()) {
                 Text(
-                    text = "Brak treningów w wybranym miesiącu",
+                    text = stringResource(R.string.no_workouts_this_month),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.align(Alignment.Center)
