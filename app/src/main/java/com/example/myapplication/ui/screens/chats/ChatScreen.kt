@@ -1,13 +1,11 @@
 package com.example.myapplication.ui.screens.chats
 
-import android.widget.ImageButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import com.example.myapplication.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -23,6 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.myapplication.ui.components.buttons.MainBackButton
+import com.example.myapplication.ui.components.chats.MessageItem
 import com.example.myapplication.ui.components.user_components.ProfileImage
 import com.example.myapplication.utils.shouldShowTimestamp
 import com.example.myapplication.utils.shouldShowProfile
