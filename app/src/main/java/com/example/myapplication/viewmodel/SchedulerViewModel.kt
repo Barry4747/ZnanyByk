@@ -1,5 +1,5 @@
 package com.example.myapplication.viewmodel
-
+//todo do wywalenia ???
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
