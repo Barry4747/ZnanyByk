@@ -22,12 +22,11 @@ fun SortScreen(
 {
     Column(
         modifier = modifier
-            .fillMaxSize() // Wypełnij cały ekran
-            .padding(16.dp), // Dodaj marginesy
-        horizontalAlignment = Alignment.CenterHorizontally, // Wycentruj elementy w poziomie
-        verticalArrangement = Arrangement.Center // Wycentruj elementy w pionie
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        // Tytuł ekranu
         Text(
             text = "Ekran Sortowania",
             style = MaterialTheme.typography.headlineMedium
@@ -35,8 +34,7 @@ fun SortScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Przycisk do powrotu
-        Button(onClick = onNavigateBack) { // Wywołaj funkcję onNavigateBack po kliknięciu
+        Button(onClick = onNavigateBack) {
             Text(text = "Wróć do listy")
         }
     }

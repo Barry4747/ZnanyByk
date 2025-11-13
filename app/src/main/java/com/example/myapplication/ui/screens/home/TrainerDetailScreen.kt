@@ -35,21 +35,18 @@ import com.example.myapplication.viewmodel.TrainersViewModel
 @Composable
 fun TrainerDetailScreen(
     onNavigateBack: () -> Unit,
-    viewModel: TrainersViewModel // Odbiera WSPÓŁDZIELONY ViewModel
+    viewModel: TrainersViewModel
 ) {
     val trainersState by viewModel.trainersState.collectAsState()
     val selectedTrainer = trainersState.selectedTrainer
 
-    // --- GŁÓWNA ZMIANA: Używamy Box jako kontenera całego ekranu ---
     Box(modifier = Modifier.fillMaxSize()) {
         if (selectedTrainer != null) {
-            // --- Główna, przewijalna treść (jest na samym spodzie) ---
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
             ) {
-                // SEKCJA OBRAZKA
                 val imageUrl = if (selectedTrainer.images?.isNotEmpty() == true) {
                     selectedTrainer.images[0]
                 } else {
@@ -68,13 +65,11 @@ fun TrainerDetailScreen(
                     contentScale = ContentScale.Crop
                 )
 
-                // SEKCJA Z INFORMACJAMI
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
                 ) {
-                    // ... (Cała zawartość: Row z imieniem, Text z doświadczeniem, FlowRow, Opis)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -143,7 +138,6 @@ fun TrainerDetailScreen(
                         style = MaterialTheme.typography.bodyLarge
                     )
 
-
                     val galleryImages = selectedTrainer.images?.drop(1) ?: emptyList()
                     if (galleryImages.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(24.dp))
@@ -154,36 +148,31 @@ fun TrainerDetailScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // --- POPRAWIONA SIATKA ---
-                        // Obliczamy wysokość siatki na podstawie liczby wierszy
-                        val rowCount = (galleryImages.size + 1) / 2 // +1 aby zaokrąglić w górę
-                        val gridHeight = (rowCount * 150).dp // Zakładając, że każdy element ma ok. 150dp wysokości
+                        val rowCount = (galleryImages.size + 1) / 2
+                        val gridHeight = (rowCount * 150).dp
 
                         LazyVerticalStaggeredGrid(
                             columns = StaggeredGridCells.Fixed(2),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(gridHeight), // Nadajemy siatce stałą wysokość
+                                .height(gridHeight),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalItemSpacing = 8.dp,
-                            // Wyłączamy przewijanie siatki, bo główna kolumna już się przewija
                             userScrollEnabled = false
                         ) {
                             items(galleryImages) { imageUrl ->
                                 GalleryImage(
                                     imageUrl = imageUrl,
-                                    onClick = { /* TODO: Otwórz obrazek w pełnym ekranie */ }
+                                    onClick = { }
                                 )
                             }
                         }
                     }
 
-                    // Dodaj pustą przestrzeń na dole, aby ostatni tekst nie chował się pod przyciskiem
                     Spacer(modifier = Modifier.height(100.dp))
                 }
             }
         } else {
-            // Sytuacja awaryjna
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -192,9 +181,6 @@ fun TrainerDetailScreen(
             }
         }
 
-        // --- Elementy "pływające" na wierzchu ---
-
-        // Przycisk powrotu (bez zmian)
         IconButton(
             onClick = onNavigateBack,
             modifier = Modifier
@@ -213,7 +199,6 @@ fun TrainerDetailScreen(
             )
         }
 
-        // Wskaźnik oceny (bez zmian)
         if (selectedTrainer != null) {
             RatingIndicator(
                 rating = selectedTrainer.avgRating ?: "0.0",
@@ -229,11 +214,10 @@ fun TrainerDetailScreen(
             )
         }
 
-        // Przycisk "Umów wizytę" - teraz jako element "pływający" na dole
         Button(
-            onClick = { /* TODO: Logika umówienia wizyty */ },
+            onClick = { },
             modifier = Modifier
-                .align(Alignment.BottomCenter) // Przyklej do dołu Boxa
+                .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
@@ -242,10 +226,6 @@ fun TrainerDetailScreen(
     }
 }
 
-/**
- * Reużywalny komponent do wyświetlania oceny z gwiazdką.
- * (Ta funkcja jest już w Twoim pliku, więc nie trzeba jej zmieniać)
- */
 @Composable
 fun RatingIndicator(
     rating: String,
@@ -271,7 +251,6 @@ fun RatingIndicator(
     }
 }
 
-
 @Composable
 fun GalleryImage(
     imageUrl: String,
@@ -285,7 +264,7 @@ fun GalleryImage(
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick),
-        contentScale = ContentScale.Crop, // Crop zapewnia, że obrazek wypełni kafelek bez zniekształceń
+        contentScale = ContentScale.Crop,
         placeholder = painterResource(id = R.drawable.gym_trainer_example),
         error = painterResource(id = R.drawable.gym_trainer_example)
     )

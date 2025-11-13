@@ -1,12 +1,16 @@
 package com.example.myapplication.viewmodel
 
+import android.app.Application
 import androidx.activity.result.launch
 import androidx.compose.animation.core.copy
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
+import coil.request.ImageRequest
+import coil.imageLoader
 import com.example.myapplication.data.model.users.Trainer
 import com.example.myapplication.data.repository.TrainerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,12 +21,48 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.concurrent.atomics.update
+import com.example.myapplication.R
+import com.example.myapplication.di.AppModule
 
 enum class SortOption(val displayName: String) {
     PRICE_ASC("Cena: Rosnąco"),
     PRICE_DESC("Cena: Malejąco"),
     RATING_DESC("Ocena: Malejąco")
 }
+
+
+enum class TrainerCategory(val stringResId: Int) {
+        CROSSFIT(R.string.category_crossfit),
+        POWERLIFTING(R.string.category_powerlifting),
+        YOGA(R.string.category_yoga),
+        CARDIO(R.string.category_cardio),
+        PILATES(R.string.category_pilates),
+        BODYBUILDING(R.string.category_bodybuilding),
+        ENDURANCE(R.string.category_endurance),
+        SPINNING(R.string.category_spinning),
+        MARTIAL_ARTS(R.string.category_martial_arts),
+        AEROBICS(R.string.category_aerobics),
+        CALISTHENICS(R.string.category_calistenics),
+        REHABILITATION(R.string.category_rehabilitation),
+        MEDITATION(R.string.category_meditation),
+        ZUMBA(R.string.category_zumba),
+        AQUA_FITNESS(R.string.category_aqua_fitness),
+        STRETCHING(R.string.category_stretching),
+        MOBILITY(R.string.category_mobility),
+        GYMNASTICS(R.string.category_gymnastics),
+        TRACK_AND_FIELD(R.string.category_track_and_field),
+        RUNNING(R.string.category_running),
+        SWIMMING(R.string.category_swimming),
+        TRIATHLON(R.string.category_triathlon),
+        SPORT_SPECIFIC(R.string.category_sport_specific),
+        OUTDOOR_FITNESS(R.string.category_outdoor_fitness);
+    }
+
+
+
+
+
+
 
 data class TrainersState(
     val trainers: List<Trainer> = emptyList(),
@@ -39,8 +79,9 @@ data class TrainersState(
 
 @HiltViewModel
 class TrainersViewModel @Inject constructor(
+    private val app: Application,
     private val trainerRepository: TrainerRepository
-) : ViewModel() {
+) : AndroidViewModel(app) {
 
 
 
@@ -73,6 +114,7 @@ class TrainersViewModel @Inject constructor(
                 _trainersState.update {
                     it.copy(isLoading = false, trainers = trainers)
                 }
+                preloadTrainerImages(trainers)
             }.onFailure { error ->
                 _trainersState.update {
                     it.copy(isLoading = false, errorMessage = error.message)
@@ -89,6 +131,19 @@ class TrainersViewModel @Inject constructor(
         _trainersState.update { it.copy(priceMin = min, priceMax = max) }
     }
 
+    private fun preloadTrainerImages(trainers: List<Trainer>) {
+        val imageLoader = app.imageLoader
+        trainers.forEach { trainer ->
+            val firstImage = trainer.images?.firstOrNull()
+            if (firstImage != null) {
+                val request = ImageRequest.Builder(app)
+                    .data(firstImage)
+                    .build()
+                imageLoader.enqueue(request)
+            }
+        }
+    }
+
     fun onCategorySelected(category: String) {
         _trainersState.update { currentState ->
             val newCategories = currentState.selectedCategories.toMutableSet()
@@ -101,9 +156,7 @@ class TrainersViewModel @Inject constructor(
         _trainersState.update { it.copy(minRating = rating) }
     }
 
-    /**
-     * Funkcja do zresetowania filtrów. Można ją wywołać z FilterScreen.
-     */
+
     fun clearFilters() {
         _trainersState.update {
             it.copy(
@@ -116,11 +169,8 @@ class TrainersViewModel @Inject constructor(
     }
 
     fun onSortOptionSelected(sortOption: SortOption) {
-        // 1. Zaktualizuj stan, aby UI wiedziało, co jest wybrane
         _trainersState.update { it.copy(sortBy = sortOption) }
 
-        // 2. Posortuj istniejącą listę lub załaduj ją na nowo z opcją sortowania
-        // Poniżej prostsza opcja - sortowanie w pamięci
         _trainersState.update { currentState ->
             val sortedList = when (sortOption) {
                 SortOption.PRICE_ASC -> currentState.trainers.sortedBy { it.pricePerHour }

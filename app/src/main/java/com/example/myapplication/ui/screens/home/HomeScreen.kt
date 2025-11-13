@@ -60,12 +60,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.values
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.rememberAsyncImagePainter
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.example.myapplication.R
 import com.example.myapplication.data.model.users.Trainer
 import com.example.myapplication.viewmodel.HomeViewModel
 import com.example.myapplication.viewmodel.SortOption
+import com.example.myapplication.viewmodel.TrainerCategory
 import com.example.myapplication.viewmodel.TrainersViewModel
 import kotlinx.coroutines.delay
 
@@ -163,10 +165,10 @@ fun HomeScreen(
             }
             if (showSortDialog) {
                 SortDialog(
-                    onDismiss = { showSortDialog = false }, // Zamknij dialog
+                    onDismiss = { showSortDialog = false },
                     onSortSelected = { sortOption ->
                         trainersViewModel.onSortOptionSelected(sortOption)
-                        showSortDialog = false // Zamknij dialog po wyborze
+                        showSortDialog = false
                     }
                 )
             }
@@ -176,12 +178,10 @@ fun HomeScreen(
 
         Box(
             modifier = Modifier.weight(1f),
-            contentAlignment = Alignment.Center // Wycentruje wskaźnik ładowania
+            contentAlignment = Alignment.Center
         ) {
-            // LazyColumn jest zawsze w Box, ale jest widoczny tylko gdy nie ma ładowania
             if (!homeState.isLoading) {
                 LazyColumn(
-                    // Nie potrzebuje już modyfikatora weight, bo jest w Box, który go ma
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
@@ -189,12 +189,9 @@ fun HomeScreen(
                         TrainerProfileCard(trainer = trainer, onClick = {
                             if (trainer.images?.isNotEmpty() == true) {
                                 val imageUrl = trainer.images[0]
-                                // 2. Zbuduj zapytanie do Coila, aby "podgrzać" cache
                                 val request = ImageRequest.Builder(context)
                                     .data(imageUrl)
-                                    // Opcjonalnie: nie musisz czekać na wynik, robisz to w tle
                                     .build()
-                                // 3. Zleć Coilowi wykonanie zapytania w tle
                                 imageLoader.enqueue(request)
                             }
                             trainersViewModel.selectTrainer(trainer)
@@ -262,17 +259,7 @@ fun TrainerProfileCard(
     val context = LocalContext.current
     val imageLoader = context.imageLoader
 
-    LaunchedEffect(key1 = trainer) {
 
-        delay(250)
-
-        trainer.images?.forEach { imageUrl ->
-            val request = ImageRequest.Builder(context)
-                .data(imageUrl)
-                .build()
-            imageLoader.enqueue(request) // Zleć ładowanie do cache'u w tle
-        }
-    }
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -285,22 +272,27 @@ fun TrainerProfileCard(
                         .fillMaxWidth()
                         .height(180.dp)
                 ) {
-                Image(
-                    painter = painterResource(id = R.drawable.gym_trainer_example),
-                    contentDescription = "Zdjęcie trenera: ${trainer.firstName} ${trainer.lastName}",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp),
-                    contentScale = ContentScale.Crop
-                )
-                    RatingIndicator(rating=trainer.avgRating ?: "0.0", modifier = Modifier
-                            .align(Alignment.TopEnd) // Przyklej do prawego górnego rogu Box
-                            .padding(8.dp) // Odsuń lekko od krawędzi
-                            .background(
-                                color = MaterialTheme.colorScheme.surface, // Biały kolor tła
-                                shape = RoundedCornerShape(16.dp) // Zaokrąglone rogi
-                            )
-                            .padding(horizontal = 8.dp, vertical = 4.dp)) // Wewnętrzny padding etykiety
+                    Image(
+                        painter = rememberAsyncImagePainter(
+                            model = trainer.images?.firstOrNull(), // Pobierz pierwszy obrazek z listy
+                            placeholder = painterResource(id = R.drawable.gym_trainer_example), // Obrazek zastępczy
+                            error = painterResource(id = R.drawable.gym_trainer_example) // Obrazek w razie błędu
+                        ),
+                        contentDescription = "Zdjęcie trenera: ${trainer.firstName} ${trainer.lastName}",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+
+                                RatingIndicator(
+                        rating = trainer.avgRating ?: "0.0", modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(8.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shape = RoundedCornerShape(16.dp)
+                                )
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
 
 
                 }
@@ -315,16 +307,17 @@ fun TrainerProfileCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                Text(
-                    text = "${trainer.firstName} ${trainer.lastName}",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                )
+                    Text(
+                        text = "${trainer.firstName} ${trainer.lastName}",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
                     Text(
                         text = "${trainer.pricePerHour ?: 0} zł/h",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.tertiary)
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -345,34 +338,36 @@ fun TrainerProfileCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp), // Odstęp poziomy między pigułkami
-                    verticalArrangement = Arrangement.spacedBy(8.dp) // Odstęp pionowy, gdy pigułki się zawiną
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    trainer.categories?.forEach { speciality ->
-                        Box(
-                            modifier = Modifier
-                                .background(
-                                    color = MaterialTheme.colorScheme.secondaryContainer, // Szary kolor tła
-                                    shape = RoundedCornerShape(12.dp) // Zaokrąglone rogi
-                                )
-                                .padding(horizontal = 12.dp, vertical = 6.dp) // Wewnętrzny padding
-                        ) {
-                            Text(
-                                text = speciality,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Medium
-                            )
+                    TrainerCategory.entries
+                        .forEach { categoryEnum ->
+                            if (trainer.categories?.contains(categoryEnum.name) == true) {
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            color = MaterialTheme.colorScheme.secondaryContainer,
+                                            shape = RoundedCornerShape(12.dp)
+                                        )
+                                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                                ) {
+                                    Text(
+                                        text = stringResource(id = categoryEnum.stringResId),
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
                         }
-                    }
                 }
-                // --- KONIEC NOWEJ SEKCJI ---
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
-        }
-    )
+        })
 }
+
 
 @Composable
 fun SortDialog(
@@ -384,7 +379,7 @@ fun SortDialog(
         title = { Text("Sortuj według") },
         text = {
             Column {
-                SortOption.values().forEach { option ->
+                SortOption.entries.forEach { option ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()

@@ -13,9 +13,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.values
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.myapplication.viewmodel.TrainerCategory
 import com.example.myapplication.viewmodel.TrainersViewModel
 import java.text.NumberFormat
 import java.util.Currency
@@ -29,9 +32,7 @@ fun FilterScreen(
 ) {
     val trainersState by viewModel.trainersState.collectAsState()
 
-    val availableCategories = remember {
-        listOf("Trening siłowy", "Joga", "Pilates", "CrossFit", "Bieganie", "Sztuki walki", "Dietetyka")
-    }
+    val availableCategories = remember { TrainerCategory.entries.toTypedArray() }
 
     Scaffold(
         topBar = {
@@ -50,7 +51,7 @@ fun FilterScreen(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 OutlinedButton(
-                    onClick = { viewModel.clearFilters() }, // Przycisk do czyszczenia
+                    onClick = { viewModel.clearFilters() },
                     modifier = Modifier.weight(1f)
                 ) {
                     Text("Wyczyść")
@@ -58,7 +59,7 @@ fun FilterScreen(
                 Button(
                     onClick = {
                         viewModel.applyFiltersAndLoad()
-                        onNavigateBack() // Wróć do poprzedniego ekranu
+                        onNavigateBack()
                     },
                     modifier = Modifier.weight(1f)
                 ) {
@@ -82,7 +83,6 @@ fun FilterScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Wyświetlanie aktualnego zakresu cen
             Text(
                 text = "${trainersState.priceMin} zł - ${trainersState.priceMax} zł",
                 style = MaterialTheme.typography.bodyLarge,
@@ -93,8 +93,8 @@ fun FilterScreen(
                 onValueChange = { range ->
                     viewModel.onPriceRangeChanged(range.start.toInt(), range.endInclusive.toInt())
                 },
-                valueRange = 0f..10000f, // Całkowity możliwy zakres
-                steps = 49 // (500-0)/10 - 1 = 49 kroków co 10 zł
+                valueRange = 0f..10000f,
+                steps = 49
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -120,7 +120,6 @@ fun FilterScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- SEKCJA KATEGORII ---
             Text(
                 text = "Specjalizacje",
                 style = MaterialTheme.typography.titleMedium,
@@ -128,17 +127,18 @@ fun FilterScreen(
             )
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Używamy FlowRow, aby "pigułki" z kategoriami ładnie się zawijały
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                availableCategories.forEach { category ->
-                    val isSelected = category in trainersState.selectedCategories
+                availableCategories.forEach { categoryEnum ->
+                    val displayName = stringResource(id=categoryEnum.stringResId)
+                    val logicalKey = categoryEnum.name
+                    val isSelected = logicalKey in trainersState.selectedCategories
                     FilterChip(
                         selected = isSelected,
-                        onClick = { viewModel.onCategorySelected(category) },
-                        label = { Text(category) },
+                        onClick = { viewModel.onCategorySelected(logicalKey) },
+                        label = { Text(displayName) },
                         leadingIcon = if (isSelected) {
                             {
                                 Icon(
