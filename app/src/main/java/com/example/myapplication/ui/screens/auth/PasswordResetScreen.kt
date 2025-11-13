@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.screens.auth
 
+import MainProgressIndicator
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -86,7 +86,7 @@ fun PasswordResetScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             if (authState.isLoading) {
-                CircularProgressIndicator()
+                MainProgressIndicator()
             } else {
                 MainButton(
                     text = "Wyślij emaila o reset hasła",

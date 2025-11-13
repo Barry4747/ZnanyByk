@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.screens.auth
 
+import MainProgressIndicator
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -148,7 +148,7 @@ fun PersonalInfoRegistrationScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             if (registrationState.isLoading) {
-                CircularProgressIndicator()
+                MainProgressIndicator()
             } else {
                 MainButton(
                     text = stringResource(R.string.create_account),

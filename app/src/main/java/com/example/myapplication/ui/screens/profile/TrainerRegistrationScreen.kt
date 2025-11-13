@@ -1,11 +1,13 @@
 package com.example.myapplication.ui.screens.profile
 
+import MainProgressIndicator
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,21 +19,21 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,12 +51,10 @@ import com.example.myapplication.data.model.users.TrainerCategory
 import com.example.myapplication.ui.components.buttons.FormButton
 import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.buttons.MainButton
+import com.example.myapplication.ui.components.buttons.RemoveButton
 import com.example.myapplication.ui.components.chips.MainCategoryChip
 import com.example.myapplication.ui.components.fields.MainFormTextField
 import com.example.myapplication.viewmodel.trainer.TrainerRegistrationViewModel
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.layout.FlowRow
 
 @Composable
 fun TrainerRegistrationScreen(
@@ -70,13 +70,12 @@ fun TrainerRegistrationScreen(
     var selectedCategories by remember { mutableStateOf<List<TrainerCategory>>(emptyList()) }
     var showDialog by remember { mutableStateOf(false) }
 
-    val selectedFiles = remember { mutableStateListOf<Uri>() }
+    val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris: List<Uri>? ->
-        if (!uris.isNullOrEmpty()) selectedFiles.addAll(uris)
+        if (!uris.isNullOrEmpty()) viewModel.uploadImages(context, uris)
     }
 
     val state by viewModel.state.collectAsState()
-    val context = LocalContext.current
 
     Box(modifier = modifier.fillMaxSize()) {
         Row(
@@ -170,16 +169,39 @@ fun TrainerRegistrationScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            items(selectedFiles) { uri ->
-                                AsyncImage(
-                                    model = ImageRequest.Builder(context)
-                                        .data(uri)
-                                        .crossfade(true)
-                                        .size(76)
-                                        .build(),
-                                    contentDescription = stringResource(R.string.trainer_upload_preview),
-                                    modifier = Modifier.size(76.dp)
-                                )
+                            items(state.selectedImages) { uri ->
+                                Box(modifier = Modifier.size(76.dp)) {
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(context)
+                                            .data(uri)
+                                            .crossfade(true)
+                                            .size(76)
+                                            .build(),
+                                        contentDescription = stringResource(R.string.trainer_upload_preview),
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                    RemoveButton(
+                                        onClick = { viewModel.removeSelectedImage(uri) },
+                                        modifier = Modifier.align(Alignment.TopEnd)
+                                    )
+                                }
+                            }
+                            items(state.uploadedImages) { url ->
+                                Box(modifier = Modifier.size(76.dp)) {
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(context)
+                                            .data(url)
+                                            .crossfade(true)
+                                            .size(76)
+                                            .build(),
+                                        contentDescription = stringResource(R.string.trainer_upload_preview),
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                    RemoveButton(
+                                        onClick = { viewModel.removeUploadedImage(url) },
+                                        modifier = Modifier.align(Alignment.TopEnd)
+                                    )
+                                }
                             }
                             item {
                                 MainCategoryChip(label = "+", onClick = { launcher.launch("image/*") })
@@ -214,8 +236,27 @@ fun TrainerRegistrationScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            if (state.isLoading) {
-                CircularProgressIndicator()
+            if (state.isLoading || state.isUploadingImages) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    MainProgressIndicator()
+                    if (state.isUploadingImages) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Uploading images...",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Loading...",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
             } else {
                 MainButton(
                     text = stringResource(R.string.confirm_trainer_profile_creation),
@@ -227,10 +268,10 @@ fun TrainerRegistrationScreen(
                             description = description,
                             experienceYears = experienceYears,
                             selectedCategories = selectedCategories.map { it.name },
-                            images = selectedFiles.toList()
+                            images = state.uploadedImages
                         )
                     },
-                    enabled = hourlyRate.isNotBlank() && description.isNotBlank() && experienceYears.isNotBlank(),
+                    enabled = hourlyRate.isNotBlank() && description.isNotBlank() && experienceYears.isNotBlank() && !state.isUploadingImages,
                     modifier = Modifier.fillMaxWidth()
                 )
             }

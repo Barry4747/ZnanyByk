@@ -355,6 +355,11 @@ fun AppNavigation(
                     val locationOnboardingViewModel: LocationOnboardingViewModel = hiltViewModel()
                     LocationOnboardingScreen(
                         viewModel = locationOnboardingViewModel,
+                        onNavigateBack = {
+                            navController.navigate(Destination.USER.route) {
+                                popUpTo(Destination.USER.route) { inclusive = true }
+                            }
+                        },
                         onNavigateToDashboard = {
                             navController.navigate("home_flow") {
                                 popUpTo(Screen.Welcome.route) { inclusive = true }
