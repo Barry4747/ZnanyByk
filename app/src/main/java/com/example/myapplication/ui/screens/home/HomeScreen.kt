@@ -110,15 +110,15 @@ fun HomeScreen(
 
         OutlinedTextField(
             value = searchTrainerText,
-            onValueChange = { searchTrainerText = it},
+            onValueChange = { searchTrainerText = it },
             label = { Text(stringResource(R.string.search)) },
             modifier = Modifier.fillMaxWidth(),
             leadingIcon = {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = stringResource(R.string.search_icon)
-            )
-        }, singleLine = true,
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = stringResource(R.string.search_icon)
+                )
+            }, singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(
                 onSearch = {
@@ -135,7 +135,7 @@ fun HomeScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             OutlinedButton(
-                onClick = {goToFilter()},
+                onClick = { goToFilter() },
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(
@@ -147,8 +147,10 @@ fun HomeScreen(
                 Text(text = "Filtruj")
             }
             OutlinedButton(
-                onClick = { showSortDialog=true
-                          Log.d("Filtry", trainersState.toString())},
+                onClick = {
+                    showSortDialog = true
+                    Log.d("Filtry", trainersState.toString())
+                },
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(
@@ -191,56 +193,58 @@ fun HomeScreen(
                                 imageLoader.enqueue(request)
                             }
                             trainersViewModel.selectTrainer(trainer)
-                            goToTrainerProfileCard(trainer)})
+                            goToTrainerProfileCard(trainer)
+                        })
                     }
                 }
             }
 
-        if (homeState.isLoading) {
-            MainProgressIndicator()
-        }  else if (errorMessage != null) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+            if (homeState.isLoading) {
+                MainProgressIndicator()
+            } else if (errorMessage != null) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
                 ) {
-                    Text(
-                        text = stringResource(R.string.error),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.error
-                    )
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = stringResource(R.string.error),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.error
+                        )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    Text(
-                        text = errorMessage,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onErrorContainer
-                    )
+                        Text(
+                            text = errorMessage,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
                 }
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Button(
+                onClick = {
+                    viewModel.logout()
+                    onLogout()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(R.string.logout))
             }
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
-
-        Button(
-            onClick = {
-                viewModel.logout()
-                onLogout()
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(stringResource(R.string.logout))
-        }
     }
-
 }
 
 @Composable
@@ -417,5 +421,5 @@ fun RatingIndicator(
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
-}}
+}
 

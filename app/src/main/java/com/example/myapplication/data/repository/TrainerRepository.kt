@@ -209,4 +209,3 @@ class TrainerRepository @Inject constructor() {
             "0.00"
         }
     }
-}
