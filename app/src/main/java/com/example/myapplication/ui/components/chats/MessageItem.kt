@@ -1,11 +1,13 @@
-package com.example.myapplication.ui.screens.chats
+package com.example.myapplication.ui.components.chats
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.data.model.chats.Message
@@ -26,7 +28,7 @@ fun MessageItem(
             Text(
                 text = timestamp,
                 fontSize = 12.sp,
-                color = androidx.compose.ui.graphics.Color.Gray,
+                color = Color.Gray,
                 modifier = Modifier
                     .padding(vertical = 8.dp)
                     .align(Alignment.CenterHorizontally)
@@ -41,14 +43,14 @@ fun MessageItem(
                 Box(
                     modifier = Modifier
                         .background(
-                            color = if (isCurrentUser) androidx.compose.ui.graphics.Color.Black else androidx.compose.ui.graphics.Color.LightGray,
-                            shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                            color = if (isCurrentUser) Color.Black else Color.LightGray,
+                            shape = RoundedCornerShape(12.dp)
                         )
                         .padding(horizontal = 12.dp, vertical = 8.dp)
                 ) {
                     Text(
                         text = message.text.trim(),
-                        color = if (isCurrentUser) androidx.compose.ui.graphics.Color.White else androidx.compose.ui.graphics.Color.Black,
+                        color = if (isCurrentUser) Color.White else Color.Black,
                         fontSize = 18.sp
                     )
                 }
