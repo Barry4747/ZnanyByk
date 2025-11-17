@@ -32,7 +32,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +46,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.myapplication.R
+import com.example.myapplication.data.model.gyms.Gym
 import com.example.myapplication.data.model.users.TrainerCategory
 import com.example.myapplication.ui.components.buttons.FormButton
 import com.example.myapplication.ui.components.buttons.MainBackButton
@@ -54,8 +54,8 @@ import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.ui.components.buttons.RemoveButton
 import com.example.myapplication.ui.components.chips.MainCategoryChip
 import com.example.myapplication.ui.components.fields.MainFormTextField
+import com.example.myapplication.ui.components.dialogs.GymSelectionDialog
 import com.example.myapplication.viewmodel.trainer.TrainerProfileViewModel
-import kotlinx.coroutines.launch
 
 @Composable
 fun TrainerEditScreen(
@@ -66,17 +66,18 @@ fun TrainerEditScreen(
 ) {
     val state by viewModel.state.collectAsState()
     var hourlyRate by remember { mutableStateOf("") }
-    var selectedGym by remember { mutableStateOf<String?>(null) }
+    var selectedGymLocal by remember { mutableStateOf<Gym?>(null) }
     var description by remember { mutableStateOf("") }
     var experienceYears by remember { mutableStateOf("") }
     var selectedCategories by remember { mutableStateOf<List<TrainerCategory>>(emptyList()) }
     var showDialog by remember { mutableStateOf(false) }
+    var showGymDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.hourlyRate) {
         hourlyRate = state.hourlyRate
     }
     LaunchedEffect(state.selectedGym) {
-        selectedGym = state.selectedGym
+        selectedGymLocal = state.selectedGym
     }
     LaunchedEffect(state.description) {
         description = state.description
@@ -92,7 +93,6 @@ fun TrainerEditScreen(
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
         if (!uris.isNullOrEmpty()) viewModel.uploadImages(context, uris)
     }
-    val scope = rememberCoroutineScope()
 
     Box(modifier = modifier.fillMaxSize()) {
         Row(
@@ -139,8 +139,8 @@ fun TrainerEditScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             FormButton(
-                text = selectedGym ?: stringResource(R.string.my_gym),
-                onClick = { /* TODO: Open gym picker dialog */ },
+                text = selectedGymLocal?.gymName ?: stringResource(R.string.my_gym),
+                onClick = { showGymDialog = true },
                 enabled = !state.isLoading
             )
 
@@ -197,7 +197,7 @@ fun TrainerEditScreen(
                                         modifier = Modifier.fillMaxSize()
                                     )
                                     RemoveButton(
-                                        onClick = { scope.launch { viewModel.removeImage(url) } },
+                                        onClick = { viewModel.removeImage(url) },
                                         modifier = Modifier.align(Alignment.TopEnd)
                                     )
                                 }
@@ -297,7 +297,7 @@ fun TrainerEditScreen(
                         viewModel.updateTrainerProfile(
                             context = context,
                             hourlyRate = hourlyRate,
-                            gymId = selectedGym,
+                            gymId = selectedGymLocal?.id,
                             description = description,
                             experienceYears = experienceYears,
                             selectedCategories = selectedCategories.map { it.name },
@@ -331,6 +331,17 @@ fun TrainerEditScreen(
         if (state.successMessage != null) {
             onSubmit()
         }
+    }
+
+    if (showGymDialog) {
+        GymSelectionDialog(
+            gyms = state.gyms,
+            onDismiss = { showGymDialog = false },
+            onGymSelected = { gym ->
+                selectedGymLocal = gym
+                showGymDialog = false
+            }
+        )
     }
 
     if (showDialog) {

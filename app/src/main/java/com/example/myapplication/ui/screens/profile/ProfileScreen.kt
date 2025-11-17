@@ -155,15 +155,6 @@ fun ProfileScreen(
                 onClick = { onEditLocation() }
             )
 
-            if (state.userRole == "TRAINER") {
-                FormButtonWithDetail(
-                    text = stringResource(R.string.my_gym),
-                    detail = stringResource(R.string.gym_name),
-                    enabled = false,
-                    onClick = { /* No logic */ }
-                )
-            }
-
             FormButtonWithDetail(
                 text = stringResource(R.string.currency),
                 detail = "PLN, zł",
