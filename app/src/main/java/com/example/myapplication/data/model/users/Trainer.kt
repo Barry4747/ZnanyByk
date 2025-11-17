@@ -10,13 +10,13 @@ data class Trainer(
     val phoneNumber: String? = null,
     val description: String? = null,
     val categories: List<String>? = null,
-    val location: String? = null,
     val ratings: List<Int>? = null,
     var avgRating: String? = null,
     val pricePerHour: Int? = null,
     val experience: Int? = null,
     val images: List<String>? = null,
-    val profileImage: String? = null
+    val profileImage: String? = null,
+    val gymId: String? = null
 )
 
 

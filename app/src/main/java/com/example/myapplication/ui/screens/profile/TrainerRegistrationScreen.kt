@@ -22,8 +22,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -47,12 +45,15 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.myapplication.R
+import com.example.myapplication.data.model.gyms.Gym
 import com.example.myapplication.data.model.users.TrainerCategory
 import com.example.myapplication.ui.components.buttons.FormButton
 import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.ui.components.buttons.RemoveButton
 import com.example.myapplication.ui.components.chips.MainCategoryChip
+import com.example.myapplication.ui.components.dialogs.CategorySelectionDialog
+import com.example.myapplication.ui.components.dialogs.GymSelectionDialog
 import com.example.myapplication.ui.components.fields.MainFormTextField
 import com.example.myapplication.viewmodel.trainer.TrainerRegistrationViewModel
 
@@ -64,11 +65,12 @@ fun TrainerRegistrationScreen(
     viewModel: TrainerRegistrationViewModel = hiltViewModel(),
 ) {
     var hourlyRate by remember { mutableStateOf("") }
-    var selectedGym by remember { mutableStateOf<String?>(null) }
+    var selectedGym by remember { mutableStateOf<Gym?>(null) }
     var description by remember { mutableStateOf("") }
     var experienceYears by remember { mutableStateOf("") }
     var selectedCategories by remember { mutableStateOf<List<TrainerCategory>>(emptyList()) }
     var showDialog by remember { mutableStateOf(false) }
+    var showGymDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris: List<Uri>? ->
@@ -123,8 +125,8 @@ fun TrainerRegistrationScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             FormButton(
-                text = selectedGym ?: stringResource(R.string.my_gym),
-                onClick = { /* TODO: Open gym picker dialog */ },
+                text = selectedGym?.gymName ?: stringResource(R.string.my_gym),
+                onClick = { showGymDialog = true },
                 enabled = !state.isLoading
             )
 
@@ -264,7 +266,7 @@ fun TrainerRegistrationScreen(
                         viewModel.submitTrainerProfile(
                             context = context,
                             hourlyRate = hourlyRate,
-                            gymId = selectedGym,
+                            gymId = selectedGym?.id,
                             description = description,
                             experienceYears = experienceYears,
                             selectedCategories = selectedCategories.map { it.name },
@@ -300,40 +302,26 @@ fun TrainerRegistrationScreen(
         }
     }
 
+    if (showGymDialog) {
+        GymSelectionDialog(
+            gyms = state.gyms,
+            onDismiss = { showGymDialog = false },
+            onGymSelected = { gym ->
+                selectedGym = gym
+                showGymDialog = false
+            }
+        )
+    }
+
     if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            modifier = Modifier.widthIn(min = 360.dp, max = 600.dp),
-            confirmButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text(stringResource(R.string.ok))
-                }
-            },
-            title = { Text(stringResource(R.string.choose_category)) },
-            text = {
-                Column(
-                    modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .padding(12.dp)
-                ) {
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        TrainerCategory.entries.forEach { category ->
-                            FilterChip(
-                                selected = category in selectedCategories,
-                                onClick = {
-                                    selectedCategories = if (category in selectedCategories) {
-                                        selectedCategories - category
-                                    } else {
-                                        selectedCategories + category
-                                    }
-                                },
-                                label = { Text(stringResource(category.labelRes)) }
-                            )
-                        }
-                    }
+        CategorySelectionDialog(
+            selectedCategories = selectedCategories,
+            onDismiss = { showDialog = false },
+            onCategoryClick = { category ->
+                selectedCategories = if (category in selectedCategories) {
+                    selectedCategories - category
+                } else {
+                    selectedCategories + category
                 }
             }
         )
