@@ -2,6 +2,7 @@ package com.example.myapplication.ui.screens.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
@@ -52,18 +53,20 @@ fun TrainerDetailScreen(
                 } else {
                     null
                 }
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        model = imageUrl,
-                        placeholder = painterResource(id = R.drawable.gym_trainer_example),
-                        error = painterResource(id = R.drawable.gym_trainer_example)
-                    ),
-                    contentDescription = "Zdjęcie trenera: ${selectedTrainer.firstName}",
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .fillMaxHeight(0.4f),
-                    contentScale = ContentScale.Crop
-                )
+                        .height(300.dp)
+                        .background(MaterialTheme.colorScheme.surface)
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                ) {
+                    Image(
+                        painter = rememberAsyncImagePainter(model = imageUrl),
+                        contentDescription = "Zdjęcie trenera: ${selectedTrainer.firstName}",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
 
                 Column(
                     modifier = Modifier
@@ -257,15 +260,26 @@ fun GalleryImage(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    AsyncImage(
-        model = imageUrl,
-        contentDescription = "Zdjęcie z galerii trenera",
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .clickable(onClick = onClick),
-        contentScale = ContentScale.Crop,
-        placeholder = painterResource(id = R.drawable.gym_trainer_example),
-        error = painterResource(id = R.drawable.gym_trainer_example)
-    )
+            .clip(RoundedCornerShape(12.dp)) // Najpierw nadaj kształt
+            .background(MaterialTheme.colorScheme.surface) // Potem tło
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.outlineVariant,
+                RoundedCornerShape(12.dp)
+            ) // Na końcu ramkę
+            .clickable(onClick = onClick)
+    ) {
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = "Zdjęcie z galerii trenera",
+            modifier = Modifier.fillMaxSize(), // Wypełnij cały Box
+            contentScale = ContentScale.Crop
+        )
+    }
 }
+
+
+

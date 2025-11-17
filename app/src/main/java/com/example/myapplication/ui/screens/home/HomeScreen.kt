@@ -57,6 +57,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.accompanist.placeholder.placeholder
+import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.imageLoader
 import coil.request.ImageRequest
@@ -66,7 +68,15 @@ import com.example.myapplication.viewmodel.HomeViewModel
 import com.example.myapplication.viewmodel.SortOption
 import com.example.myapplication.viewmodel.TrainerCategory
 import com.example.myapplication.viewmodel.TrainersViewModel
-
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.*
+import androidx.compose.ui.composed
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.platform.debugInspectorInfo
 
 @Composable
 fun HomeScreen(
@@ -231,17 +241,6 @@ fun HomeScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Button(
-                onClick = {
-                    viewModel.logout()
-                    onLogout()
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.logout))
-            }
         }
 
     }
@@ -269,14 +268,19 @@ fun TrainerProfileCard(
                         .fillMaxWidth()
                         .height(180.dp)
                 ) {
+                    val imageUrl = trainer.images?.firstOrNull()
+                    val painter = rememberAsyncImagePainter(model = imageUrl)
+
+                    val showPlaceholder = painter.state is AsyncImagePainter.State.Loading || imageUrl == null
+
+
                     Image(
-                        painter = rememberAsyncImagePainter(
-                            model = trainer.images?.firstOrNull(), // Pobierz pierwszy obrazek z listy
-                            placeholder = painterResource(id = R.drawable.gym_trainer_example), // Obrazek zastępczy
-                            error = painterResource(id = R.drawable.gym_trainer_example) // Obrazek w razie błędu
-                        ),
+                        painter = painter,
                         contentDescription = "Zdjęcie trenera: ${trainer.firstName} ${trainer.lastName}",
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.fillMaxSize().simplePlaceholder(
+                            visible = showPlaceholder,
+                            color = MaterialTheme.colorScheme.surface,
+                        ),
                         contentScale = ContentScale.Crop
                     )
 
@@ -422,4 +426,14 @@ fun RatingIndicator(
             )
         }
 }
+
+
+
+fun Modifier.simplePlaceholder(
+    visible: Boolean,
+    color: Color
+): Modifier = this.then(
+    Modifier.background(if (visible) color else Color.Transparent)
+)
+
 
