@@ -96,7 +96,8 @@ dependencies {
     implementation(libs.wheelpickercompose)
     implementation(libs.coil.compose)
 
-    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation(libs.maps.compose)
+    implementation(libs.play.services.maps)
     implementation("com.google.android.libraries.places:places:3.4.0")
     implementation(libs.androidx.compose.ui.text)
 
