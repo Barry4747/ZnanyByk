@@ -42,7 +42,6 @@ import com.example.myapplication.viewmodel.profile.ProfileViewModel
 import com.example.myapplication.viewmodel.registration.AuthViewModel
 import com.example.myapplication.viewmodel.registration.RegistrationViewModel
 import com.example.myapplication.viewmodel.TrainersViewModel
-import com.example.myapplication.viewmodel.TrainerDetailViewModel
 import com.example.myapplication.viewmodel.HomeViewModel
 
 private const val ANIMATION_DURATION = 50
@@ -229,6 +228,7 @@ fun AppNavigation(
                         }
                         val trainersViewModel: TrainersViewModel = hiltViewModel(parentEntry)
 
+
                         FilterScreen(
                             onNavigateBack = {
                                 navController.popBackStack()
@@ -246,12 +246,11 @@ fun AppNavigation(
                     }
 
                     composable(Screen.Trainer.route) { backStackEntry -> // Prosta ścieżka bez argumentów
-                        // Pobierz tego samego "rodzica"
                         val parentEntry = remember(backStackEntry) {
                             navController.getBackStackEntry("home_flow")
                         }
-                        // Hilt dostarczy TĘ SAMĄ instancję TrainersViewModel
                         val trainersViewModel: TrainersViewModel = hiltViewModel(parentEntry)
+
 
                         TrainerDetailScreen(
                             viewModel = trainersViewModel,

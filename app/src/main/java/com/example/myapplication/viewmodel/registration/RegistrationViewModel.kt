@@ -263,4 +263,5 @@ class RegistrationViewModel @Inject constructor(
             errorMessage = null
         )
     }
+
 }
