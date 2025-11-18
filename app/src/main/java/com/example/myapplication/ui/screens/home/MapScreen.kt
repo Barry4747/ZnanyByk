@@ -1,12 +1,24 @@
 package com.example.myapplication.ui.screens.home
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.example.myapplication.data.model.gyms.GymLocation
 import com.example.myapplication.data.model.users.Trainer
-import com.example.myapplication.ui.components.BlackMarker
+import com.example.myapplication.ui.components.map.MainTrainerMarker
+import com.example.myapplication.ui.components.map.TrainerInfoDialog
 import com.example.myapplication.viewmodel.MapViewModel
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
@@ -20,13 +32,52 @@ const val DEFAULT_ZOOM = 17f
 
 const val MAP_STYLE_JSON = """
     [
-      {
-        "featureType": "poi",
-        "elementType": "labels",
-        "stylers": [
-          { "visibility": "off" }
-        ]
-      }
+        {
+            "featureType": "all",
+            "stylers": [
+                {
+                    "saturation": 0
+                },
+                {
+                    "hue": "#e7ecf0"
+                }
+            ]
+        },
+        {
+            "featureType": "road",
+            "stylers": [
+                {
+                    "saturation": -70
+                }
+            ]
+        },
+        {
+            "featureType": "transit",
+            "stylers": [
+                {
+                    "visibility": "off"
+                }
+            ]
+        },
+        {
+            "featureType": "poi",
+            "stylers": [
+                {
+                    "visibility": "off"
+                }
+            ]
+        },
+        {
+            "featureType": "water",
+            "stylers": [
+                {
+                    "visibility": "simplified"
+                },
+                {
+                    "saturation": -60
+                }
+            ]
+        }
     ]
 """
 
@@ -39,6 +90,7 @@ fun MapScreen(
     val currentUser = state.currentUser
 
     var trainersWithGyms by remember { mutableStateOf<List<Pair<Trainer, GymLocation>>>(emptyList()) }
+    var selectedTrainer by remember { mutableStateOf<Trainer?>(null) }
 
     LaunchedEffect(Unit) {
         trainersWithGyms = viewModel.getTrainersWithGymLocations()
@@ -52,6 +104,15 @@ fun MapScreen(
         position = CameraPosition.fromLatLngZoom(initialLocation, DEFAULT_ZOOM)
     }
 
+    LaunchedEffect(selectedTrainer) {
+        selectedTrainer?.let { trainer ->
+            val gym = trainersWithGyms.find { it.first == trainer }?.second
+            gym?.let {
+                cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), 15f))
+            }
+        }
+    }
+
     val properties = MapProperties(
         isMyLocationEnabled = false,
         mapStyleOptions = MapStyleOptions(MAP_STYLE_JSON)
@@ -62,18 +123,41 @@ fun MapScreen(
         mapToolbarEnabled = false
     )
 
-    GoogleMap(
-        modifier = Modifier.fillMaxSize(),
-        cameraPositionState = cameraPositionState,
-        properties = properties,
-        uiSettings = uiSettings
-    ) {
-        trainersWithGyms.forEach { (trainer, gymLocation) ->
-            BlackMarker(
-                position = LatLng(gymLocation.latitude, gymLocation.longitude),
-                title = "${trainer.firstName} ${trainer.lastName}",
-                snippet = trainer.description ?: ""
+    Box(modifier = Modifier.fillMaxSize()) {
+        GoogleMap(
+            modifier = Modifier.fillMaxSize(),
+            cameraPositionState = cameraPositionState,
+            properties = properties,
+            uiSettings = uiSettings
+        ) {
+            trainersWithGyms.forEach { (trainer, gymLocation) ->
+                MainTrainerMarker(
+                    position = LatLng(gymLocation.latitude, gymLocation.longitude),
+                    title = "${trainer.firstName} ${trainer.lastName}",
+                    snippet = trainer.description ?: "",
+                    onClick = { selectedTrainer = trainer }
+                )
+            }
+        }
+
+        FloatingActionButton(
+            onClick = onNavigateBack,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(16.dp),
+            containerColor = Color.White,
+            contentColor = Color.Black
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back"
             )
         }
     }
+
+    TrainerInfoDialog(
+        trainer = selectedTrainer,
+        onSeeMore = { TODO("Navigate to trainer details screen") },
+        onDismiss = { selectedTrainer = null }
+    )
 }
