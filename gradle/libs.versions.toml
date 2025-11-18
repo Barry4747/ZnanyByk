@@ -22,8 +22,8 @@ credentialsPlayServicesAuth = "1.5.0"
 datastorePreferences = "1.1.7"
 wheelpickercompose = "1.1.11"
 uiText = "1.9.4"
-mapsCompose = "4.4.1"
-playServicesMaps = "18.2.0"
+mapsCompose = "2.14.0"
+playServicesMaps = "18.1.0"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
