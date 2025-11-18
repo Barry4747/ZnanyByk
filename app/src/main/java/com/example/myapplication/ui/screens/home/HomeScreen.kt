@@ -32,6 +32,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -81,6 +82,7 @@ import androidx.compose.ui.platform.debugInspectorInfo
 @Composable
 fun HomeScreen(
     onLogout: () -> Unit,
+    onMapClick: () -> Unit,
     goToFilter: () -> Unit,
     goToTrainerProfileCard: (Trainer) -> Unit,
     modifier: Modifier = Modifier,
@@ -118,24 +120,37 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        OutlinedTextField(
-            value = searchTrainerText,
-            onValueChange = { searchTrainerText = it },
-            label = { Text(stringResource(R.string.search)) },
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            leadingIcon = {
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            IconButton(onClick = { onMapClick() }) {
                 Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = stringResource(R.string.search_icon)
+                    painter = painterResource(id = R.drawable.map_search_icon),
+                    contentDescription = "Search on map"
                 )
-            }, singleLine = true,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(
-                onSearch = {
-                    trainersViewModel.searchTrainers(searchTrainerText)
-                }
+            }
+            OutlinedTextField(
+                value = searchTrainerText,
+                onValueChange = { searchTrainerText = it },
+                label = { Text(stringResource(R.string.search)) },
+                modifier = Modifier.weight(1f),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = stringResource(R.string.search_icon)
+                    )
+                }, singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        trainersViewModel.searchTrainers(searchTrainerText)
+                    }
+                )
             )
-        )
+        }
+
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -435,5 +450,3 @@ fun Modifier.simplePlaceholder(
 ): Modifier = this.then(
     Modifier.background(if (visible) color else Color.Transparent)
 )
-
-
