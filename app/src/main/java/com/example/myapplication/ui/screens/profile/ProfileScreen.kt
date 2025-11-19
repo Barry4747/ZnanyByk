@@ -4,6 +4,9 @@ import FormButtonWithDetail
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,8 +29,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -68,13 +73,16 @@ fun ProfileScreen(
     ) {
 
         Box(contentAlignment = Alignment.Center) {
+            val avatarResource = state.avatarUrl ?: R.drawable.user_active
+
             AsyncImage(
-                model = state.avatarUrl,
+                model = avatarResource,
                 contentDescription = stringResource(R.string.profile_picture),
                 modifier = Modifier
                     .size(120.dp)
                     .clip(CircleShape),
-                error = painterResource(R.drawable.user_active)
+                error = painterResource(R.drawable.user_active),
+                placeholder = painterResource(R.drawable.user_active)
             )
             Icon(
                 imageVector = Icons.Default.AddCircleOutline,
