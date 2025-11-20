@@ -78,6 +78,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.platform.debugInspectorInfo
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun HomeScreen(
@@ -204,7 +205,7 @@ fun HomeScreen(
             contentAlignment = Alignment.Center
         ) {
             if (!homeState.isLoading) {
-                LazyColumn(
+               LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
@@ -256,6 +257,18 @@ fun HomeScreen(
                 }
             }
 
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = onLogout,
+            modifier = Modifier.fillMaxWidth(),
+            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.error
+            )
+        ) {
+            Text(text = "Wyloguj się")
         }
 
     }
@@ -379,7 +392,7 @@ fun TrainerProfileCard(
                         }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+
             }
         })
 }

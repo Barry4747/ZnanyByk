@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.screens.home
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,6 +38,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,16 +52,42 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.myapplication.R
+import com.example.myapplication.ui.components.dialogs.RatingDialog
 import com.example.myapplication.viewmodel.TrainersViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun TrainerDetailScreen(
     onNavigateBack: () -> Unit,
-    viewModel: TrainersViewModel
+    viewModel: TrainersViewModel,
 ) {
     val trainersState by viewModel.trainersState.collectAsState()
     val selectedTrainer = trainersState.selectedTrainer
+    var showRatingDialog by rememberSaveable { mutableStateOf(false) }
+    var selectedImageForZoom by rememberSaveable { mutableStateOf<String?>(null) }
+
+    if (showRatingDialog) {
+        RatingDialog(
+            onDismissRequest = {
+                showRatingDialog = false
+            },
+            onSubmit = { rating ->
+                Log.d("RatingDialog", "Trener oceniony na: $rating")
+                Log.d("RatingDialog", "Trener id: ${selectedTrainer}")
+                viewModel.updateUserRating(rating)
+                showRatingDialog = false
+            },
+            initialRating = if (trainersState.currentUserRating == 0) 3 else trainersState.currentUserRating
+
+        )
+    }
+
+    if (selectedImageForZoom != null) {
+        FullScreenImageDialog(
+            imageUrl = selectedImageForZoom!!,
+            onDismiss = { selectedImageForZoom = null }
+        )
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (selectedTrainer != null) {
@@ -74,6 +104,7 @@ fun TrainerDetailScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .fillMaxSize()
                         .height(300.dp)
                         .background(MaterialTheme.colorScheme.surface)
                         .border(1.dp, MaterialTheme.colorScheme.outlineVariant)
@@ -84,6 +115,23 @@ fun TrainerDetailScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
+
+                    TextButton(
+                        onClick = {showRatingDialog = true},
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(16.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                    ) {
+                        Text(
+                            text = "Oceń",
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
 
                 Column(
@@ -170,13 +218,12 @@ fun TrainerDetailScreen(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         val rowCount = (galleryImages.size + 1) / 2
-                        val gridHeight = (rowCount * 150).dp
 
                         LazyVerticalStaggeredGrid(
                             columns = StaggeredGridCells.Fixed(2),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(gridHeight),
+                                .heightIn(max=1000.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalItemSpacing = 8.dp,
                             userScrollEnabled = false
@@ -184,7 +231,7 @@ fun TrainerDetailScreen(
                             items(galleryImages) { imageUrl ->
                                 GalleryImage(
                                     imageUrl = imageUrl,
-                                    onClick = { }
+                                    onClick = {selectedImageForZoom = imageUrl }
                                 )
                             }
                         }
@@ -234,6 +281,7 @@ fun TrainerDetailScreen(
                     .padding(horizontal = 8.dp, vertical = 4.dp)
             )
         }
+
 
         Button(
             onClick = { },
@@ -287,15 +335,47 @@ fun GalleryImage(
                 1.dp,
                 MaterialTheme.colorScheme.outlineVariant,
                 RoundedCornerShape(12.dp)
-            ) // Na końcu ramkę
+            )
             .clickable(onClick = onClick)
     ) {
         AsyncImage(
             model = imageUrl,
             contentDescription = "Zdjęcie z galerii trenera",
-            modifier = Modifier.fillMaxSize(), // Wypełnij cały Box
-            contentScale = ContentScale.Crop
+            modifier = Modifier.fillMaxWidth(), // Wypełnij cały Box
+            contentScale = ContentScale.FillWidth
         )
+    }
+
+}
+
+@Composable
+fun FullScreenImageDialog(
+    imageUrl: String,
+    onDismiss: () -> Unit
+) {
+    // Używamy Dialog z właściwościami pełnoekranowymi
+    androidx.compose.ui.window.Dialog(
+        onDismissRequest = onDismiss,
+        properties = androidx.compose.ui.window.DialogProperties(
+            usePlatformDefaultWidth = false // Pozwala zająć cały ekran
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black) // Czarne tło
+                .clickable { onDismiss() }, // Kliknięcie w tło zamyka
+            contentAlignment = Alignment.Center
+        ) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = "Powiększone zdjęcie",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(), // Zachowaj proporcje
+                contentScale = ContentScale.Fit // Dopasuj do ekranu bez przycinania
+            )
+        }
     }
 }
 

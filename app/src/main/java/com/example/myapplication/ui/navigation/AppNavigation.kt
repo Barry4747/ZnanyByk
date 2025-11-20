@@ -35,6 +35,8 @@ import com.example.myapplication.ui.screens.home.FilterScreen
 import com.example.myapplication.ui.screens.home.SortScreen
 import com.example.myapplication.ui.screens.home.TrainerDetailScreen
 import com.example.myapplication.ui.screens.profile.TrainerRegistrationScreen
+import com.example.myapplication.ui.screens.scheduler.TrainerScheduleScreen
+import com.example.myapplication.ui.screens.scheduler.TrainerScheduleScreen
 import com.example.myapplication.viewmodel.profile.LocationOnboardingViewModel
 import com.example.myapplication.viewmodel.profile.PInfoEditViewModel
 import com.example.myapplication.viewmodel.profile.ProfileViewModel
@@ -188,25 +190,27 @@ fun AppNavigation(
                             }
                         },
 
-                        onRegistrationSuccessProceedWithTrainer = {
-                            sharedRegistrationViewModel.clearPendingGoogleRegistration()
-                            navController.navigate(Screen.RegisterTrainer.route) {
-                                popUpTo(Screen.Welcome.route) { inclusive = true }
-                            }
-                        }, viewModel = sharedRegistrationViewModel
-                    )
-                }
-            }
-
-            navigation(
-                startDestination = Screen.Home.route, route = "home_flow"
-            ) {
-                composable(Screen.Home.route) { backStackEntry ->
-                    val parentEntry = remember(backStackEntry) {
-                        navController.getBackStackEntry("home_flow")
+                            onRegistrationSuccessProceedWithTrainer = {
+                                sharedRegistrationViewModel.clearPendingGoogleRegistration()
+                                navController.navigate(Screen.RegisterTrainer.route) {
+                                    popUpTo(Screen.Welcome.route) { inclusive = true }
+                                }
+                            },
+                            viewModel = sharedRegistrationViewModel
+                        )
                     }
-                    val homeViewModel: HomeViewModel = hiltViewModel(parentEntry)
-                    val trainersViewModel: TrainersViewModel = hiltViewModel(parentEntry)
+                }
+
+                navigation(
+                    startDestination = Screen.Home.route,
+                    route = "home_flow"
+                ) {
+                    composable(Screen.Home.route) { backStackEntry ->
+                        val parentEntry = remember(backStackEntry) {
+                            navController.getBackStackEntry("home_flow")
+                        }
+                        val homeViewModel: HomeViewModel = hiltViewModel(parentEntry)
+                        val trainersViewModel:TrainersViewModel = hiltViewModel(parentEntry)
 
 
 
@@ -228,37 +232,47 @@ fun AppNavigation(
                             navController.navigate(Screen.Trainer.route)
                         }
 
-                    )
-                }
-
-                composable(Screen.Filter.route) { backStackEntry ->
-                    val parentEntry = remember(backStackEntry) {
-                        navController.getBackStackEntry("home_flow")
+                        )
                     }
-                    val trainersViewModel: TrainersViewModel = hiltViewModel(parentEntry)
 
-                    FilterScreen(
-                        onNavigateBack = {
-                            navController.popBackStack()
-                        }, viewModel = trainersViewModel
-                    )
-                }
+                    composable(Screen.Filter.route) { backStackEntry ->
+                        val parentEntry = remember(backStackEntry) {
+                            navController.getBackStackEntry("home_flow")
+                        }
+                        val trainersViewModel: TrainersViewModel = hiltViewModel(parentEntry)
 
-                composable(Screen.Sort.route) {
-                    SortScreen(
-                        onNavigateBack = {
-                            navController.popBackStack()
-                        })
-                }
 
-                composable(Screen.Trainer.route) { backStackEntry -> // Prosta ścieżka bez argumentów
-                    // Pobierz tego samego "rodzica"
-                    val parentEntry = remember(backStackEntry) {
-                        navController.getBackStackEntry("home_flow")
+                        FilterScreen(
+                            onNavigateBack = {
+                                navController.popBackStack()
+                            },
+                            viewModel = trainersViewModel
+                        )
                     }
-                    // Hilt dostarczy TĘ SAMĄ instancję TrainersViewModel
-                    val trainersViewModel: TrainersViewModel = hiltViewModel(parentEntry)
 
+                    composable(Screen.Sort.route) {
+                        SortScreen(
+                            onNavigateBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    }
+
+                    composable(Screen.Trainer.route) { backStackEntry -> // Prosta ścieżka bez argumentów
+                        val parentEntry = remember(backStackEntry) {
+                            navController.getBackStackEntry("home_flow")
+                        }
+                        val trainersViewModel: TrainersViewModel = hiltViewModel(parentEntry)
+
+
+                        TrainerDetailScreen(
+                            viewModel = trainersViewModel,
+                            onNavigateBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    }
+                }
                     TrainerDetailScreen(
                         viewModel = trainersViewModel, onNavigateBack = {
                             navController.popBackStack()
