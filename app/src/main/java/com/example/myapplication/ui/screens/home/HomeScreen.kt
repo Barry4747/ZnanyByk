@@ -190,7 +190,7 @@ fun HomeScreen(
             contentAlignment = Alignment.Center
         ) {
             if (!homeState.isLoading) {
-                LazyColumn(
+               LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
