@@ -43,7 +43,6 @@ import com.example.myapplication.viewmodel.profile.ProfileViewModel
 import com.example.myapplication.viewmodel.registration.AuthViewModel
 import com.example.myapplication.viewmodel.registration.RegistrationViewModel
 import com.example.myapplication.viewmodel.TrainersViewModel
-import com.example.myapplication.viewmodel.TrainerDetailViewModel
 import com.example.myapplication.viewmodel.HomeViewModel
 import com.example.myapplication.viewmodel.MapViewModel
 
@@ -273,12 +272,8 @@ fun AppNavigation(
                         )
                     }
                 }
-                    TrainerDetailScreen(
-                        viewModel = trainersViewModel, onNavigateBack = {
-                            navController.popBackStack()
-                        })
-                }
-            }
+
+
 
             composable(Screen.Map.route) {
                 val mapViewModel: MapViewModel = hiltViewModel()

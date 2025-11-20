@@ -101,6 +101,7 @@ dependencies {
     implementation("com.google.android.libraries.places:places:3.4.0")
     implementation(libs.androidx.compose.ui.text)
     implementation("com.google.accompanist:accompanist-permissions:0.34.0")
+    implementation(libs.androidx.compose.foundation.layout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

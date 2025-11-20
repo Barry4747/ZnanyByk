@@ -24,6 +24,7 @@ wheelpickercompose = "1.1.11"
 uiText = "1.9.4"
 mapsCompose = "2.14.0"
 playServicesMaps = "18.1.0"
+foundationLayout = "1.9.4"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
@@ -59,6 +60,7 @@ wheelpickercompose = { module = "com.github.commandiron:WheelPickerCompose", ver
 androidx-compose-ui-text = { group = "androidx.compose.ui", name = "ui-text", version.ref = "uiText" }
 maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "mapsCompose" }
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
+androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "foundationLayout" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
