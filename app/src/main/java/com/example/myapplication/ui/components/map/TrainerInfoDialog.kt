@@ -22,7 +22,7 @@ import com.example.myapplication.data.model.users.Trainer
 fun TrainerInfoDialog(
     trainer: Trainer?,
     onDismiss: () -> Unit,
-    onSeeMore: (Trainer) -> Unit = {}
+    onSeeMore:  (Trainer) -> Unit = {}
 ) {
     if (trainer != null) {
         ModalBottomSheet(onDismissRequest = onDismiss) {

@@ -271,19 +271,29 @@ fun AppNavigation(
                             }
                         )
                     }
+
+                    composable(Screen.Map.route) { backStackEntry ->
+                        val mapViewModel: MapViewModel = hiltViewModel()
+                        val parentEntry = remember(backStackEntry) {
+                            navController.getBackStackEntry("home_flow")
+                        }
+                        val sharedTrainersViewModel: TrainersViewModel = hiltViewModel(parentEntry)
+                        MapScreen(
+                            viewModel = mapViewModel, onNavigateBack = {
+                                navController.popBackStack()
+
+                            }, onNavigateToTrainer =  { trainer ->
+                                sharedTrainersViewModel.selectTrainer(trainer)
+                                navController.navigate(Screen.Trainer.route)
+                            }
+
+                        )
+                    }
                 }
 
 
 
-            composable(Screen.Map.route) {
-                val mapViewModel: MapViewModel = hiltViewModel()
-                MapScreen(
-                    viewModel = mapViewModel, onNavigateBack = {
-                        navController.navigate("home_flow") {
-                            popUpTo("home_flow") { inclusive = true }
-                        }
-                    })
-            }
+
 
             composable(Screen.RegisterTrainer.route) {
                 TrainerRegistrationScreen(onNavigateBack = {

@@ -84,7 +84,8 @@ const val MAP_STYLE_JSON = """
 @Composable
 fun MapScreen(
     viewModel: MapViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToTrainer: (Trainer) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
     val currentUser = state.currentUser
@@ -157,7 +158,10 @@ fun MapScreen(
 
     TrainerInfoDialog(
         trainer = selectedTrainer,
-        onSeeMore = { TODO("Navigate to trainer details screen") },
+        onSeeMore = {
+            selectedTrainer?.let { trainer ->
+                onNavigateToTrainer(trainer)
+            }},
         onDismiss = { selectedTrainer = null }
     )
 }
