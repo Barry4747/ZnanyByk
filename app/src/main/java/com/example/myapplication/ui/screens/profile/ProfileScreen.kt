@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -79,9 +81,11 @@ fun ProfileScreen(
             AsyncImage(
                 model = avatarResource,
                 contentDescription = stringResource(R.string.profile_picture),
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(120.dp)
-                    .clip(CircleShape),
+                    .clip(CircleShape)
+                    .border(2.dp, Color.Black, CircleShape),
                 error = painterResource(R.drawable.user_active),
                 placeholder = painterResource(R.drawable.user_active)
             )
@@ -173,12 +177,12 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            FormButtonWithDetail(
-                text = stringResource(R.string.customer_support),
-                detail = stringResource(R.string.solve_your_problems),
-                enabled = false,
-                onClick = { /* No logic */ }
-            )
+//            FormButtonWithDetail(
+//                text = stringResource(R.string.customer_support),
+//                detail = stringResource(R.string.solve_your_problems),
+//                enabled = false,
+//                onClick = { /* No logic */ }
+//            )
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -188,7 +192,7 @@ fun ProfileScreen(
                     viewModel.logout()
                     onLogout()
                 },
-                modifier = Modifier.fillMaxWidth(0.6f)
+                modifier = Modifier.fillMaxWidth(1f)
             )
         }
     }

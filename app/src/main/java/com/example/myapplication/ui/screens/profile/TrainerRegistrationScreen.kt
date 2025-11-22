@@ -183,29 +183,26 @@ fun TrainerRegistrationScreen(
                                 Box(modifier = Modifier.size(76.dp)) {
                                     val isVideo = viewModel.isVideoUri(context, uri)
 
-                                    AsyncImage(
-                                        model = ImageRequest.Builder(context)
-                                            .data(uri)
-                                            .apply {
-                                                if (isVideo) {
-                                                    videoFrameMillis(1000)
-                                                }
-                                            }
-                                            .crossfade(true)
-                                            .size(76)
-                                            .build(),
-                                        contentDescription = stringResource(R.string.trainer_upload_preview),
-                                        modifier = Modifier.fillMaxSize()
-                                    )
+                                    if (!isVideo) {
+                                        AsyncImage(
+                                            model = ImageRequest.Builder(context)
+                                                .data(uri)
+                                                .crossfade(true)
+                                                .size(76)
+                                                .build(),
+                                            contentDescription = stringResource(R.string.trainer_upload_preview),
+                                            modifier = Modifier.fillMaxSize()
+                                        )
+                                    }
 
                                     if (isVideo) {
                                         Icon(
                                             painter = painterResource(R.drawable.play_icon),
                                             contentDescription = "Video",
                                             modifier = Modifier
-                                                .size(24.dp)
+                                                .size(36.dp)
                                                 .align(Alignment.Center),
-                                            tint = Color.White
+                                            tint = Color.Black
                                         )
                                     }
 
@@ -219,24 +216,26 @@ fun TrainerRegistrationScreen(
                                 Box(modifier = Modifier.size(76.dp)) {
                                     val isVideo = viewModel.isVideoUrl(url)
 
-                                    AsyncImage(
-                                        model = ImageRequest.Builder(context)
-                                            .data(url)
-                                            .crossfade(true)
-                                            .size(76)
-                                            .build(),
-                                        contentDescription = stringResource(R.string.trainer_upload_preview),
-                                        modifier = Modifier.fillMaxSize()
-                                    )
+                                    if (!isVideo) {
+                                        AsyncImage(
+                                            model = ImageRequest.Builder(context)
+                                                .data(url)
+                                                .crossfade(true)
+                                                .size(76)
+                                                .build(),
+                                            contentDescription = stringResource(R.string.trainer_upload_preview),
+                                            modifier = Modifier.fillMaxSize()
+                                        )
+                                    }
 
                                     if (isVideo) {
                                         Icon(
                                             painter = painterResource(R.drawable.play_icon),
                                             contentDescription = "Video",
                                             modifier = Modifier
-                                                .size(24.dp)
+                                                .size(36.dp)
                                                 .align(Alignment.Center),
-                                            tint = Color.White
+                                            tint = Color.Black
                                         )
                                     }
 
