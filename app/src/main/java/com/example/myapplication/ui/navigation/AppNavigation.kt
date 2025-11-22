@@ -347,6 +347,11 @@ fun AppNavigation(
                     navController.navigate(Screen.RegisterTrainer.route) {
                         launchSingleTop = true
                     }
+                },
+                    onLogout = {
+                        navController.navigate(Screen.Welcome.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
                 })
             }
 

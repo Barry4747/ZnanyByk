@@ -7,7 +7,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,15 +15,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -36,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import coil.request.videoFrameMillis
 import com.example.myapplication.R
 import com.example.myapplication.data.model.gyms.Gym
 import com.example.myapplication.data.model.users.TrainerCategory
@@ -57,6 +58,7 @@ import com.example.myapplication.ui.components.dialogs.GymSelectionDialog
 import com.example.myapplication.ui.components.fields.MainFormTextField
 import com.example.myapplication.viewmodel.trainer.TrainerRegistrationViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrainerRegistrationScreen(
     modifier: Modifier = Modifier,
@@ -71,10 +73,16 @@ fun TrainerRegistrationScreen(
     var selectedCategories by remember { mutableStateOf<List<TrainerCategory>>(emptyList()) }
     var showDialog by remember { mutableStateOf(false) }
     var showGymDialog by remember { mutableStateOf(false) }
+    var showMediaPicker by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris: List<Uri>? ->
-        if (!uris.isNullOrEmpty()) viewModel.uploadImages(context, uris)
+    val imageLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris: List<Uri>? ->
+        if (!uris.isNullOrEmpty()) viewModel.uploadMedias(context, uris)
+        showMediaPicker = false
+    }
+    val videoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris: List<Uri>? ->
+        if (!uris.isNullOrEmpty()) viewModel.uploadMedias(context, uris)
+        showMediaPicker = false
     }
 
     val state by viewModel.state.collectAsState()
@@ -173,23 +181,44 @@ fun TrainerRegistrationScreen(
                         ) {
                             items(state.selectedImages) { uri ->
                                 Box(modifier = Modifier.size(76.dp)) {
+                                    val isVideo = viewModel.isVideoUri(context, uri)
+
                                     AsyncImage(
                                         model = ImageRequest.Builder(context)
                                             .data(uri)
+                                            .apply {
+                                                if (isVideo) {
+                                                    videoFrameMillis(1000)
+                                                }
+                                            }
                                             .crossfade(true)
                                             .size(76)
                                             .build(),
                                         contentDescription = stringResource(R.string.trainer_upload_preview),
                                         modifier = Modifier.fillMaxSize()
                                     )
+
+                                    if (isVideo) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.play_icon),
+                                            contentDescription = "Video",
+                                            modifier = Modifier
+                                                .size(24.dp)
+                                                .align(Alignment.Center),
+                                            tint = Color.White
+                                        )
+                                    }
+
                                     RemoveButton(
-                                        onClick = { viewModel.removeSelectedImage(uri) },
+                                        onClick = { viewModel.removeSelectedMedia(uri) },
                                         modifier = Modifier.align(Alignment.TopEnd)
                                     )
                                 }
                             }
                             items(state.uploadedImages) { url ->
                                 Box(modifier = Modifier.size(76.dp)) {
+                                    val isVideo = viewModel.isVideoUrl(url)
+
                                     AsyncImage(
                                         model = ImageRequest.Builder(context)
                                             .data(url)
@@ -199,14 +228,26 @@ fun TrainerRegistrationScreen(
                                         contentDescription = stringResource(R.string.trainer_upload_preview),
                                         modifier = Modifier.fillMaxSize()
                                     )
+
+                                    if (isVideo) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.play_icon),
+                                            contentDescription = "Video",
+                                            modifier = Modifier
+                                                .size(24.dp)
+                                                .align(Alignment.Center),
+                                            tint = Color.White
+                                        )
+                                    }
+
                                     RemoveButton(
-                                        onClick = { viewModel.removeUploadedImage(url) },
+                                        onClick = { viewModel.removeUploadedMedia(url) },
                                         modifier = Modifier.align(Alignment.TopEnd)
                                     )
                                 }
                             }
                             item {
-                                MainCategoryChip(label = stringResource(R.string.add_button_plus), onClick = { launcher.launch("image/*") })
+                                MainCategoryChip(label = stringResource(R.string.add_button_plus), onClick = { showMediaPicker = true })
                             }
                         }
                     }
@@ -264,7 +305,6 @@ fun TrainerRegistrationScreen(
                     text = stringResource(R.string.confirm_trainer_profile_creation),
                     onClick = {
                         viewModel.submitTrainerProfile(
-                            context = context,
                             hourlyRate = hourlyRate,
                             gymId = selectedGym?.id,
                             description = description,
@@ -325,6 +365,42 @@ fun TrainerRegistrationScreen(
                 }
             }
         )
+    }
+
+    if (showMediaPicker) {
+        ModalBottomSheet(
+            onDismissRequest = { showMediaPicker = false },
+            sheetState = rememberModalBottomSheetState()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.select_media_type),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                MainButton(
+                    text = stringResource(R.string.select_images),
+                    onClick = { imageLauncher.launch("image/*") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                MainButton(
+                    text = stringResource(R.string.select_videos),
+                    onClick = { videoLauncher.launch("video/*") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
     }
 }
 

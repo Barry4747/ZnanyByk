@@ -1,12 +1,8 @@
 package com.example.myapplication.data.repository
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
-import androidx.compose.foundation.gestures.forEach
-import androidx.compose.foundation.layout.size
 import com.example.myapplication.data.model.users.Trainer
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -14,8 +10,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.tasks.await
-import java.io.File
-import java.io.FileOutputStream
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -26,65 +20,49 @@ class TrainerRepository @Inject constructor() {
     private val trainerCollection = FirebaseFirestore.getInstance().collection("trainers")
 
 
-    private suspend fun uploadSingleImage(
+    private suspend fun uploadSingleMedia(
         context: Context,
         userId: String,
         uri: Uri
     ): Result<String> {
         return try {
             val storageRef = FirebaseStorage.getInstance().reference
-            val supportedMimeTypes = setOf("image/jpeg", "image/png", "image/webp")
+            val supportedMimeTypes = setOf("image/jpeg", "image/png", "image/webp", "video/mp4")
 
             val mimeType = context.contentResolver.getType(uri) ?: "image/jpeg"
 
             if (mimeType !in supportedMimeTypes) {
-                throw IllegalArgumentException("Unsupported image type: $mimeType")
+                throw IllegalArgumentException("Unsupported media type: $mimeType")
             }
 
-            val extension = mimeType.substringAfterLast('/', "jpg")
-            val rawName = uri.lastPathSegment?.substringAfterLast('/')?.takeIf { it.isNotBlank() }
-            val filename = rawName ?: "${UUID.randomUUID()}.$extension"
-
-            // Compress the image
-            val bitmap = BitmapFactory.decodeStream(context.contentResolver.openInputStream(uri))
-            if (bitmap == null) {
-                throw IllegalArgumentException("Failed to decode image")
+            val fileExtension = when (mimeType) {
+                "image/jpeg" -> "jpg"
+                "image/png" -> "png"
+                "image/webp" -> "webp"
+                "video/mp4" -> "mp4"
+                else -> "unknown"
             }
 
-            val tempFile = File.createTempFile("compressed", ".$extension", context.cacheDir)
-            val outputStream = FileOutputStream(tempFile)
-            val compressFormat = when (mimeType) {
-                "image/jpeg" -> Bitmap.CompressFormat.JPEG
-                "image/png" -> Bitmap.CompressFormat.PNG
-                "image/webp" -> Bitmap.CompressFormat.WEBP
-                else -> Bitmap.CompressFormat.JPEG
-            }
-            val quality = if (mimeType == "image/png") 100 else 80
-            bitmap.compress(compressFormat, quality, outputStream)
-            outputStream.close()
-            bitmap.recycle()
+            val fileName = "${UUID.randomUUID()}.$fileExtension"
+            val fileRef = storageRef.child("users/$userId/$fileName")
 
-            val fileRef = storageRef.child("users/$userId/$filename")
-            fileRef.putFile(Uri.fromFile(tempFile)).await()
-            val url = fileRef.downloadUrl.await().toString()
+            fileRef.putFile(uri).await()
+            val downloadUrl = fileRef.downloadUrl.await().toString()
 
-            // Clean up temp file
-            tempFile.delete()
-
-            Result.success(url)
+            Result.success(downloadUrl)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    suspend fun uploadImages(
+    suspend fun uploadMedias(
         context: Context,
         userId: String,
         files: List<Uri>
     ): Result<Pair<List<String>, List<Uri>>> {
         return try {
             val uploadResults = coroutineScope {
-                files.map { uri -> async { uploadSingleImage(context, userId, uri) } }.awaitAll()
+                files.map { uri -> async { uploadSingleMedia(context, userId, uri) } }.awaitAll()
             }
 
             val successfulUrls = uploadResults.mapNotNull { it.getOrNull() }

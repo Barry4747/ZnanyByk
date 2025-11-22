@@ -55,6 +55,7 @@ fun ProfileScreen(
     onEditLocation: () -> Unit = {},
     onBecomeTrainer: () -> Unit = {},
     onEditTrainerProfile: () -> Unit = {},
+    onLogout: () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
@@ -177,6 +178,17 @@ fun ProfileScreen(
                 detail = stringResource(R.string.solve_your_problems),
                 enabled = false,
                 onClick = { /* No logic */ }
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            MainButton(
+                text = stringResource(R.string.logout),
+                onClick = {
+                    viewModel.logout()
+                    onLogout()
+                },
+                modifier = Modifier.fillMaxWidth(0.6f)
             )
         }
     }

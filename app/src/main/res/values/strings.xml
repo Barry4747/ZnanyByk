@@ -127,4 +127,7 @@
     <string name="chats">Czaty</string>
     <string name="close">Zamknij</string>
     <string name="see_more">Zobacz więcej</string>
+    <string name="select_media_type">Wybierz typ pliku</string>
+    <string name="select_images">Wybierz zdjęcia</string>
+    <string name="select_videos">Wybierz wideo</string>
 </resources>

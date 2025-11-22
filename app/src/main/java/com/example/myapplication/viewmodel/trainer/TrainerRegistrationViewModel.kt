@@ -86,7 +86,6 @@ class TrainerRegistrationViewModel @Inject constructor(
     }
 
     fun submitTrainerProfile(
-        context: Context,
         hourlyRate: String,
         gymId: String?,
         description: String,
@@ -192,11 +191,11 @@ class TrainerRegistrationViewModel @Inject constructor(
             }
     }
 
-    fun uploadImages(context: Context, uris: List<Uri>) {
+    fun uploadMedias(context: Context, uris: List<Uri>) {
         val currentUserId = getCurrentUserId() ?: return
         _state.value = _state.value.copy(selectedImages = _state.value.selectedImages + uris, isUploadingImages = true)
         viewModelScope.launch {
-            val result = trainerRepository.uploadImages(context, currentUserId, uris)
+            val result = trainerRepository.uploadMedias(context, currentUserId, uris)
             result.onSuccess { (successfulUrls, _) ->
                 _state.value = _state.value.copy(
                     selectedImages = _state.value.selectedImages - uris,
@@ -213,14 +212,22 @@ class TrainerRegistrationViewModel @Inject constructor(
         }
     }
 
-    fun removeSelectedImage(uri: Uri) {
+    fun removeSelectedMedia(uri: Uri) {
         _state.value = _state.value.copy(selectedImages = _state.value.selectedImages - uri)
     }
 
-    fun removeUploadedImage(url: String) {
+    fun removeUploadedMedia(url: String) {
         _state.value = _state.value.copy(uploadedImages = _state.value.uploadedImages.filter { it != url })
         viewModelScope.launch {
             trainerRepository.deleteImageByUrl(url)
         }
+    }
+
+    fun isVideoUri(context: Context, uri: Uri): Boolean {
+        return context.contentResolver.getType(uri)?.startsWith("video/") == true
+    }
+
+    fun isVideoUrl(url: String): Boolean {
+        return url.contains(".mp4", ignoreCase = true)
     }
 }
