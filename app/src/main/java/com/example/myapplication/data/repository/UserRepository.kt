@@ -127,11 +127,9 @@ class UserRepository @Inject constructor() {
             val storageRef = FirebaseStorage.getInstance().reference
             val user = getUser(userId).getOrNull()
             if (user?.avatarUrl != null) {
-                // Delete previous avatar
                 val previousRef = FirebaseStorage.getInstance().getReferenceFromUrl(user.avatarUrl!!)
                 previousRef.delete().await()
             }
-            // Upload new avatar
             val filename = "avatar.jpg"
             val avatarRef = storageRef.child("users/$userId/avatar/$filename")
             val inputStream = context.contentResolver.openInputStream(uri)
@@ -139,7 +137,6 @@ class UserRepository @Inject constructor() {
                 avatarRef.putStream(stream).await()
             }
             val downloadUrl = avatarRef.downloadUrl.await().toString()
-            // Update user with new avatarUrl
             val updatedUser = user?.copy(avatarUrl = downloadUrl) ?: User(avatarUrl = downloadUrl)
             updateUser(userId, updatedUser)
             Result.success(downloadUrl)

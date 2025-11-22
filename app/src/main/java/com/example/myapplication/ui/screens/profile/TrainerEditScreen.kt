@@ -22,10 +22,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -46,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import coil.request.videoFrameMillis
 import com.example.myapplication.R
 import com.example.myapplication.data.model.gyms.Gym
 import com.example.myapplication.data.model.users.TrainerCategory
@@ -58,6 +63,7 @@ import com.example.myapplication.ui.components.fields.MainFormTextField
 import com.example.myapplication.ui.components.dialogs.GymSelectionDialog
 import com.example.myapplication.viewmodel.trainer.TrainerProfileViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrainerEditScreen(
     modifier: Modifier = Modifier,
@@ -73,6 +79,7 @@ fun TrainerEditScreen(
     var selectedCategories by remember { mutableStateOf<List<TrainerCategory>>(emptyList()) }
     var showDialog by remember { mutableStateOf(false) }
     var showGymDialog by remember { mutableStateOf(false) }
+    var showMediaPicker by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.hourlyRate) {
         hourlyRate = state.hourlyRate
@@ -91,8 +98,13 @@ fun TrainerEditScreen(
     }
 
     val context = LocalContext.current
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
-        if (!uris.isNullOrEmpty()) viewModel.uploadImages(context, uris)
+    val imageLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
+        if (!uris.isNullOrEmpty()) viewModel.uploadMedias(context, uris)
+        showMediaPicker = false
+    }
+    val videoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
+        if (!uris.isNullOrEmpty()) viewModel.uploadMedias(context, uris)
+        showMediaPicker = false
     }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -188,16 +200,33 @@ fun TrainerEditScreen(
                         ) {
                             items(state.existingImages) { url ->
                                 Box(modifier = Modifier.size(76.dp)) {
-                                    AsyncImage(
-                                        model = ImageRequest.Builder(context)
-                                            .data(url)
-                                            .crossfade(true)
-                                            .size(76)
-                                            .build(),
-                                        contentDescription = stringResource(R.string.trainer_upload_preview),
-                                        placeholder = painterResource(R.drawable.image_placeholder),
-                                        modifier = Modifier.fillMaxSize()
-                                    )
+                                    val isVideo = viewModel.isVideoUrl(url)
+
+                                    if (!isVideo) {
+                                        AsyncImage(
+                                            model = ImageRequest.Builder(context)
+                                                .data(url)
+                                                .crossfade(true)
+                                                .size(76)
+                                                .build(),
+                                            contentDescription = stringResource(R.string.trainer_upload_preview),
+                                            placeholder = painterResource(R.drawable.image_placeholder),
+                                            error = painterResource(R.drawable.image_placeholder),
+                                            modifier = Modifier.fillMaxSize()
+                                        )
+                                    }
+
+                                    if (isVideo) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.play_icon),
+                                            contentDescription = "Video",
+                                            modifier = Modifier
+                                                .size(36.dp)
+                                                .align(Alignment.Center),
+                                            tint = Color.Black
+                                        )
+                                    }
+
                                     RemoveButton(
                                         onClick = { viewModel.removeImage(url) },
                                         modifier = Modifier.align(Alignment.TopEnd)
@@ -206,16 +235,33 @@ fun TrainerEditScreen(
                             }
                             items(state.selectedImages) { uri ->
                                 Box(modifier = Modifier.size(76.dp)) {
-                                    AsyncImage(
-                                        model = ImageRequest.Builder(context)
-                                            .data(uri)
-                                            .crossfade(true)
-                                            .size(76)
-                                            .build(),
-                                        contentDescription = stringResource(R.string.trainer_upload_preview),
-                                        placeholder = painterResource(R.drawable.image_placeholder),
-                                        modifier = Modifier.fillMaxSize()
-                                    )
+                                    val isVideo = viewModel.isVideoUri(context, uri)
+
+                                    if (!isVideo) {
+                                        AsyncImage(
+                                            model = ImageRequest.Builder(context)
+                                                .data(uri)
+                                                .crossfade(true)
+                                                .size(76)
+                                                .build(),
+                                            contentDescription = stringResource(R.string.trainer_upload_preview),
+                                            placeholder = painterResource(R.drawable.image_placeholder),
+                                            error = painterResource(R.drawable.image_placeholder),
+                                            modifier = Modifier.fillMaxSize()
+                                        )
+                                    }
+
+                                    if (isVideo) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.play_icon),
+                                            contentDescription = "Video",
+                                            modifier = Modifier
+                                                .size(36.dp)
+                                                .align(Alignment.Center),
+                                            tint = Color.Black
+                                        )
+                                    }
+
                                     RemoveButton(
                                         onClick = { viewModel.removeSelectedImage(uri) },
                                         modifier = Modifier.align(Alignment.TopEnd)
@@ -224,16 +270,33 @@ fun TrainerEditScreen(
                             }
                             items(state.uploadedImages) { url ->
                                 Box(modifier = Modifier.size(76.dp)) {
-                                    AsyncImage(
-                                        model = ImageRequest.Builder(context)
-                                            .data(url)
-                                            .crossfade(true)
-                                            .size(76)
-                                            .build(),
-                                        contentDescription = stringResource(R.string.trainer_upload_preview),
-                                        placeholder = painterResource(R.drawable.image_placeholder),
-                                        modifier = Modifier.fillMaxSize()
-                                    )
+                                    val isVideo = viewModel.isVideoUrl(url)
+
+                                    if (!isVideo) {
+                                        AsyncImage(
+                                            model = ImageRequest.Builder(context)
+                                                .data(url)
+                                                .crossfade(true)
+                                                .size(76)
+                                                .build(),
+                                            contentDescription = stringResource(R.string.trainer_upload_preview),
+                                            placeholder = painterResource(R.drawable.image_placeholder),
+                                            error = painterResource(R.drawable.image_placeholder),
+                                            modifier = Modifier.fillMaxSize()
+                                        )
+                                    }
+
+                                    if (isVideo) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.play_icon),
+                                            contentDescription = "Video",
+                                            modifier = Modifier
+                                                .size(36.dp)
+                                                .align(Alignment.Center),
+                                            tint = Color.Black
+                                        )
+                                    }
+
                                     RemoveButton(
                                         onClick = { viewModel.removeUploadedImage(url) },
                                         modifier = Modifier.align(Alignment.TopEnd)
@@ -241,7 +304,7 @@ fun TrainerEditScreen(
                                 }
                             }
                             item {
-                                MainCategoryChip(label = stringResource(R.string.add_button_plus), onClick = { launcher.launch("image/*") })
+                                MainCategoryChip(label = stringResource(R.string.add_button_plus), onClick = { showMediaPicker = true })
                             }
                         }
                     }
@@ -385,6 +448,42 @@ fun TrainerEditScreen(
                 }
             }
         )
+    }
+
+    if (showMediaPicker) {
+        ModalBottomSheet(
+            onDismissRequest = { showMediaPicker = false },
+            sheetState = rememberModalBottomSheetState()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.select_media_type),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                MainButton(
+                    text = stringResource(R.string.select_images),
+                    onClick = { imageLauncher.launch("image/*") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                MainButton(
+                    text = stringResource(R.string.select_videos),
+                    onClick = { videoLauncher.launch("video/*") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
     }
 }
 

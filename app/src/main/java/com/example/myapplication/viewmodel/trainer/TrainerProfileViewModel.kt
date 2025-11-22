@@ -274,7 +274,7 @@ class TrainerProfileViewModel @Inject constructor(
         val currentUserId = getCurrentUserId() ?: return
         _state.value = _state.value.copy(selectedImages = _state.value.selectedImages + uris, isUploadingImages = true)
         viewModelScope.launch {
-            val result = trainerRepository.uploadImages(context, currentUserId, uris)
+            val result = trainerRepository.uploadMedias(context, currentUserId, uris)
             result.onSuccess { (successfulUrls, _) ->
                 _state.value = _state.value.copy(
                     selectedImages = _state.value.selectedImages - uris,
@@ -300,5 +300,17 @@ class TrainerProfileViewModel @Inject constructor(
         viewModelScope.launch {
             trainerRepository.deleteImageByUrl(url)
         }
+    }
+
+    fun uploadMedias(context: Context, uris: List<Uri>) {
+        uploadImages(context, uris)
+    }
+
+    fun isVideoUri(context: Context, uri: Uri): Boolean {
+        return context.contentResolver.getType(uri)?.startsWith("video/") == true
+    }
+
+    fun isVideoUrl(url: String): Boolean {
+        return url.contains(".mp4", ignoreCase = true)
     }
 }
