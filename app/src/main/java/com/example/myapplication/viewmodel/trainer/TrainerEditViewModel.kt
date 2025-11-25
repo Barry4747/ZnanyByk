@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class TrainerProfileState(
+data class TrainerEditState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val successMessage: String? = null,
@@ -40,15 +40,15 @@ data class TrainerProfileState(
 )
 
 @HiltViewModel
-class TrainerProfileViewModel @Inject constructor(
+class TrainerEditViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val trainerRepository: TrainerRepository,
     private val userRepository: UserRepository,
     private val gymRepository: GymRepository
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(TrainerProfileState())
-    val state: StateFlow<TrainerProfileState> = _state.asStateFlow()
+    private val _state = MutableStateFlow(TrainerEditState())
+    val state: StateFlow<TrainerEditState> = _state.asStateFlow()
 
     init {
         loadUserName()

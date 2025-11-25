@@ -135,4 +135,6 @@
     <string name="app_motto">Twój trener. Twoje skibidibi</string>
     <string name="or">lub</string>
     <string name="select_categories_label">wybierz kategorię</string>
+    <string name="no_gyms_available">Brak dostępnych siłowni</string>
+    <string name="no_gyms_found">Nie znaleziono siłowni</string>
 </resources>

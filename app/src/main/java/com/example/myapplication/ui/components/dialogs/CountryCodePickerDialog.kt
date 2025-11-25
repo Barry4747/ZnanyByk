@@ -132,9 +132,8 @@ private fun CountryCodeItem(
             Icon(
                 imageVector = Icons.Default.Check,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
+                tint = androidx.compose.ui.graphics.Color.Black
             )
         }
     }
 }
-

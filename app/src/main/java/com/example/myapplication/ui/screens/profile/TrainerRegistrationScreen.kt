@@ -1,6 +1,5 @@
 package com.example.myapplication.ui.screens.profile
 
-import MainProgressIndicator
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,9 +20,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -48,6 +45,7 @@ import coil.request.videoFrameMillis
 import com.example.myapplication.R
 import com.example.myapplication.data.model.gyms.Gym
 import com.example.myapplication.data.model.users.TrainerCategory
+import com.example.myapplication.ui.components.bottomsheets.MediaPickerBottomSheet
 import com.example.myapplication.ui.components.buttons.FormButton
 import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.buttons.MainButton
@@ -87,253 +85,46 @@ fun TrainerRegistrationScreen(
 
     val state by viewModel.state.collectAsState()
 
-    Box(modifier = modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            MainBackButton(
-                onClick = onNavigateBack
+    TrainerForm(
+        modifier = modifier,
+        userName = state.userName,
+        titleRes = R.string.fillout_trainer_profile,
+        hourlyRate = hourlyRate,
+        onHourlyRateChange = { input -> hourlyRate = input.filter { it.isDigit() } },
+        selectedGymName = selectedGym?.gymName,
+        onGymClick = { showGymDialog = true },
+        description = description,
+        onDescriptionChange = { description = it },
+        experienceYears = experienceYears,
+        onExperienceChange = { input -> experienceYears = input.filter { it.isDigit() } },
+        selectedCategories = selectedCategories,
+        onCategoryDialogOpen = { showDialog = true },
+        existingImages = emptyList(),
+        uploadedImages = state.uploadedImages,
+        selectedImages = state.selectedImages,
+        isVideoUri = { uri -> viewModel.isVideoUri(context, uri) },
+        isVideoUrl = { url -> viewModel.isVideoUrl(url) },
+        onRemoveUploadedImage = { viewModel.removeUploadedMedia(it) },
+        onRemoveSelectedImage = { viewModel.removeSelectedMedia(it) },
+        onMediaPickerOpen = { showMediaPicker = true },
+        isLoading = state.isLoading,
+        isUploadingImages = state.isUploadingImages,
+        onSubmit = {
+            viewModel.submitTrainerProfile(
+                hourlyRate = hourlyRate,
+                gymId = selectedGym?.id,
+                description = description,
+                experienceYears = experienceYears,
+                selectedCategories = selectedCategories.map { it.name },
+                images = state.uploadedImages
             )
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Text(
-                text = state.userName.ifBlank { stringResource(R.string.placeholder_username) },
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = stringResource(R.string.fillout_trainer_profile),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-
-            MainFormTextField(
-                value = hourlyRate,
-                onValueChange = { input -> hourlyRate = input.filter { it.isDigit() } },
-                label = stringResource(R.string.hourly_rate),
-                enabled = !state.isLoading,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            FormButton(
-                text = selectedGym?.gymName ?: stringResource(R.string.my_gym),
-                onClick = { showGymDialog = true },
-                enabled = !state.isLoading
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            MainFormTextField(
-                value = description,
-                onValueChange = { description = it },
-                label = stringResource(R.string.description_label),
-                enabled = !state.isLoading,
-                modifier = Modifier.height(120.dp)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            MainFormTextField(
-                value = experienceYears,
-                onValueChange = { input -> experienceYears = input.filter { it.isDigit() } },
-                label = stringResource(R.string.how_long_trainer),
-                enabled = !state.isLoading,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = stringResource(R.string.select_images_label),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .align(Alignment.Start)
-                    .padding(start = 8.dp, bottom = 4.dp)
-            )
-            Box(modifier = Modifier.height(140.dp)) {
-                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Box(modifier = Modifier.height(80.dp)) {
-                        LazyRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            items(state.selectedImages) { uri ->
-                                Box(modifier = Modifier.size(76.dp)) {
-                                    val isVideo = viewModel.isVideoUri(context, uri)
-
-                                    if (!isVideo) {
-                                        AsyncImage(
-                                            model = ImageRequest.Builder(context)
-                                                .data(uri)
-                                                .crossfade(true)
-                                                .size(76)
-                                                .build(),
-                                            contentDescription = stringResource(R.string.trainer_upload_preview),
-                                            modifier = Modifier.fillMaxSize()
-                                        )
-                                    }
-
-                                    if (isVideo) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.play_icon),
-                                            contentDescription = "Video",
-                                            modifier = Modifier
-                                                .size(36.dp)
-                                                .align(Alignment.Center),
-                                            tint = Color.Black
-                                        )
-                                    }
-
-                                    RemoveButton(
-                                        onClick = { viewModel.removeSelectedMedia(uri) },
-                                        modifier = Modifier.align(Alignment.TopEnd)
-                                    )
-                                }
-                            }
-                            items(state.uploadedImages) { url ->
-                                Box(modifier = Modifier.size(76.dp)) {
-                                    val isVideo = viewModel.isVideoUrl(url)
-
-                                    if (!isVideo) {
-                                        AsyncImage(
-                                            model = ImageRequest.Builder(context)
-                                                .data(url)
-                                                .crossfade(true)
-                                                .size(76)
-                                                .build(),
-                                            contentDescription = stringResource(R.string.trainer_upload_preview),
-                                            modifier = Modifier.fillMaxSize()
-                                        )
-                                    }
-
-                                    if (isVideo) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.play_icon),
-                                            contentDescription = "Video",
-                                            modifier = Modifier
-                                                .size(36.dp)
-                                                .align(Alignment.Center),
-                                            tint = Color.Black
-                                        )
-                                    }
-
-                                    RemoveButton(
-                                        onClick = { viewModel.removeUploadedMedia(url) },
-                                        modifier = Modifier.align(Alignment.TopEnd)
-                                    )
-                                }
-                            }
-                            item {
-                                MainCategoryChip(label = stringResource(R.string.add_button_plus), onClick = { showMediaPicker = true })
-                            }
-                        }
-                    }
-                }
-            }
-
-            Text(
-                text = stringResource(R.string.select_categories_label),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .align(Alignment.Start)
-                    .padding(start = 8.dp, bottom = 4.dp)
-            )
-            Box(modifier = Modifier.height(56.dp)) {
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    items(selectedCategories) { category ->
-                        MainCategoryChip(category = category)
-                    }
-                    item {
-                        MainCategoryChip(label = stringResource(R.string.add_button_plus), onClick = { showDialog = true })
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            if (state.isLoading || state.isUploadingImages) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    MainProgressIndicator()
-                    if (state.isUploadingImages) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.uploading_images),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    } else {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.loading),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
-            } else {
-                MainButton(
-                    text = stringResource(R.string.confirm_trainer_profile_creation),
-                    onClick = {
-                        viewModel.submitTrainerProfile(
-                            hourlyRate = hourlyRate,
-                            gymId = selectedGym?.id,
-                            description = description,
-                            experienceYears = experienceYears,
-                            selectedCategories = selectedCategories.map { it.name },
-                            images = state.uploadedImages
-                        )
-                    },
-                    enabled = hourlyRate.isNotBlank() && description.isNotBlank() && experienceYears.isNotBlank() && !state.isUploadingImages,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            if (state.errorMessage != null) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = state.errorMessage ?: "",
-                    color = Color.Red
-                )
-            }
-
-            if (state.successMessage != null) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = state.successMessage ?: "",
-                    color = Color.Green
-                )
-            }
-        }
-    }
+        },
+        submitTextRes = R.string.confirm_trainer_profile_creation,
+        submitEnabled = hourlyRate.isNotBlank() && description.isNotBlank() && experienceYears.isNotBlank() && !state.isUploadingImages,
+        onNavigateBack = onNavigateBack,
+        errorMessage = state.errorMessage,
+        successMessage = state.successMessage
+    )
 
     LaunchedEffect(key1 = state.successMessage) {
         if (state.successMessage != null) {
@@ -367,39 +158,11 @@ fun TrainerRegistrationScreen(
     }
 
     if (showMediaPicker) {
-        ModalBottomSheet(
+        MediaPickerBottomSheet(
             onDismissRequest = { showMediaPicker = false },
-            sheetState = rememberModalBottomSheetState()
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.select_media_type),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
-                MainButton(
-                    text = stringResource(R.string.select_images),
-                    onClick = { imageLauncher.launch("image/*") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                MainButton(
-                    text = stringResource(R.string.select_videos),
-                    onClick = { videoLauncher.launch("video/*") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-        }
+            onSelectImages = { imageLauncher.launch("image/*") },
+            onSelectVideos = { videoLauncher.launch("video/*") }
+        )
     }
 }
 
