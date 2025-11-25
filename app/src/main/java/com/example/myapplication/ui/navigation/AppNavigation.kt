@@ -45,19 +45,22 @@ import com.example.myapplication.viewmodel.registration.RegistrationViewModel
 import com.example.myapplication.viewmodel.TrainersViewModel
 import com.example.myapplication.viewmodel.HomeViewModel
 import com.example.myapplication.viewmodel.MapViewModel
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 
-private const val ANIMATION_DURATION = 50
+private const val ANIMATION_DURATION = 400
 
+
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun AppNavigation(
     navController: NavHostController, modifier: Modifier = Modifier, startDestination: String
 ) {
 
-    Box(modifier = Modifier) {
+    SharedTransitionLayout(modifier = modifier) {
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = modifier,
             enterTransition = {
                 fadeIn(
                     animationSpec = androidx.compose.animation.core.tween(
@@ -88,11 +91,16 @@ fun AppNavigation(
             }) {
 
             composable(Screen.Welcome.route) {
-                WelcomeScreen(onNavigateToLogin = {
-                    navController.navigate(Screen.Login.route)
-                }, onNavigateToRegister = {
-                    navController.navigate(Screen.RegistrationFlow.route)
-                })
+                WelcomeScreen(
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedVisibilityScope = this,
+                    onNavigateToLogin = {
+                        navController.navigate(Screen.Login.route)
+                    },
+                    onNavigateToRegister = {
+                        navController.navigate(Screen.RegistrationFlow.route)
+                    }
+                )
             }
 
 
@@ -100,6 +108,8 @@ fun AppNavigation(
                 val authViewModel: AuthViewModel = hiltViewModel()
 
                 LoginScreen(
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedVisibilityScope = this,
                     onNavigateBack = {
                         navController.navigate(Screen.Welcome.route) {
                             popUpTo(Screen.Welcome.route)
@@ -128,6 +138,8 @@ fun AppNavigation(
                 val authViewModel: AuthViewModel = hiltViewModel()
 
                 PasswordResetScreen(
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedVisibilityScope = this,
                     onNavigateBack = {
                         navController.navigate(Screen.Login.route) {
                             popUpTo(Screen.Login.route)
@@ -149,6 +161,8 @@ fun AppNavigation(
                         hiltViewModel(parentEntry)
 
                     CredentialsRegistrationScreen(
+                        sharedTransitionScope = this@SharedTransitionLayout,
+                        animatedVisibilityScope = this,
                         onNavigateBack = {
                             sharedRegistrationViewModel.clearPendingGoogleRegistration()
                             navController.navigate(Screen.Welcome.route) {
@@ -179,6 +193,8 @@ fun AppNavigation(
                         hiltViewModel(parentEntry)
 
                     PersonalInfoRegistrationScreen(
+                        sharedTransitionScope = this@SharedTransitionLayout,
+                        animatedVisibilityScope = this,
                         onNavigateBack = {
                             sharedRegistrationViewModel.clearPendingGoogleRegistration()
                             navController.popBackStack()

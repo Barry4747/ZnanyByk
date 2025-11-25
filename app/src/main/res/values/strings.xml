@@ -13,7 +13,7 @@
     <string name="personal_info">Dane Personalne</string>
     <string name="first_name">Imię</string>
     <string name="last_name">Nazwisko</string>
-    <string name="phone_number_opt">Numer telefonu (opcjonalne)</string>
+    <string name="phone_number_opt">Numer telefonu</string>
     <string name="birthday_opt">Wybierz datę urodzenia (opcjonalne)</string>
     <string name="create_account">Utwórz konto</string>
     <string name="back">Wróć</string>
@@ -49,7 +49,7 @@
     <string name="want_to_be_trainer">Chcę zostać trenerem</string>
     <string name="choose_files">Wybierz pliki</string>
     <string name="trainer_upload_preview">Podgląd pliku</string>
-    <string name="select_categories_label">Wybierz kategorie:</string>
+    <string name="select_country">Wybierz kraj</string>
     <string name="fill_trainer_profile">Uzupełnij swój profil trenera</string>
     <string name="edit_personal_info">Edytuj dane personalne</string>
 
@@ -63,7 +63,9 @@
     <string name="error_loading_chats">Błąd podczas wczytywania chatów</string>
     <string name="error_failed_load_user_data">Nie udało się wczytać danych użytkownika</string>
     <string name="error_loading_trainers">Nie udało się załadować trenerów</string>
-    <string name="invalid_email_format">Błędny format adresu email</string>
+    <string name="invalid_email_format">Nieprawidłowy format email</string>
+    <string name="invalid_phone_number_format">Nieprawidłowy format numeru telefonu</string>
+    <string name="invalid_phone_number_length">Numer telefonu musi mieć od 6 do 15 cyfr</string>
 
 
     <!-- Kategorie trenera -->
@@ -130,4 +132,7 @@
     <string name="select_media_type">Wybierz typ pliku</string>
     <string name="select_images">Wybierz zdjęcia</string>
     <string name="select_videos">Wybierz wideo</string>
+    <string name="app_motto">Twój trener. Twoje skibidibi</string>
+    <string name="or">lub</string>
+    <string name="select_categories_label">wybierz kategorię</string>
 </resources>

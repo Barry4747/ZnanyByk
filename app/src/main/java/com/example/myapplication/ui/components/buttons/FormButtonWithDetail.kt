@@ -18,18 +18,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp // Import for sp
 
 private val BUTTON_HEIGHT = 56.dp
-private val BUTTON_CORNER_RADIUS = 8.dp
+private val BUTTON_CORNER_RADIUS = 12.dp
 private const val DISABLED_CONTAINER_ALPHA = 0.12f
 private const val DISABLED_CONTENT_ALPHA = 0.38f
 private val BORDER_WIDTH = 1.dp
 private val HORIZONTAL_PADDING = 16.dp
-private val VERTICAL_PADDING = 8.dp
-private val FORM_BUTTON_TEXT_SIZE = 14.sp
+private val VERTICAL_PADDING = 16.dp
 
 
 @Composable
@@ -56,7 +55,7 @@ fun FormButtonWithDetail(
         border = BorderStroke(
             width = BORDER_WIDTH,
             color = if (enabled) {
-                MaterialTheme.colorScheme.outline
+                Color.Gray
             } else {
                 MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_CONTAINER_ALPHA)
             }
@@ -70,9 +69,8 @@ fun FormButtonWithDetail(
         ) {
             Text(
                 text = text,
-                style = MaterialTheme.typography.bodyLarge, // Base style
-                fontSize = FORM_BUTTON_TEXT_SIZE, // Overridden size
-                color = MaterialTheme.colorScheme.onSurface
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.Black
             )
 
             Row(
@@ -81,13 +79,12 @@ fun FormButtonWithDetail(
             ) {
                 Text(
                     text = detail,
-                    style = MaterialTheme.typography.bodyLarge, // Base style
-                    fontSize = FORM_BUTTON_TEXT_SIZE, // Overridden size
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
                 )
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null, // Decorative
+                    contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
