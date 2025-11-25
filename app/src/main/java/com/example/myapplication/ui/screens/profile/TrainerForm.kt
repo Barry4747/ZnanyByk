@@ -26,8 +26,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -80,38 +78,20 @@ fun TrainerForm(
     onSubmit: () -> Unit,
     submitTextRes: Int,
     submitEnabled: Boolean,
-    onNavigateBack: () -> Unit,
-    errorMessage: String? = null,
-    successMessage: String? = null
+    onNavigateBack: () -> Unit
 ) {
     val context = LocalContext.current
 
     Box(modifier = modifier.fillMaxSize().imePadding()) {
-        Row(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            MainBackButton(onClick = onNavigateBack)
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                text = userName.ifBlank { stringResource(R.string.placeholder_username) },
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 16.dp),
+                .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(80.dp)) // Space for back button header
 
             Text(
                 text = stringResource(titleRes),
@@ -142,16 +122,16 @@ fun TrainerForm(
             Spacer(modifier = Modifier.height(8.dp))
 
             // --- GYM SELECTOR (LOOKS LIKE DROPDOWN) ---
+            // FIXED: Używamy Boxa z nakładką (overlay), aby przechwycić kliknięcie
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(enabled = !isLoading) { onGymClick() }
+                modifier = Modifier.fillMaxWidth()
             ) {
                 MainFormTextField(
                     value = selectedGymName ?: stringResource(R.string.my_gym),
-                    onValueChange = {},
+                    onValueChange = {}, // Ignorowane, bo readOnly
                     label = stringResource(R.string.my_gym),
-                    readOnly = true,
+                    enabled = true, // Pozostawiamy true dla estetyki (nie wyszarzone)
+                    readOnly = true, // Klawiatura się nie otworzy
                     trailingIcon = {
                         Icon(
                             imageVector = Icons.Default.ArrowDropDown,
@@ -159,6 +139,13 @@ fun TrainerForm(
                         )
                     },
                     modifier = Modifier.fillMaxWidth()
+                )
+
+                // Niewidoczna nakładka, która przechwytuje kliknięcie
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clickable(enabled = !isLoading) { onGymClick() }
                 )
             }
 
@@ -204,13 +191,12 @@ fun TrainerForm(
                     Box(modifier = Modifier.height(80.dp)) {
                         LazyRow(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp), // Increased spacing
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Define standard styling modifier
                             val mediaShape = RoundedCornerShape(12.dp)
                             val mediaModifier = Modifier
-                                .size(80.dp) // Slightly bigger
+                                .size(80.dp)
                                 .clip(mediaShape)
                                 .border(1.dp, Color.LightGray, mediaShape)
 
@@ -223,12 +209,12 @@ fun TrainerForm(
                                             model = ImageRequest.Builder(context)
                                                 .data(url)
                                                 .crossfade(true)
-                                                .size(200) // Request slightly larger for quality
+                                                .size(200)
                                                 .build(),
                                             contentDescription = stringResource(R.string.trainer_upload_preview),
                                             placeholder = painterResource(R.drawable.image_placeholder),
                                             error = painterResource(R.drawable.image_placeholder),
-                                            contentScale = ContentScale.Crop, // Crop to fill box
+                                            contentScale = ContentScale.Crop,
                                             modifier = Modifier.fillMaxSize()
                                         )
                                     }
@@ -390,23 +376,25 @@ fun TrainerForm(
                 )
             }
 
-            if (errorMessage != null) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = errorMessage,
-                    color = Color.Red
-                )
-            }
-
-            if (successMessage != null) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = successMessage,
-                    color = Color.Green
-                )
-            }
 
             Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // Back button on top layer - always clickable
+        Row(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            MainBackButton(onClick = onNavigateBack)
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = userName.ifBlank { stringResource(R.string.placeholder_username) },
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold
+            )
         }
     }
 }

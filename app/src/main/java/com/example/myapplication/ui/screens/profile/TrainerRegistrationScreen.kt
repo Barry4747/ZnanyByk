@@ -20,6 +20,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -73,6 +75,8 @@ fun TrainerRegistrationScreen(
     var showGymDialog by remember { mutableStateOf(false) }
     var showMediaPicker by remember { mutableStateOf(false) }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
     val context = LocalContext.current
     val imageLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris: List<Uri>? ->
         if (!uris.isNullOrEmpty()) viewModel.uploadMedias(context, uris)
@@ -85,51 +89,71 @@ fun TrainerRegistrationScreen(
 
     val state by viewModel.state.collectAsState()
 
-    TrainerForm(
-        modifier = modifier,
-        userName = state.userName,
-        titleRes = R.string.fillout_trainer_profile,
-        hourlyRate = hourlyRate,
-        onHourlyRateChange = { input -> hourlyRate = input.filter { it.isDigit() } },
-        selectedGymName = selectedGym?.gymName,
-        onGymClick = { showGymDialog = true },
-        description = description,
-        onDescriptionChange = { description = it },
-        experienceYears = experienceYears,
-        onExperienceChange = { input -> experienceYears = input.filter { it.isDigit() } },
-        selectedCategories = selectedCategories,
-        onCategoryDialogOpen = { showDialog = true },
-        existingImages = emptyList(),
-        uploadedImages = state.uploadedImages,
-        selectedImages = state.selectedImages,
-        isVideoUri = { uri -> viewModel.isVideoUri(context, uri) },
-        isVideoUrl = { url -> viewModel.isVideoUrl(url) },
-        onRemoveUploadedImage = { viewModel.removeUploadedMedia(it) },
-        onRemoveSelectedImage = { viewModel.removeSelectedMedia(it) },
-        onMediaPickerOpen = { showMediaPicker = true },
-        isLoading = state.isLoading,
-        isUploadingImages = state.isUploadingImages,
-        onSubmit = {
-            viewModel.submitTrainerProfile(
-                hourlyRate = hourlyRate,
-                gymId = selectedGym?.id,
-                description = description,
-                experienceYears = experienceYears,
-                selectedCategories = selectedCategories.map { it.name },
-                images = state.uploadedImages
+    LaunchedEffect(state.errorMessage) {
+        state.errorMessage?.let { error ->
+            snackbarHostState.showSnackbar(
+                message = error,
+                withDismissAction = true
             )
-        },
-        submitTextRes = R.string.confirm_trainer_profile_creation,
-        submitEnabled = hourlyRate.isNotBlank() && description.isNotBlank() && experienceYears.isNotBlank() && !state.isUploadingImages,
-        onNavigateBack = onNavigateBack,
-        errorMessage = state.errorMessage,
-        successMessage = state.successMessage
-    )
+        }
+    }
 
-    LaunchedEffect(key1 = state.successMessage) {
-        if (state.successMessage != null) {
+    LaunchedEffect(state.successMessage) {
+        state.successMessage?.let { success ->
+            snackbarHostState.showSnackbar(
+                message = success,
+                withDismissAction = true
+            )
             onSubmit()
         }
+    }
+
+    Box {
+        TrainerForm(
+            modifier = modifier,
+            userName = state.userName,
+            titleRes = R.string.fillout_trainer_profile,
+            hourlyRate = hourlyRate,
+            onHourlyRateChange = { input -> hourlyRate = input.filter { it.isDigit() } },
+            selectedGymName = selectedGym?.gymName,
+            onGymClick = { showGymDialog = true },
+            description = description,
+            onDescriptionChange = { description = it },
+            experienceYears = experienceYears,
+            onExperienceChange = { input -> experienceYears = input.filter { it.isDigit() } },
+            selectedCategories = selectedCategories,
+            onCategoryDialogOpen = { showDialog = true },
+            existingImages = emptyList(),
+            uploadedImages = state.uploadedImages,
+            selectedImages = state.selectedImages,
+            isVideoUri = { uri -> viewModel.isVideoUri(context, uri) },
+            isVideoUrl = { url -> viewModel.isVideoUrl(url) },
+            onRemoveUploadedImage = { viewModel.removeUploadedMedia(it) },
+            onRemoveSelectedImage = { viewModel.removeSelectedMedia(it) },
+            onMediaPickerOpen = { showMediaPicker = true },
+            isLoading = state.isLoading,
+            isUploadingImages = state.isUploadingImages,
+            onSubmit = {
+                viewModel.submitTrainerProfile(
+                    hourlyRate = hourlyRate,
+                    gymId = selectedGym?.id,
+                    description = description,
+                    experienceYears = experienceYears,
+                    selectedCategories = selectedCategories.map { it.name },
+                    images = state.uploadedImages
+                )
+            },
+            submitTextRes = R.string.confirm_trainer_profile_creation,
+            submitEnabled = hourlyRate.isNotBlank() && description.isNotBlank() && experienceYears.isNotBlank() && !state.isUploadingImages,
+            onNavigateBack = onNavigateBack
+        )
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 16.dp)
+        )
     }
 
     if (showGymDialog) {
