@@ -17,13 +17,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.R
 
 private val BUTTON_HEIGHT = 56.dp
-private val BUTTON_CORNER_RADIUS = 4.dp
+private val BUTTON_CORNER_RADIUS = 12.dp
 private val BORDER_WIDTH = 1.dp
 private val HORIZONTAL_PADDING = 16.dp
 private val VERTICAL_PADDING = 16.dp
@@ -41,7 +42,6 @@ fun FormButton(
         onClick = onClick,
         enabled = enabled,
         modifier = modifier
-            .fillMaxWidth()
             .height(BUTTON_HEIGHT),
         shape = RoundedCornerShape(BUTTON_CORNER_RADIUS),
         colors = ButtonDefaults.outlinedButtonColors(
@@ -53,7 +53,7 @@ fun FormButton(
         border = BorderStroke(
             width = BORDER_WIDTH,
             color = if (enabled) {
-                MaterialTheme.colorScheme.outline
+                Color.Gray
             } else {
                 MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_CONTAINER_ALPHA)
             }

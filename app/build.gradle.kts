@@ -100,6 +100,8 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation("com.google.android.libraries.places:places:3.4.0")
     implementation(libs.androidx.compose.ui.text)
+    implementation("androidx.compose.ui:ui:1.7.5")
+    implementation("androidx.compose.animation:animation:1.7.5")
     implementation("com.google.accompanist:accompanist-permissions:0.34.0")
     implementation(libs.androidx.compose.foundation.layout)
     testImplementation(libs.junit)

@@ -18,7 +18,7 @@ fun MainTrainerMarker(
         state = markerState,
         title = title,
         snippet = snippet,
-        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET),
+        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
         onClick = { marker ->
             onClick()
             true

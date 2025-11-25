@@ -9,10 +9,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.R
@@ -29,7 +31,7 @@ fun CategorySelectionDialog(
         modifier = Modifier.widthIn(min = 360.dp, max = 600.dp),
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.ok))
+                Text(stringResource(R.string.ok), color = Color.Black)
             }
         },
         title = { Text(stringResource(R.string.choose_category)) },
@@ -47,7 +49,13 @@ fun CategorySelectionDialog(
                         FilterChip(
                             selected = category in selectedCategories,
                             onClick = { onCategoryClick(category) },
-                            label = { Text(stringResource(category.labelRes)) }
+                            label = { Text(stringResource(category.labelRes)) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = Color.Black,
+                                selectedLabelColor = Color.White,
+                                containerColor = Color.White,
+                                labelColor = Color.Black
+                            )
                         )
                     }
                 }
@@ -55,4 +63,3 @@ fun CategorySelectionDialog(
         }
     )
 }
-
