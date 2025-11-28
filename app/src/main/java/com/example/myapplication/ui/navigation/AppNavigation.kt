@@ -48,6 +48,7 @@ import com.example.myapplication.viewmodel.MapViewModel
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import com.example.myapplication.ui.screens.booking.BookingScreen
+import com.example.myapplication.ui.screens.booking.PaymentScreen
 
 private const val ANIMATION_DURATION = 400
 
@@ -300,10 +301,33 @@ fun AppNavigation(
                         BookingScreen(
                             trainerId = trainerId,
                             onNavigateToPayment = { tId, dateMillis, time ->
-                                // TODO: nawigacja do platnosci
-                                android.util.Log.d("NAV", "Przejście do płatności: $tId, $dateMillis, $time")
+                                navController.navigate("payment/$tId/$dateMillis/$time")
                             },
                             onNavigateBack = navController::popBackStack
+                        )
+                    }
+                    composable(
+                        route = "payment/{trainerId}/{dateMillis}/{time}",
+                        arguments = listOf(
+                            navArgument("trainerId") { type = NavType.StringType },
+                            navArgument("dateMillis") { type = NavType.LongType },
+                            navArgument("time") { type = NavType.StringType }
+                        )
+                    ) { backStackEntry ->
+                        val trainerId = backStackEntry.arguments?.getString("trainerId") ?: return@composable
+                        val dateMillis = backStackEntry.arguments?.getLong("dateMillis") ?: return@composable
+                        val time = backStackEntry.arguments?.getString("time") ?: return@composable
+
+                        PaymentScreen(
+                            trainerId = trainerId,
+                            dateMillis = dateMillis,
+                            time = time,
+                            onNavigateBack = { navController.popBackStack() },
+                            onPaymentSuccess = {
+                                navController.navigate("home_flow") {
+                                    popUpTo("home_flow") { inclusive = true }
+                                }
+                            }
                         )
                     }
 

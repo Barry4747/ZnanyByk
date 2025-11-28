@@ -1,10 +1,6 @@
-package com.example.myapplication.viewmodel
+package com.example.myapplication.viewmodel.booking
 
-import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.model.trainings.Appointment
 import com.example.myapplication.data.model.trainings.TrainingSlot
 import com.example.myapplication.data.model.trainings.WeeklySchedule
@@ -14,11 +10,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Date
 import javax.inject.Inject
 
 data class BookingUiState(
@@ -76,13 +72,13 @@ class BookingViewModel @Inject constructor(
         val dayOfWeek = date.dayOfWeek
 
         val rawSlots = when (dayOfWeek) {
-            java.time.DayOfWeek.MONDAY -> schedule.monday
-            java.time.DayOfWeek.TUESDAY -> schedule.tuesday
-            java.time.DayOfWeek.WEDNESDAY -> schedule.wednesday
-            java.time.DayOfWeek.THURSDAY -> schedule.thursday
-            java.time.DayOfWeek.FRIDAY -> schedule.friday
-            java.time.DayOfWeek.SATURDAY -> schedule.saturday
-            java.time.DayOfWeek.SUNDAY -> schedule.sunday
+            DayOfWeek.MONDAY -> schedule.monday
+            DayOfWeek.TUESDAY -> schedule.tuesday
+            DayOfWeek.WEDNESDAY -> schedule.wednesday
+            DayOfWeek.THURSDAY -> schedule.thursday
+            DayOfWeek.FRIDAY -> schedule.friday
+            DayOfWeek.SATURDAY -> schedule.saturday
+            DayOfWeek.SUNDAY -> schedule.sunday
             else -> emptyList()
         } ?: emptyList()
 
@@ -91,14 +87,14 @@ class BookingViewModel @Inject constructor(
             appointmentDate == date
         }.mapNotNull { it.time }
 
-        val nowTime = java.time.LocalTime.now()
+        val nowTime = LocalTime.now()
         val isToday = date == LocalDate.now()
 
         val availableSlots = rawSlots.filter { slot ->
             val isTaken = takenTimes.contains(slot.time)
 
             val slotTime = try {
-                java.time.LocalTime.parse(slot.time, DateTimeFormatter.ofPattern("HH:mm"))
+                LocalTime.parse(slot.time, DateTimeFormatter.ofPattern("HH:mm"))
             } catch (e: Exception) { null }
 
             val isPast = if (isToday && slotTime != null) slotTime.isBefore(nowTime) else false
@@ -110,7 +106,7 @@ class BookingViewModel @Inject constructor(
             it.copy(availableSlots = availableSlots, isLoading = false)
         }
     }
-    
+
     override fun onCleared() {
         super.onCleared()
         repository.weeklySchedule.removeObserver(weeklyScheduleObserver)

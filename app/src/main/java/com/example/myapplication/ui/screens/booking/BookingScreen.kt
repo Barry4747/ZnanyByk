@@ -11,21 +11,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.ui.components.MainTopBar
-import com.example.myapplication.viewmodel.BookingViewModel
+import com.example.myapplication.ui.components.buttons.MainButton
+import com.example.myapplication.viewmodel.booking.BookingViewModel
 import java.time.Instant
-import java.time.LocalDate
 import java.time.ZoneId
-import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookingScreen(
     trainerId: String,
-    onNavigateToPayment: (String, Long, String) -> Unit, // trainerId, dateMillis, time
+    onNavigateToPayment: (String, Long, String) -> Unit,
     onNavigateBack: () -> Unit,
     viewModel: BookingViewModel = hiltViewModel()
 ) {
-    // Inicjalizacja ViewModel
     LaunchedEffect(trainerId) {
         viewModel.init(trainerId)
     }
@@ -35,7 +33,6 @@ fun BookingScreen(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
 
-    // Nasłuchiwanie zmian w DatePicker i przekazywanie do ViewModel
     LaunchedEffect(datePickerState.selectedDateMillis) {
         datePickerState.selectedDateMillis?.let { millis ->
             val selectedDate = Instant.ofEpochMilli(millis)
@@ -50,10 +47,9 @@ fun BookingScreen(
             MainTopBar(onNavigateBack = onNavigateBack, text="Umów wizytę" )
         },
         bottomBar = {
-            Button(
+            MainButton(
                 onClick = {
                     state.selectedSlot?.let { slot ->
-                        // Konwersja LocalDate na long (timestamp) dla łatwego przesyłania
                         val dateMillis = state.selectedDate
                             .atStartOfDay(ZoneId.systemDefault())
                             .toInstant()
@@ -69,10 +65,9 @@ fun BookingScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                enabled = state.selectedSlot != null
-            ) {
-                Text(text = "Przejdź do płatności")
-            }
+                enabled = state.selectedSlot != null,
+                text = "Przejdź do płatności"
+            )
         }
     ) { paddingValues ->
         Column(

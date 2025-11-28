@@ -171,7 +171,7 @@ fun ProfileScreen(
                 onClick = { /* No logic */ }
             )
             // TODO mati zobacz se to
-            AlternateButton(
+            if (state.userRole == "TRAINER") AlternateButton(
                 text = "Edytuj grafik trenera",
                 onClick = { onEditSchedule() },
             )
