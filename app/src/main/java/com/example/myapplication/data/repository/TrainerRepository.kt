@@ -191,7 +191,7 @@ class TrainerRepository @Inject constructor() {
         query: String = "",
         minRating: Float = 0.0f,
         minPrice: Int = 0,
-        maxPrice: Int = 8000,
+        maxPrice: Int = 1000,
         categories: Set<String> = emptySet()
     ): Result<List<Trainer>> {
         return try {

@@ -1,6 +1,13 @@
 package com.example.myapplication.ui.screens.home
 
+import android.media.MediaPlayer
+import android.net.Uri
 import android.util.Log
+import android.view.Gravity
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.widget.FrameLayout
+import android.widget.MediaController
+import android.widget.VideoView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -30,8 +37,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,9 +48,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -49,14 +60,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.myapplication.R
 import com.example.myapplication.ui.components.dialogs.RatingDialog
 import com.example.myapplication.viewmodel.TrainersViewModel
+import androidx.core.net.toUri
+
+
+data class GalleryItem(
+    val uri: String,
+    val isVideo: Boolean
+)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -86,8 +109,11 @@ fun TrainerDetailScreen(
     }
 
     if (selectedImageForZoom != null) {
-        FullScreenImageDialog(
-            imageUrl = selectedImageForZoom!!,
+        val isVideo = viewModel.isVideoUrl(selectedImageForZoom!!)
+        Log.d("TrainerDetailScreen", "Opening full screen media. URL: $selectedImageForZoom, isVideo: $isVideo")
+        FullScreenMediaDialog(
+            mediaUrl = selectedImageForZoom!!,
+            isVideo = isVideo,
             onDismiss = { selectedImageForZoom = null }
         )
     }
@@ -99,16 +125,23 @@ fun TrainerDetailScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
             ) {
-                val imageUrl = if (selectedTrainer.images?.isNotEmpty() == true) {
-                    selectedTrainer.images[0]
+                val imageUrl: Any? = if (selectedTrainer.images?.isNotEmpty() == true) {
+                    selectedTrainer.images!!.let { images ->
+                        if (viewModel.isVideoUrl(images[0])) {
+                            R.drawable.placeholder
+                        } else {
+                            images[0]
+                        }
+                    }
                 } else {
-                    null
+                    R.drawable.placeholder
                 }
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .fillMaxSize()
-                        .height(300.dp)
+                        .height(250.dp)
                         .background(MaterialTheme.colorScheme.surface)
                         .border(1.dp, MaterialTheme.colorScheme.outlineVariant)
                 ) {
@@ -210,7 +243,19 @@ fun TrainerDetailScreen(
                         style = MaterialTheme.typography.bodyLarge
                     )
 
-                    val galleryImages = selectedTrainer.images?.drop(1) ?: emptyList()
+                    var galleryImages: List<String> = selectedTrainer.images ?: emptyList()
+
+
+                    if (galleryImages.isNotEmpty()) {
+                        val firstItem = galleryImages.first()
+
+                        if (!viewModel.isVideoUrl(firstItem)) {
+                            galleryImages = galleryImages.drop(1)
+                        }
+                    }
+
+                    Log.d("TrainerDetailScreen", "Gallery images: $galleryImages")
+
                     if (galleryImages.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(24.dp))
                         Text(
@@ -232,9 +277,11 @@ fun TrainerDetailScreen(
                             userScrollEnabled = false
                         ) {
                             items(galleryImages) { imageUrl ->
+                                val isVideo = viewModel.isVideoUrl(imageUrl)
+                                Log.d("TrainerDetailScreen", "Processing gallery item: $imageUrl, isVideo: $isVideo")
                                 GalleryImage(
-                                    imageUrl = imageUrl,
-                                    onClick = {selectedImageForZoom = imageUrl }
+                                    item = GalleryItem(uri = imageUrl, isVideo = isVideo),
+                                    onClick = {selectedImageForZoom =  imageUrl}
                                 )
                             }
                         }
@@ -325,62 +372,119 @@ fun RatingIndicator(
 
 @Composable
 fun GalleryImage(
-    imageUrl: String,
-    onClick: () -> Unit,
+    item: GalleryItem,
+    onClick: (GalleryItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp)) // Najpierw nadaj kształt
-            .background(MaterialTheme.colorScheme.surface) // Potem tło
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surface)
             .border(
                 1.dp,
                 MaterialTheme.colorScheme.outlineVariant,
                 RoundedCornerShape(12.dp)
             )
-            .clickable(onClick = onClick)
+            .clickable { onClick(item) }
     ) {
-        AsyncImage(
-            model = imageUrl,
-            contentDescription = "Zdjęcie z galerii trenera",
-            modifier = Modifier.fillMaxWidth(), // Wypełnij cały Box
-            contentScale = ContentScale.FillWidth
-        )
-    }
 
+        AsyncImage(
+            model = item.uri,
+            contentDescription = if (item.isVideo) "Wideo z galerii" else "Zdjęcie z galerii",
+            modifier = Modifier.fillMaxWidth(),
+            contentScale = ContentScale.Crop
+        )
+
+
+        if (item.isVideo) {
+            Log.d("GalleryImage", "Showing play button for video")
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(Color.Black.copy(alpha = 0.3f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.PlayArrow,
+                    contentDescription = "Odtwórz wideo",
+                    tint = Color.White,
+                    modifier = Modifier.size(48.dp)
+                )
+            }
+        }
+    }
 }
 
 @Composable
-fun FullScreenImageDialog(
-    imageUrl: String,
+fun FullScreenMediaDialog(
+    mediaUrl: String,
+    isVideo: Boolean,
     onDismiss: () -> Unit
 ) {
-    // Używamy Dialog z właściwościami pełnoekranowymi
     androidx.compose.ui.window.Dialog(
         onDismissRequest = onDismiss,
         properties = androidx.compose.ui.window.DialogProperties(
-            usePlatformDefaultWidth = false // Pozwala zająć cały ekran
+            usePlatformDefaultWidth = false
         )
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black) // Czarne tło
-                .clickable { onDismiss() }, // Kliknięcie w tło zamyka
+                .background(Color.Black)
+                .clickable { onDismiss() },
             contentAlignment = Alignment.Center
         ) {
-            AsyncImage(
-                model = imageUrl,
-                contentDescription = "Powiększone zdjęcie",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(), // Zachowaj proporcje
-                contentScale = ContentScale.Fit // Dopasuj do ekranu bez przycinania
-            )
+            if (isVideo) {
+                ExoPlayerView(mediaUrl)
+            } else {
+                Log.d("FullScreenMediaDialog", "Showing image: $mediaUrl")
+                AsyncImage(
+                    model = mediaUrl,
+                    contentDescription = "Powiększone zdjęcie",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
+                    contentScale = ContentScale.Fit
+                )
+            }
         }
     }
 }
 
+@Composable
+fun ExoPlayerView(mediaUrl: String) {
+    val context = LocalContext.current
 
+    // 1. Inicjalizacja ExoPlayera
+    val exoPlayer = remember {
+        ExoPlayer.Builder(context).build().apply {
+            setMediaItem(MediaItem.fromUri(mediaUrl.toUri()))
+            prepare()
+        }
+    }
 
+    // 2. Zarządzanie cyklem życia (KLUCZOWE)
+    DisposableEffect(key1 = Unit) {
+        // Rozpocznij odtwarzanie, gdy kompozycja jest aktywna
+        exoPlayer.playWhenReady = true
+
+        onDispose {
+            // Zatrzymaj i zwolnij zasoby, gdy kompozycja znika
+            exoPlayer.release()
+        }
+    }
+
+    // 3. Wyświetlenie odtwarzacza za pomocą AndroidView
+    AndroidView(
+        factory = {
+            // PlayerView to UI opakowujące ExoPlayer
+            PlayerView(context).apply {
+                player = exoPlayer
+                useController = true
+                layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+            }
+        },
+        modifier = Modifier.fillMaxSize()
+    )
+}

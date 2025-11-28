@@ -25,12 +25,14 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -60,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.placeholder.placeholder
 import coil.compose.AsyncImagePainter
+import coil.compose.SubcomposeAsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.imageLoader
 import coil.request.ImageRequest
@@ -294,25 +297,54 @@ fun TrainerProfileCard(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(180.dp)
+                        .height(250.dp)
                 ) {
                     val imageUrl = trainer.images?.firstOrNull()
-                    val painter = rememberAsyncImagePainter(model = imageUrl)
+                    val isVideo = imageUrl?.contains(".mp4", ignoreCase = true) == true
 
-                    val showPlaceholder = painter.state is AsyncImagePainter.State.Loading || imageUrl == null
+                    if (imageUrl != null) {
+                        SubcomposeAsyncImage(
+                            model = imageUrl,
+                            contentDescription = "Zdjęcie trenera: ${trainer.firstName} ${trainer.lastName}",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop,
+                            loading = {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                                }
+                            },
+                            error = {
+                                Image(
+                                    painter = painterResource(id = R.drawable.placeholder),
+                                    contentDescription = "Błąd ładowania",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(id = R.drawable.placeholder),
+                            contentDescription = "Brak zdjęcia",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+
+                    if (isVideo) {
+                        Image(
+                            painter = painterResource(id = R.drawable.placeholder),
+                            contentDescription = "Brak zdjęcia",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
 
 
-                    Image(
-                        painter = painter,
-                        contentDescription = "Zdjęcie trenera: ${trainer.firstName} ${trainer.lastName}",
-                        modifier = Modifier.fillMaxSize().simplePlaceholder(
-                            visible = showPlaceholder,
-                            color = MaterialTheme.colorScheme.surface,
-                        ),
-                        contentScale = ContentScale.Crop
-                    )
-
-                                RatingIndicator(
+                    RatingIndicator(
                         rating = trainer.avgRating ?: "0.0", modifier = Modifier
                                 .align(Alignment.TopEnd)
                                 .padding(8.dp)

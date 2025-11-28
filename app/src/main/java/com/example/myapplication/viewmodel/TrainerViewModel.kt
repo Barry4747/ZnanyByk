@@ -60,7 +60,7 @@ data class TrainersState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val priceMin: Int = 0,
-    val priceMax: Int = 8000,
+    val priceMax: Int = 1000,
     val selectedCategories: Set<String> = emptySet(),
     val minRating: Float = 0.0f,
     val sortBy: SortOption = SortOption.RATING_DESC,
@@ -251,5 +251,9 @@ class TrainersViewModel @Inject constructor(
                 _trainersState.update { it.copy(errorMessage = "Nie udało się odświeżyć danych.") }
             }
         }
+    }
+
+    fun isVideoUrl(url: String): Boolean {
+        return url.contains(".mp4", ignoreCase = true)
     }
 }

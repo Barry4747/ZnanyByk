@@ -95,7 +95,8 @@ dependencies {
 
     implementation(libs.wheelpickercompose)
     implementation(libs.coil.compose)
-
+    implementation("androidx.media3:media3-exoplayer:1.8.0") // Sprawdź aktualną wersję
+    implementation("androidx.media3:media3-ui:1.2.1")
     implementation(libs.maps.compose)
     implementation(libs.play.services.maps)
     implementation("com.google.android.libraries.places:places:3.4.0")
