@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.ui.components.MainTopBar
+import com.example.myapplication.ui.components.buttons.PaymentButton
 import com.example.myapplication.viewmodel.booking.PaymentUiState
 import com.example.myapplication.viewmodel.booking.PaymentViewModel
 import java.text.SimpleDateFormat
@@ -82,7 +83,7 @@ fun PaymentScreen(
                             Text("Szczegóły rezerwacji", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            RowItem("Trener ID", trainerId.take(8) + "...") // Skrócone ID
+                            RowItem("Trener ID", trainerId.take(8) + "...")
                             RowItem("Data", dateString)
                             RowItem("Godzina", time)
                             RowItem("Czas trwania", "60 min")
@@ -116,24 +117,13 @@ fun PaymentScreen(
                         )
                     }
 
-                    Button(
+                    PaymentButton(
+                        isProcessing = state is PaymentUiState.Processing,
                         onClick = {
                             viewModel.processPayment(trainerId, dateMillis, time)
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
-                        enabled = state !is PaymentUiState.Processing
-                    ) {
-                        if (state is PaymentUiState.Processing) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                        } else {
-                            Text("Potwierdź i zapłać")
                         }
-                    }
+                    )
+
                 }
             }
         }

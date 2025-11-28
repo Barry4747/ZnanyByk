@@ -22,7 +22,9 @@ data class BookingUiState(
     val selectedDate: LocalDate = LocalDate.now(),
     val availableSlots: List<TrainingSlot> = emptyList(),
     val selectedSlot: TrainingSlot? = null,
-    val trainerId: String = ""
+    val trainerId: String = "",
+    val schedule: WeeklySchedule = WeeklySchedule(),
+    val appointments: List<Appointment> = emptyList()
 )
 
 @HiltViewModel
@@ -34,10 +36,16 @@ class BookingViewModel @Inject constructor(
     val uiState: StateFlow<BookingUiState> = _uiState.asStateFlow()
 
     private val weeklyScheduleObserver = { schedule: WeeklySchedule ->
+        _uiState.update {
+            it.copy(schedule = schedule)
+        }
         calculateSlotsForDate(_uiState.value.selectedDate, schedule, repository.appointments.value ?: emptyList())
     }
 
     private val appointmentsObserver = { appointments: List<Appointment> ->
+        _uiState.update {
+            it.copy(appointments = appointments)
+        }
         calculateSlotsForDate(_uiState.value.selectedDate, repository.weeklySchedule.value ?: WeeklySchedule(), appointments)
     }
 

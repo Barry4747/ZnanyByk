@@ -8,12 +8,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.myapplication.data.model.trainings.WeeklySchedule
 import com.example.myapplication.ui.components.MainTopBar
 import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.viewmodel.booking.BookingViewModel
+import java.time.DayOfWeek
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,23 +34,64 @@ fun BookingScreen(
     }
 
     val state by viewModel.uiState.collectAsState()
-    val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = System.currentTimeMillis()
+
+val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = System.currentTimeMillis(),
+        selectableDates = remember(state.schedule, state.appointments) {
+            object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    val dateToCheck = Instant.ofEpochMilli(utcTimeMillis)
+                        .atZone(ZoneId.of("UTC"))
+                        .toLocalDate()
+
+                    val today = LocalDate.now()
+
+                    if (dateToCheck.isBefore(today)) return false
+
+                    val rawSlots = when (dateToCheck.dayOfWeek) {
+                        DayOfWeek.MONDAY -> state.schedule.monday
+                        DayOfWeek.TUESDAY -> state.schedule.tuesday
+                        DayOfWeek.WEDNESDAY -> state.schedule.wednesday
+                        DayOfWeek.THURSDAY -> state.schedule.thursday
+                        DayOfWeek.FRIDAY -> state.schedule.friday
+                        DayOfWeek.SATURDAY -> state.schedule.saturday
+                        DayOfWeek.SUNDAY -> state.schedule.sunday
+                        else -> emptyList()
+                    } ?: emptyList()
+
+                    if (rawSlots.isEmpty()) return false
+
+                    val appointmentsOnDay = state.appointments.filter { appt ->
+                        val apptDate = appt.date?.toInstant()
+                            ?.atZone(ZoneId.systemDefault())
+                            ?.toLocalDate()
+                        apptDate == dateToCheck
+                    }
+
+                    val isFull = appointmentsOnDay.size >= rawSlots.size
+
+                    return !isFull
+                }
+
+                override fun isSelectableYear(year: Int): Boolean {
+                    return year >= LocalDate.now().year
+                }
+            }
+        }
     )
+
 
     LaunchedEffect(datePickerState.selectedDateMillis) {
         datePickerState.selectedDateMillis?.let { millis ->
             val selectedDate = Instant.ofEpochMilli(millis)
-                .atZone(ZoneId.systemDefault())
+                .atZone(ZoneId.of("UTC"))
                 .toLocalDate()
             viewModel.onDateSelected(selectedDate)
         }
     }
 
     Scaffold(
-        topBar = {
-            MainTopBar(onNavigateBack = onNavigateBack, text="Umów wizytę" )
-        },
+        topBar = { MainTopBar(onNavigateBack = onNavigateBack, text = "Umów trening") },
         bottomBar = {
             MainButton(
                 onClick = {
@@ -55,33 +101,27 @@ fun BookingScreen(
                             .toInstant()
                             .toEpochMilli()
 
-                        onNavigateToPayment(
-                            state.trainerId,
-                            dateMillis,
-                            slot.time ?: ""
-                        )
+                        onNavigateToPayment(state.trainerId, dateMillis, slot.time ?: "")
                     }
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
                 enabled = state.selectedSlot != null,
                 text = "Przejdź do płatności"
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-        ) {
-            // 1. Kalendarz
+        Column(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
             DatePicker(
                 state = datePickerState,
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(horizontal = 16.dp),
                 showModeToggle = false,
                 title = null,
-                headline = null
+                headline = null,
+                colors = DatePickerDefaults.colors(
+                    disabledDayContentColor = Color.LightGray.copy(alpha = 0.6f),
+                    disabledSelectedDayContentColor = Color.Gray,
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             )
 
             HorizontalDivider()
@@ -92,14 +132,14 @@ fun BookingScreen(
                 modifier = Modifier.padding(16.dp)
             )
 
-            // 2. Wybór godziny
             if (state.isLoading) {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
             } else if (state.availableSlots.isEmpty()) {
                 Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-                    Text("Brak wolnych terminów w tym dniu.", color = MaterialTheme.colorScheme.secondary)
+                    Text(
+                        if (state.appointments.isNotEmpty()) "Brak wolnych miejsc w tym dniu." else "Wybierz datę.",
+                        color = MaterialTheme.colorScheme.secondary
+                    )
                 }
             } else {
                 LazyVerticalGrid(
@@ -113,13 +153,7 @@ fun BookingScreen(
                         FilterChip(
                             selected = isSelected,
                             onClick = { viewModel.onSlotSelected(slot) },
-                            label = {
-                                Text(
-                                    text = slot.time ?: "--:--",
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                                )
-                            },
+                            label = { Text(slot.time ?: "--:--", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = MaterialTheme.colorScheme.primary,
                                 selectedLabelColor = MaterialTheme.colorScheme.onPrimary
