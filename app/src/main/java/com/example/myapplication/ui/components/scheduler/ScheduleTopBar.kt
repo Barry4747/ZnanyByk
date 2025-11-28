@@ -15,9 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.myapplication.ui.components.buttons.MainBackButton
 
 @Composable
-fun ScheduleTopBar() {
+fun ScheduleTopBar(onNavigateBack: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -31,6 +32,8 @@ fun ScheduleTopBar() {
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            MainBackButton(onClick = onNavigateBack)
+
             Text(text = "Terminarz", style = MaterialTheme.typography.titleLarge)
         }
 

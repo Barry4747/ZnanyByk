@@ -53,6 +53,7 @@ fun ProfileScreen(
     onBecomeTrainer: () -> Unit = {},
     onEditTrainerProfile: () -> Unit = {},
     onLogout: () -> Unit = {},
+    onEditSchedule: () -> Unit = {}, //TODO mati zobacz se to
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
@@ -169,6 +170,12 @@ fun ProfileScreen(
                 enabled = false,
                 onClick = { /* No logic */ }
             )
+            // TODO mati zobacz se to
+            AlternateButton(
+                text = "Edytuj grafik trenera",
+                onClick = { onEditSchedule() },
+            )
+
         }
 
         Spacer(modifier = Modifier.height(32.dp))

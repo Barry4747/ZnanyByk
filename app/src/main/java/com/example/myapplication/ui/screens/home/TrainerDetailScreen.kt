@@ -86,6 +86,7 @@ data class GalleryItem(
 fun TrainerDetailScreen(
     onNavigateBack: () -> Unit,
     viewModel: TrainersViewModel,
+    onBookClick: (String) -> Unit
 ) {
     val trainersState by viewModel.trainersState.collectAsState()
     val selectedTrainer = trainersState.selectedTrainer
@@ -334,7 +335,7 @@ fun TrainerDetailScreen(
 
 
         Button(
-            onClick = { },
+            onClick = { onBookClick(selectedTrainer?.id ?: "") },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
