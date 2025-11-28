@@ -21,6 +21,7 @@ import coil.compose.AsyncImage
 import com.example.myapplication.R
 import com.example.myapplication.data.model.trainings.Appointment
 import com.example.myapplication.data.model.trainings.DayOfTheWeek
+import com.example.myapplication.ui.components.buttons.MessageButton
 import com.example.myapplication.viewmodel.trainer.ScheduleViewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -28,6 +29,7 @@ import java.util.*
 @Composable
 fun AppointmentCard(
     appointment: Appointment,
+    onAppointmentChatClick: (chatId: String, receiverId: String) -> Unit,
     viewModel: ScheduleViewModel = hiltViewModel()
 ) {
     val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
@@ -126,22 +128,44 @@ fun AppointmentCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                appointment.date?.let { date ->
-                    InfoRow(label = "Data", value = dateFormat.format(date))
+                Row (verticalAlignment = Alignment.CenterVertically){
+                    Icon(
+                        painter = painterResource(R.drawable.scheduler_grey),
+                        contentDescription = null,
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "$dayOfWeekText, ${dateFormat.format(appointment.date ?: Date())}"
+                    )
                 }
-
-                appointment.time?.let { time ->
-                    InfoRow(label = "Godzina", value = time)
+                Row (verticalAlignment = Alignment.CenterVertically){
+                    Icon(
+                        painter = painterResource(R.drawable.clock),
+                        contentDescription = null,
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "${appointment.time}, ${appointment.duration} min"
+                    )
                 }
+                Row (verticalAlignment = Alignment.CenterVertically){
+                    Icon(
+                        painter = painterResource(R.drawable.location_mark),
+                        contentDescription = null,
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
 
-                appointment.duration?.let { duration ->
-                    InfoRow(label = "Czas trwania", value = "$duration min")
-                }
-
-                if (dayOfWeekText.isNotEmpty()) {
-                    InfoRow(label = "Dzień tygodnia", value = dayOfWeekText)
+//                    Text(
+//                        text = "${}, ${dateFormat.format(appointment.date ?: Date())}"
+//                    )
                 }
             }
+
+            MessageButton(
+                userId = appointment.clientId.toString(),
+                trainerId = appointment.trainerId.toString(),
+                onAppointmentChatClick = onAppointmentChatClick
+            )
         }
     }
 }
@@ -201,8 +225,8 @@ fun AppointmentCardPreview() {
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            AppointmentCard(appointment = upcomingAppointment)
-            AppointmentCard(appointment = pastAppointment)
+            AppointmentCard(appointment = upcomingAppointment, onAppointmentChatClick = {} as (String, String) -> Unit)
+            AppointmentCard(appointment = pastAppointment, onAppointmentChatClick = {} as (String, String) -> Unit)
         }
     }
 }

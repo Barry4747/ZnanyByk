@@ -29,6 +29,7 @@ import com.example.myapplication.viewmodel.trainer.ScheduleViewModel
 @Composable
 fun TrainerScheduleScreen(
     modifier: Modifier = Modifier,
+    onNavigateBack: () -> Unit = {},
     viewModel: ScheduleViewModel = hiltViewModel()
 ) {
     LaunchedEffect(Unit) {
@@ -43,7 +44,7 @@ fun TrainerScheduleScreen(
     var selectedDay by remember { mutableStateOf("") }
 
     Column(modifier = modifier.fillMaxSize()) {
-        ScheduleTopBar()
+        ScheduleTopBar(onNavigateBack=onNavigateBack)
         ScheduleList(
             days = days,
             weeklySchedule = weeklySchedule,

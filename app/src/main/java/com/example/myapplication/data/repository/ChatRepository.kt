@@ -110,33 +110,31 @@ class ChatRepository @Inject constructor() {
         }
     }
 
-    suspend fun createChatIfNotExists(userA: String, userB: String): Result<String> {
-        return try {
-            val snapshot = chatsCollection
-                .whereArrayContains("users", userA)
-                .get()
-                .await()
+    suspend fun createChatIfNotExists(userA: String, userB: String): String {
+        val snapshot = chatsCollection
+            .whereArrayContains("users", userA)
+            .get()
+            .await()
 
-            val existingChat = snapshot.documents.firstOrNull { doc ->
-                val users = doc.get("users") as? List<*>
-                users?.contains(userB) == true
-            }
-
-            if (existingChat != null) {
-                Result.success(existingChat.id)
-            } else {
-                val chatData = mapOf(
-                    "users" to listOf(userA, userB),
-                    "lastMessage" to "",
-                    "lastTimestamp" to System.currentTimeMillis()
-                )
-                val newChatRef = chatsCollection.add(chatData).await()
-                Result.success(newChatRef.id)
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+        val existingChat = snapshot.documents.firstOrNull { doc ->
+            val users = doc.get("users") as? List<*>
+            users?.contains(userB) == true
         }
+
+        if (existingChat != null) {
+            return existingChat.id
+        }
+
+        val chatData = mapOf(
+            "users" to listOf(userA, userB),
+            "lastMessage" to "",
+            "lastTimestamp" to System.currentTimeMillis()
+        )
+
+        val newChatRef = chatsCollection.add(chatData).await()
+        return newChatRef.id
     }
+
 
     suspend fun markMessagesAsSeen(chatId: String, currentUserId: String) {
         val chatRef = chatsCollection.document(chatId)

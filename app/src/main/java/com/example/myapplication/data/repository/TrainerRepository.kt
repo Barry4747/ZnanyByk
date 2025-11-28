@@ -254,4 +254,4 @@ class TrainerRepository @Inject constructor() {
         } else {
             "0.00"
         }
-    }
+        }

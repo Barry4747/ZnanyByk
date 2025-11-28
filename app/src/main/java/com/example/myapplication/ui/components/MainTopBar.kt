@@ -1,4 +1,5 @@
-package com.example.myapplication.ui.components.scheduler
+package com.example.myapplication.ui.components
+
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -18,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.example.myapplication.ui.components.buttons.MainBackButton
 
 @Composable
-fun ScheduleTopBar(onNavigateBack: () -> Unit) {
+fun MainTopBar(onNavigateBack: () -> Unit, text: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -34,7 +35,7 @@ fun ScheduleTopBar(onNavigateBack: () -> Unit) {
         ) {
             MainBackButton(onClick = onNavigateBack)
 
-            Text(text = "Terminarz", style = MaterialTheme.typography.titleLarge)
+            Text(text = text, style = MaterialTheme.typography.titleLarge)
         }
 
         Box(

@@ -47,6 +47,8 @@ import com.example.myapplication.viewmodel.HomeViewModel
 import com.example.myapplication.viewmodel.MapViewModel
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import com.example.myapplication.ui.screens.booking.BookingScreen
+import com.example.myapplication.ui.screens.booking.PaymentScreen
 
 private const val ANIMATION_DURATION = 400
 
@@ -273,7 +275,7 @@ fun AppNavigation(
                         )
                     }
 
-                    composable(Screen.Trainer.route) { backStackEntry -> // Prosta ścieżka bez argumentów
+                    composable(Screen.Trainer.route) { backStackEntry ->
                         val parentEntry = remember(backStackEntry) {
                             navController.getBackStackEntry("home_flow")
                         }
@@ -284,6 +286,47 @@ fun AppNavigation(
                             viewModel = trainersViewModel,
                             onNavigateBack = {
                                 navController.popBackStack()
+                            },
+                            onBookClick = { trainerId ->
+                                navController.navigate("booking/$trainerId")
+                            }
+                        )
+                    }
+                    composable(
+                        route = "booking/{trainerId}",
+                        arguments = listOf(navArgument("trainerId") { type = NavType.StringType })
+                    ) { backStackEntry ->
+                        val trainerId = backStackEntry.arguments?.getString("trainerId") ?: return@composable
+
+                        BookingScreen(
+                            trainerId = trainerId,
+                            onNavigateToPayment = { tId, dateMillis, time ->
+                                navController.navigate("payment/$tId/$dateMillis/$time")
+                            },
+                            onNavigateBack = navController::popBackStack
+                        )
+                    }
+                    composable(
+                        route = "payment/{trainerId}/{dateMillis}/{time}",
+                        arguments = listOf(
+                            navArgument("trainerId") { type = NavType.StringType },
+                            navArgument("dateMillis") { type = NavType.LongType },
+                            navArgument("time") { type = NavType.StringType }
+                        )
+                    ) { backStackEntry ->
+                        val trainerId = backStackEntry.arguments?.getString("trainerId") ?: return@composable
+                        val dateMillis = backStackEntry.arguments?.getLong("dateMillis") ?: return@composable
+                        val time = backStackEntry.arguments?.getString("time") ?: return@composable
+
+                        PaymentScreen(
+                            trainerId = trainerId,
+                            dateMillis = dateMillis,
+                            time = time,
+                            onNavigateBack = { navController.popBackStack() },
+                            onPaymentSuccess = {
+                                navController.navigate("home_flow") {
+                                    popUpTo("home_flow") { inclusive = true }
+                                }
                             }
                         )
                     }
@@ -336,8 +379,31 @@ fun AppNavigation(
             }
 
             composable(Destination.SCHEDULER.route) {
-                AppointmentsScreen()
+                AppointmentsScreen(
+                    onAppointmentChatClick = { chatId, receiverId ->
+                        navController.navigate("chat/$chatId/$receiverId")
+                    }
+                )
             }
+
+            composable("trainer_schedule") {
+                TrainerScheduleScreen(
+                    onNavigateBack = {
+                        navController.navigate(Destination.USER.route) {
+                            popUpTo(Destination.USER.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            composable("appointments") {
+                AppointmentsScreen(
+                    onAppointmentChatClick = { chatId, receiverId ->
+                        navController.navigate("chat/$chatId/$receiverId")
+                    }
+                )
+            }
+
 
             composable("chats") {
                 ChatsListScreen(
@@ -387,7 +453,14 @@ fun AppNavigation(
                         navController.navigate(Screen.Welcome.route) {
                             popUpTo(0) { inclusive = true }
                         }
-                })
+                }, //TODO mati zobacz se to
+                        onEditSchedule = {
+                        navController.navigate("trainer_schedule") {
+                            launchSingleTop = true
+
+                        }
+                    }
+                    )
             }
 
             composable(Screen.LocationOnboarding.route) {
