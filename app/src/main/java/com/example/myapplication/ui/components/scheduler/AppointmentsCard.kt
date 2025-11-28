@@ -126,20 +126,36 @@ fun AppointmentCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                appointment.date?.let { date ->
-                    InfoRow(label = "Data", value = dateFormat.format(date))
+                Row (verticalAlignment = Alignment.CenterVertically){
+                    Icon(
+                        painter = painterResource(R.drawable.scheduler_grey),
+                        contentDescription = null,
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "$dayOfWeekText, ${dateFormat.format(appointment.date ?: Date())}"
+                    )
                 }
-
-                appointment.time?.let { time ->
-                    InfoRow(label = "Godzina", value = time)
+                Row (verticalAlignment = Alignment.CenterVertically){
+                    Icon(
+                        painter = painterResource(R.drawable.clock),
+                        contentDescription = null,
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "${appointment.time}, ${appointment.duration} min"
+                    )
                 }
+                Row (verticalAlignment = Alignment.CenterVertically){
+                    Icon(
+                        painter = painterResource(R.drawable.location_mark),
+                        contentDescription = null,
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
 
-                appointment.duration?.let { duration ->
-                    InfoRow(label = "Czas trwania", value = "$duration min")
-                }
-
-                if (dayOfWeekText.isNotEmpty()) {
-                    InfoRow(label = "Dzień tygodnia", value = dayOfWeekText)
+//                    Text(
+//                        text = "${}, ${dateFormat.format(appointment.date ?: Date())}"
+//                    )
                 }
             }
         }

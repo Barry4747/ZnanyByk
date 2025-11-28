@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -96,18 +97,15 @@ private fun RevoPicker(
     val visibleCount = 5
     val halfVisible = visibleCount / 2
 
-    // Dodaj puste elementy na początku i końcu, aby umożliwić przewijanie
     val paddedItems = List(halfVisible) { "" } + items + List(halfVisible) { "" }
     val adjustedInitialIndex = initialIndex + halfVisible
 
-    // Przewiń do pozycji wyśrodkowanej: targetIndex - halfVisible
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = (adjustedInitialIndex - halfVisible).coerceAtLeast(0)
     )
     val coroutine = rememberCoroutineScope()
     val density = LocalDensity.current
 
-    // Zgłoś początkową wartość
     LaunchedEffect(Unit) {
         onSnapped(initialIndex)
     }
@@ -133,7 +131,6 @@ private fun RevoPicker(
                 val distance = abs(centerIndex - index)
                 val scale = 1f - (distance * 0.15f).coerceAtLeast(0f)
 
-                // Ukryj puste elementy padding
                 val item = paddedItems[index]
                 if (item.isNotEmpty()) {
                     Text(
@@ -141,7 +138,7 @@ private fun RevoPicker(
                         fontSize = (16 * scale).sp,
                         fontWeight = if (distance == 0) FontWeight.Bold else FontWeight.Normal,
                         color = if (distance == 0)
-                            MaterialTheme.colorScheme.primary
+                            Color.Black
                         else
                             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                         modifier = Modifier
@@ -167,7 +164,6 @@ private fun RevoPicker(
 
             coroutine.launch {
                 listState.animateScrollToItem(targetIndex - halfVisible)
-                // Zwróć indeks bez paddingu
                 onSnapped((targetIndex - halfVisible).coerceIn(0, items.lastIndex))
             }
         }
