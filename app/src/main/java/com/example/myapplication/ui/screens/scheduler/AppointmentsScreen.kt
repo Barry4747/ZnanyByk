@@ -25,6 +25,7 @@ import java.time.LocalDate
 
 @Composable
 fun AppointmentsScreen(
+    onAppointmentChatClick: (chatId: String, receiverId: String) -> Unit,
     viewModel: ScheduleViewModel = hiltViewModel()
 ) {
     var showMonthYearPicker by remember { mutableStateOf(false) }
@@ -99,7 +100,7 @@ fun AppointmentsScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(appointments.sortedBy { it.date }) { appointment ->
-                        AppointmentCard(appointment = appointment)
+                        AppointmentCard(appointment = appointment, onAppointmentChatClick=onAppointmentChatClick)
                     }
                 }
             }

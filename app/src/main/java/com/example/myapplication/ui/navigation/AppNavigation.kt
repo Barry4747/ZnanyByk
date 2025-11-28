@@ -336,8 +336,13 @@ fun AppNavigation(
             }
 
             composable(Destination.SCHEDULER.route) {
-                AppointmentsScreen()
+                AppointmentsScreen(
+                    onAppointmentChatClick = { chatId, receiverId ->
+                        navController.navigate("chat/$chatId/$receiverId")
+                    }
+                )
             }
+
 
             composable("chats") {
                 ChatsListScreen(

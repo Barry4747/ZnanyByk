@@ -21,6 +21,7 @@ import coil.compose.AsyncImage
 import com.example.myapplication.R
 import com.example.myapplication.data.model.trainings.Appointment
 import com.example.myapplication.data.model.trainings.DayOfTheWeek
+import com.example.myapplication.ui.components.buttons.MessageButton
 import com.example.myapplication.viewmodel.trainer.ScheduleViewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -28,6 +29,7 @@ import java.util.*
 @Composable
 fun AppointmentCard(
     appointment: Appointment,
+    onAppointmentChatClick: (chatId: String, receiverId: String) -> Unit,
     viewModel: ScheduleViewModel = hiltViewModel()
 ) {
     val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
@@ -158,6 +160,12 @@ fun AppointmentCard(
 //                    )
                 }
             }
+
+            MessageButton(
+                userId = appointment.clientId.toString(),
+                trainerId = appointment.trainerId.toString(),
+                onAppointmentChatClick = onAppointmentChatClick
+            )
         }
     }
 }
@@ -217,8 +225,8 @@ fun AppointmentCardPreview() {
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            AppointmentCard(appointment = upcomingAppointment)
-            AppointmentCard(appointment = pastAppointment)
+            AppointmentCard(appointment = upcomingAppointment, onAppointmentChatClick = {} as (String, String) -> Unit)
+            AppointmentCard(appointment = pastAppointment, onAppointmentChatClick = {} as (String, String) -> Unit)
         }
     }
 }
