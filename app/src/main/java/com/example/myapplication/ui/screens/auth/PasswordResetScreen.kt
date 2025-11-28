@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -32,10 +31,20 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.myapplication.R
 import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.buttons.MainButton
+import com.example.myapplication.ui.components.fields.MainFormTextField
 import com.example.myapplication.viewmodel.registration.AuthViewModel
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 
+
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun PasswordResetScreen(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AuthViewModel = hiltViewModel()
@@ -58,11 +67,21 @@ fun PasswordResetScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.znanybyklogo_transparent),
-                contentDescription = stringResource(R.string.znany_byk_logo),
-                modifier = Modifier.size(270.dp)
-            )
+            with(sharedTransitionScope) {
+                Image(
+                    painter = painterResource(id = R.drawable.znanybyklogo_transparent),
+                    contentDescription = stringResource(R.string.znany_byk_logo),
+                    modifier = Modifier
+                        .sharedElement(
+                            sharedContentState = rememberSharedContentState(key = "logo"),
+                            animatedVisibilityScope = animatedVisibilityScope,
+                            boundsTransform = { _, _ ->
+                                tween(durationMillis = ANIMATION_TIME, easing = FastOutSlowInEasing)
+                            }
+                        )
+                        .size(270.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -74,10 +93,10 @@ fun PasswordResetScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            OutlinedTextField(
+            MainFormTextField(
                 value = emailState.value,
                 onValueChange = { emailState.value = it },
-                label = { Text(stringResource(R.string.email)) },
+                label = stringResource(R.string.email),
                 enabled = !authState.isLoading,
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
@@ -115,4 +134,3 @@ fun PasswordResetScreen(
         }
     }
 }
-

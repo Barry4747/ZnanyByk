@@ -1,10 +1,28 @@
+
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,6 +68,7 @@ fun MonthYearPicker(
                     "Wybierz miesiąc i rok",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
+                    color = androidx.compose.ui.graphics.Color.Black,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
                 Row(
@@ -75,11 +94,15 @@ fun MonthYearPicker(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(onClick = onDismiss) { Text("Anuluj") }
+                    TextButton(onClick = onDismiss) {
+                        Text("Anuluj", color = androidx.compose.ui.graphics.Color.Black)
+                    }
                     TextButton(onClick = {
                         onConfirm(selectedMonth + 1, years[selectedYear])
                         onDismiss()
-                    }) { Text("OK") }
+                    }) {
+                        Text("OK", color = androidx.compose.ui.graphics.Color.Black)
+                    }
                 }
             }
         }
@@ -120,7 +143,7 @@ private fun RevoPicker(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(itemHeight)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+                .background(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
         )
         LazyColumn(
             state = listState,
@@ -138,9 +161,9 @@ private fun RevoPicker(
                         fontSize = (16 * scale).sp,
                         fontWeight = if (distance == 0) FontWeight.Bold else FontWeight.Normal,
                         color = if (distance == 0)
-                            Color.Black
+                            androidx.compose.ui.graphics.Color.Black
                         else
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.6f),
                         modifier = Modifier
                             .height(itemHeight)
                             .fillMaxWidth()

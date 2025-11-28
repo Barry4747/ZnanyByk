@@ -76,6 +76,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation("com.google.accompanist:accompanist-placeholder:0.32.0")
 
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -94,11 +95,16 @@ dependencies {
 
     implementation(libs.wheelpickercompose)
     implementation(libs.coil.compose)
-
-    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("androidx.media3:media3-exoplayer:1.8.0") // Sprawdź aktualną wersję
+    implementation("androidx.media3:media3-ui:1.2.1")
+    implementation(libs.maps.compose)
+    implementation(libs.play.services.maps)
     implementation("com.google.android.libraries.places:places:3.4.0")
     implementation(libs.androidx.compose.ui.text)
-
+    implementation("androidx.compose.ui:ui:1.7.5")
+    implementation("androidx.compose.animation:animation:1.7.5")
+    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
+    implementation(libs.androidx.compose.foundation.layout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -106,6 +112,7 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    implementation("io.coil-kt:coil-video:2.7.0")
 
     implementation("androidx.compose.runtime:runtime-livedata:1.6.0")
     ksp(libs.hilt.compiler)

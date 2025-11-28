@@ -34,7 +34,8 @@ data class RegistrationState(
     val registrationCredentials: RegistrationCredentials = RegistrationCredentials(),
     val pendingGoogleUid: String? = null,
     val passwordValidationError: String? = null,
-    val emailValidationError: String? = null
+    val emailValidationError: String? = null,
+    val phoneNumberValidationError: String? = null
 )
 
 @HiltViewModel
@@ -53,6 +54,13 @@ class RegistrationViewModel @Inject constructor(
         _registrationState.value = _registrationState.value.copy(
             registrationCredentials = _registrationState.value.registrationCredentials.copy(email = email),
             emailValidationError = emailError
+        )
+    }
+
+    fun updatePhoneNumber(phoneNumber: String, countryDialCode: String) {
+        val error = validatePhoneNumber(phoneNumber, countryDialCode)
+        _registrationState.value = _registrationState.value.copy(
+            phoneNumberValidationError = error
         )
     }
 
@@ -83,6 +91,20 @@ class RegistrationViewModel @Inject constructor(
 
     private fun validateEmail(email: String): String? {
         return if (email.isBlank()) null else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) appContext.getString(R.string.invalid_email_format) else null
+    }
+
+    private fun validatePhoneNumber(phoneNumber: String, countryDialCode: String): String? {
+        if (phoneNumber.isBlank()) return null
+        
+        val fullNumber = "$countryDialCode$phoneNumber"
+        
+        return if (!Patterns.PHONE.matcher(fullNumber).matches()) {
+            appContext.getString(R.string.invalid_phone_number_format)
+        } else if (phoneNumber.length < 6 || phoneNumber.length > 15) {
+            appContext.getString(R.string.invalid_phone_number_length)
+        } else {
+            null
+        }
     }
 
     fun isFormValid(): Boolean {
@@ -263,4 +285,5 @@ class RegistrationViewModel @Inject constructor(
             errorMessage = null
         )
     }
+
 }

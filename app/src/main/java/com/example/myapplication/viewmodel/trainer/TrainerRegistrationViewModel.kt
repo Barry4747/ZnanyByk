@@ -5,10 +5,12 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myapplication.data.model.gyms.Gym
 import com.example.myapplication.data.model.users.Role
 import com.example.myapplication.data.model.users.Trainer
 import com.example.myapplication.data.model.users.User
 import com.example.myapplication.data.repository.AuthRepository
+import com.example.myapplication.data.repository.GymRepository
 import com.example.myapplication.data.repository.TrainerRepository
 import com.example.myapplication.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,14 +27,16 @@ data class TrainerRegistrationState(
     val userName: String = "",
     val selectedImages: List<Uri> = emptyList(),
     val uploadedImages: List<String> = emptyList(),
-    val isUploadingImages: Boolean = false
+    val isUploadingImages: Boolean = false,
+    val gyms: List<Gym> = emptyList()
 )
 
 @HiltViewModel
 class TrainerRegistrationViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val trainerRepository: TrainerRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val gymRepository: GymRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TrainerRegistrationState())
@@ -40,6 +44,19 @@ class TrainerRegistrationViewModel @Inject constructor(
 
     init {
         loadUserName()
+        loadGyms()
+    }
+
+    private fun loadGyms() {
+        viewModelScope.launch {
+            gymRepository.getAllGyms()
+                .onSuccess { gyms ->
+                    _state.value = _state.value.copy(gyms = gyms)
+                }
+                .onFailure { exception ->
+                    Log.e("TrainerRegistrationVM", "Failed to load gyms", exception)
+                }
+        }
     }
 
     private fun loadUserName() {
@@ -69,7 +86,6 @@ class TrainerRegistrationViewModel @Inject constructor(
     }
 
     fun submitTrainerProfile(
-        context: Context,
         hourlyRate: String,
         gymId: String?,
         description: String,
@@ -140,7 +156,7 @@ class TrainerRegistrationViewModel @Inject constructor(
             description = description.ifBlank { null },
             pricePerHour = hourlyRateInt,
             experience = experienceInt,
-            location = gymId,
+            gymId = gymId,
             categories = selectedCategories,
             ratings = null,
             avgRating = null,
@@ -175,11 +191,11 @@ class TrainerRegistrationViewModel @Inject constructor(
             }
     }
 
-    fun uploadImages(context: Context, uris: List<Uri>) {
+    fun uploadMedias(context: Context, uris: List<Uri>) {
         val currentUserId = getCurrentUserId() ?: return
         _state.value = _state.value.copy(selectedImages = _state.value.selectedImages + uris, isUploadingImages = true)
         viewModelScope.launch {
-            val result = trainerRepository.uploadImages(context, currentUserId, uris)
+            val result = trainerRepository.uploadMedias(context, currentUserId, uris)
             result.onSuccess { (successfulUrls, _) ->
                 _state.value = _state.value.copy(
                     selectedImages = _state.value.selectedImages - uris,
@@ -196,14 +212,22 @@ class TrainerRegistrationViewModel @Inject constructor(
         }
     }
 
-    fun removeSelectedImage(uri: Uri) {
+    fun removeSelectedMedia(uri: Uri) {
         _state.value = _state.value.copy(selectedImages = _state.value.selectedImages - uri)
     }
 
-    fun removeUploadedImage(url: String) {
+    fun removeUploadedMedia(url: String) {
         _state.value = _state.value.copy(uploadedImages = _state.value.uploadedImages.filter { it != url })
         viewModelScope.launch {
             trainerRepository.deleteImageByUrl(url)
         }
+    }
+
+    fun isVideoUri(context: Context, uri: Uri): Boolean {
+        return context.contentResolver.getType(uri)?.startsWith("video/") == true
+    }
+
+    fun isVideoUrl(url: String): Boolean {
+        return url.contains(".mp4", ignoreCase = true)
     }
 }

@@ -5,11 +5,13 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myapplication.data.model.gyms.Gym
 import com.example.myapplication.data.model.users.Role
 import com.example.myapplication.data.model.users.Trainer
 import com.example.myapplication.data.model.users.TrainerCategory
 import com.example.myapplication.data.model.users.User
 import com.example.myapplication.data.repository.AuthRepository
+import com.example.myapplication.data.repository.GymRepository
 import com.example.myapplication.data.repository.TrainerRepository
 import com.example.myapplication.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,13 +21,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class TrainerProfileState(
+data class TrainerEditState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val successMessage: String? = null,
     val userName: String = "",
     val hourlyRate: String = "",
-    val selectedGym: String? = null,
+    val selectedGym: Gym? = null,
     val description: String = "",
     val experienceYears: String = "",
     val selectedCategories: List<TrainerCategory> = emptyList(),
@@ -33,22 +35,37 @@ data class TrainerProfileState(
     val existingImages: List<String> = emptyList(),
     val selectedImages: List<Uri> = emptyList(),
     val uploadedImages: List<String> = emptyList(),
-    val isUploadingImages: Boolean = false
+    val isUploadingImages: Boolean = false,
+    val gyms: List<Gym> = emptyList()
 )
 
 @HiltViewModel
-class TrainerProfileViewModel @Inject constructor(
+class TrainerEditViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val trainerRepository: TrainerRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val gymRepository: GymRepository
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(TrainerProfileState())
-    val state: StateFlow<TrainerProfileState> = _state.asStateFlow()
+    private val _state = MutableStateFlow(TrainerEditState())
+    val state: StateFlow<TrainerEditState> = _state.asStateFlow()
 
     init {
         loadUserName()
         loadTrainerProfile()
+        loadGyms()
+    }
+
+    private fun loadGyms() {
+        viewModelScope.launch {
+            gymRepository.getAllGyms()
+                .onSuccess { gyms ->
+                    _state.value = _state.value.copy(gyms = gyms)
+                }
+                .onFailure { exception ->
+                    Log.e("TrainerProfileVM", "Failed to load gyms", exception)
+                }
+        }
     }
 
     private fun loadUserName() {
@@ -70,9 +87,14 @@ class TrainerProfileViewModel @Inject constructor(
             }
             trainerRepository.getTrainerById(currentUserId).onSuccess { trainer ->
                 Log.d("TrainerProfileVM", "Successfully loaded trainer: ${trainer.firstName} ${trainer.lastName}")
+
+                val gymObj: Gym? = trainer.gymId?.let { gymId ->
+                    gymRepository.getGymById(gymId).getOrNull()
+                }
+
                 _state.value = _state.value.copy(
                     hourlyRate = trainer.pricePerHour?.toString() ?: "",
-                    selectedGym = trainer.location,
+                    selectedGym = gymObj,
                     description = trainer.description ?: "",
                     experienceYears = trainer.experience?.toString() ?: "",
                     selectedCategories = trainer.categories?.mapNotNull { try { TrainerCategory.valueOf(it) } catch (e: Exception) { Log.e("TrainerProfileVM", "Invalid category: $it"); null } } ?: emptyList(),
@@ -85,7 +107,7 @@ class TrainerProfileViewModel @Inject constructor(
         }
     }
 
-    suspend fun removeImage(imageUrl: String) {
+    fun removeImage(imageUrl: String) {
         val currentImages = _state.value.existingImages
         val updatedImages = currentImages.filter { it != imageUrl }
         _state.value = _state.value.copy(existingImages = updatedImages)
@@ -100,7 +122,6 @@ class TrainerProfileViewModel @Inject constructor(
 
             trainerRepository.deleteImageByUrl(imageUrl).onFailure { e ->
                 _state.value = _state.value.copy(errorMessage = "Błąd podczas usuwania zdjęcia: ${e.message}")
-                // Optionally, add the image back if deletion failed
                 val restoredImages = (_state.value.existingImages + imageUrl).distinct()
                 _state.value = _state.value.copy(existingImages = restoredImages)
                 return@launch
@@ -110,17 +131,14 @@ class TrainerProfileViewModel @Inject constructor(
                 val finalImages = trainer.images?.filter { it != imageUrl }
                 val updatedTrainer = trainer.copy(images = finalImages?.ifEmpty { null })
                 trainerRepository.addTrainer(updatedTrainer, currentUserId).onSuccess {
-                    // Ensure the state is updated with the final list
                     _state.value = _state.value.copy(existingImages = finalImages ?: emptyList())
                 }.onFailure { e ->
                     _state.value = _state.value.copy(errorMessage = "Błąd podczas aktualizacji profilu: ${e.message}")
-                    // Restore the image if update failed
                     val restoredImages = (_state.value.existingImages + imageUrl).distinct()
                     _state.value = _state.value.copy(existingImages = restoredImages)
                 }
             }.onFailure { e ->
                 _state.value = _state.value.copy(errorMessage = "Błąd podczas pobierania profilu: ${e.message}")
-                // Restore the image
                 val restoredImages = (_state.value.existingImages + imageUrl).distinct()
                 _state.value = _state.value.copy(existingImages = restoredImages)
             }
@@ -217,7 +235,7 @@ class TrainerProfileViewModel @Inject constructor(
             description = description.ifBlank { null },
             pricePerHour = hourlyRateInt,
             experience = experienceInt,
-            location = gymId,
+            gymId = gymId,
             categories = selectedCategories,
             ratings = null,
             avgRating = null,
@@ -256,7 +274,7 @@ class TrainerProfileViewModel @Inject constructor(
         val currentUserId = getCurrentUserId() ?: return
         _state.value = _state.value.copy(selectedImages = _state.value.selectedImages + uris, isUploadingImages = true)
         viewModelScope.launch {
-            val result = trainerRepository.uploadImages(context, currentUserId, uris)
+            val result = trainerRepository.uploadMedias(context, currentUserId, uris)
             result.onSuccess { (successfulUrls, _) ->
                 _state.value = _state.value.copy(
                     selectedImages = _state.value.selectedImages - uris,
@@ -282,5 +300,17 @@ class TrainerProfileViewModel @Inject constructor(
         viewModelScope.launch {
             trainerRepository.deleteImageByUrl(url)
         }
+    }
+
+    fun uploadMedias(context: Context, uris: List<Uri>) {
+        uploadImages(context, uris)
+    }
+
+    fun isVideoUri(context: Context, uri: Uri): Boolean {
+        return context.contentResolver.getType(uri)?.startsWith("video/") == true
+    }
+
+    fun isVideoUrl(url: String): Boolean {
+        return url.contains(".mp4", ignoreCase = true)
     }
 }

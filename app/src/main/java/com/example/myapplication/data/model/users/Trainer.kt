@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import com.example.myapplication.R
 
 data class Trainer(
+    val id: String = "",
     val email: String = "",
     val firstName: String = "",
     val lastName: String = "",
@@ -11,12 +12,13 @@ data class Trainer(
     val description: String? = null,
     val categories: List<String>? = null,
     val location: String? = null,
-    val ratings: List<Int>? = null,
+    val ratings: Map<String, Int>? = null,
     var avgRating: String? = null,
     val pricePerHour: Int? = null,
     val experience: Int? = null,
     val images: List<String>? = null,
-    val profileImage: String? = null
+    val profileImage: String? = null,
+    val gymId: String? = null
 )
 
 

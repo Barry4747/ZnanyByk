@@ -4,11 +4,11 @@ import FormButtonWithDetail
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,9 +32,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
@@ -50,6 +52,7 @@ fun ProfileScreen(
     onEditLocation: () -> Unit = {},
     onBecomeTrainer: () -> Unit = {},
     onEditTrainerProfile: () -> Unit = {},
+    onLogout: () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
@@ -63,18 +66,24 @@ fun ProfileScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+            .padding(horizontal = 24.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.height(40.dp))
 
         Box(contentAlignment = Alignment.Center) {
+            val avatarResource = state.avatarUrl ?: R.drawable.user_active
+
             AsyncImage(
-                model = state.avatarUrl,
+                model = avatarResource,
                 contentDescription = stringResource(R.string.profile_picture),
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(120.dp)
-                    .clip(CircleShape),
-                error = painterResource(R.drawable.user_active)
+                    .clip(CircleShape)
+                    .border(2.dp, Color.Black, CircleShape),
+                error = painterResource(R.drawable.user_active),
+                placeholder = painterResource(R.drawable.user_active)
             )
             Icon(
                 imageVector = Icons.Default.AddCircleOutline,
@@ -92,56 +101,55 @@ fun ProfileScreen(
 
         Text(
             text = state.userName,
-            style = MaterialTheme.typography.headlineSmall
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+
+        MainButton(
+            text = stringResource(R.string.edytuj_profil_button_text),
+            onClick = { onEditProfile() },
+            modifier = Modifier.fillMaxWidth()
+        )
 
         if (state.userRole == "TRAINER") {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                MainButton(
-                    text = stringResource(R.string.edytuj_profil_button_text),
-                    onClick = { onEditProfile() },
-                    modifier = Modifier.weight(1f)
-                )
-                MainButton(
-                    text = stringResource(R.string.edit_profile_button_text),
-                    onClick = { onEditTrainerProfile() },
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        } else {
-            MainButton(
-                text = stringResource(R.string.edytuj_profil_button_text),
-                onClick = { onEditProfile() },
-                modifier = Modifier.fillMaxWidth(0.6f)
+            Spacer(modifier = Modifier.height(8.dp))
+
+            AlternateButton(
+                text = stringResource(R.string.edit_profile_button_text),
+                onClick = { onEditTrainerProfile() },
+                modifier = Modifier.fillMaxWidth()
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+        HorizontalDivider()
+        Spacer(modifier = Modifier.height(24.dp))
 
         if (state.userRole == "CLIENT") {
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = stringResource(R.string.want_to_become_trainer),
                     style = MaterialTheme.typography.bodyLarge
                 )
-                AlternateButton(text = stringResource(R.string.join_us), onClick = { onBecomeTrainer() })
+                Spacer(modifier = Modifier.height(8.dp))
+                AlternateButton(
+                    text = stringResource(R.string.join_us),
+                    onClick = { onBecomeTrainer() },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(24.dp))
         }
-        Spacer(modifier = Modifier.height(16.dp))
 
-        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             FormButtonWithDetail(
                 text = stringResource(R.string.language),
                 detail = stringResource(R.string.polish),
@@ -155,30 +163,25 @@ fun ProfileScreen(
                 onClick = { onEditLocation() }
             )
 
-            if (state.userRole == "TRAINER") {
-                FormButtonWithDetail(
-                    text = stringResource(R.string.my_gym),
-                    detail = stringResource(R.string.gym_name),
-                    enabled = false,
-                    onClick = { /* No logic */ }
-                )
-            }
-
             FormButtonWithDetail(
                 text = stringResource(R.string.currency),
                 detail = "PLN, zł",
                 enabled = false,
                 onClick = { /* No logic */ }
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            FormButtonWithDetail(
-                text = stringResource(R.string.customer_support),
-                detail = stringResource(R.string.solve_your_problems),
-                enabled = false,
-                onClick = { /* No logic */ }
-            )
         }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        MainButton(
+            text = stringResource(R.string.logout),
+            onClick = {
+                viewModel.logout()
+                onLogout()
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }

@@ -25,13 +25,16 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -57,6 +60,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.accompanist.placeholder.placeholder
+import coil.compose.AsyncImagePainter
+import coil.compose.SubcomposeAsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.imageLoader
 import coil.request.ImageRequest
@@ -66,11 +72,21 @@ import com.example.myapplication.viewmodel.HomeViewModel
 import com.example.myapplication.viewmodel.SortOption
 import com.example.myapplication.viewmodel.TrainerCategory
 import com.example.myapplication.viewmodel.TrainersViewModel
-
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.*
+import androidx.compose.ui.composed
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.platform.debugInspectorInfo
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun HomeScreen(
     onLogout: () -> Unit,
+    onMapClick: () -> Unit,
     goToFilter: () -> Unit,
     goToTrainerProfileCard: (Trainer) -> Unit,
     modifier: Modifier = Modifier,
@@ -108,24 +124,37 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        OutlinedTextField(
-            value = searchTrainerText,
-            onValueChange = { searchTrainerText = it },
-            label = { Text(stringResource(R.string.search)) },
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            leadingIcon = {
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            IconButton(onClick = { onMapClick() }) {
                 Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = stringResource(R.string.search_icon)
+                    painter = painterResource(id = R.drawable.map_search_icon),
+                    contentDescription = "Search on map"
                 )
-            }, singleLine = true,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(
-                onSearch = {
-                    trainersViewModel.searchTrainers(searchTrainerText)
-                }
+            }
+            OutlinedTextField(
+                value = searchTrainerText,
+                onValueChange = { searchTrainerText = it },
+                label = { Text(stringResource(R.string.search)) },
+                modifier = Modifier.weight(1f),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = stringResource(R.string.search_icon)
+                    )
+                }, singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        trainersViewModel.searchTrainers(searchTrainerText)
+                    }
+                )
             )
-        )
+        }
+
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -179,7 +208,7 @@ fun HomeScreen(
             contentAlignment = Alignment.Center
         ) {
             if (!homeState.isLoading) {
-                LazyColumn(
+               LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
@@ -231,17 +260,18 @@ fun HomeScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
+        }
 
-            Button(
-                onClick = {
-                    viewModel.logout()
-                    onLogout()
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.logout))
-            }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = onLogout,
+            modifier = Modifier.fillMaxWidth(),
+            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.error
+            )
+        ) {
+            Text(text = "Wyloguj się")
         }
 
     }
@@ -267,20 +297,54 @@ fun TrainerProfileCard(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(180.dp)
+                        .height(250.dp)
                 ) {
-                    Image(
-                        painter = rememberAsyncImagePainter(
-                            model = trainer.images?.firstOrNull(), // Pobierz pierwszy obrazek z listy
-                            placeholder = painterResource(id = R.drawable.gym_trainer_example), // Obrazek zastępczy
-                            error = painterResource(id = R.drawable.gym_trainer_example) // Obrazek w razie błędu
-                        ),
-                        contentDescription = "Zdjęcie trenera: ${trainer.firstName} ${trainer.lastName}",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
+                    val imageUrl = trainer.images?.firstOrNull()
+                    val isVideo = imageUrl?.contains(".mp4", ignoreCase = true) == true
 
-                                RatingIndicator(
+                    if (imageUrl != null) {
+                        SubcomposeAsyncImage(
+                            model = imageUrl,
+                            contentDescription = "Zdjęcie trenera: ${trainer.firstName} ${trainer.lastName}",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop,
+                            loading = {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                                }
+                            },
+                            error = {
+                                Image(
+                                    painter = painterResource(id = R.drawable.placeholder),
+                                    contentDescription = "Błąd ładowania",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(id = R.drawable.placeholder),
+                            contentDescription = "Brak zdjęcia",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+
+                    if (isVideo) {
+                        Image(
+                            painter = painterResource(id = R.drawable.placeholder),
+                            contentDescription = "Brak zdjęcia",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+
+
+                    RatingIndicator(
                         rating = trainer.avgRating ?: "0.0", modifier = Modifier
                                 .align(Alignment.TopEnd)
                                 .padding(8.dp)
@@ -360,7 +424,7 @@ fun TrainerProfileCard(
                         }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+
             }
         })
 }
@@ -423,3 +487,11 @@ fun RatingIndicator(
         }
 }
 
+
+
+fun Modifier.simplePlaceholder(
+    visible: Boolean,
+    color: Color
+): Modifier = this.then(
+    Modifier.background(if (visible) color else Color.Transparent)
+)

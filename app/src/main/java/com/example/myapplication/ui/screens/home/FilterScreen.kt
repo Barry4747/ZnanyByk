@@ -93,7 +93,7 @@ fun FilterScreen(
                 onValueChange = { range ->
                     viewModel.onPriceRangeChanged(range.start.toInt(), range.endInclusive.toInt())
                 },
-                valueRange = 0f..10000f,
+                valueRange = 0f..1000f,
                 steps = 49
             )
 
