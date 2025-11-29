@@ -113,10 +113,7 @@ fun AppNavigation(
                     sharedTransitionScope = this@SharedTransitionLayout,
                     animatedVisibilityScope = this,
                     onNavigateBack = {
-                        navController.navigate(Screen.Welcome.route) {
-                            popUpTo(Screen.Welcome.route)
-                            launchSingleTop = true
-                        }
+                        navController.popBackStack()
                     }, onNavigateToRegister = {
                         navController.navigate(Screen.RegistrationFlow.route) {
                             popUpTo(Screen.Welcome.route)
@@ -143,10 +140,7 @@ fun AppNavigation(
                     sharedTransitionScope = this@SharedTransitionLayout,
                     animatedVisibilityScope = this,
                     onNavigateBack = {
-                        navController.navigate(Screen.Login.route) {
-                            popUpTo(Screen.Login.route)
-                            launchSingleTop = true
-                        }
+                        navController.popBackStack()
                     }, viewModel = authViewModel
                 )
             }
@@ -167,10 +161,7 @@ fun AppNavigation(
                         animatedVisibilityScope = this,
                         onNavigateBack = {
                             sharedRegistrationViewModel.clearPendingGoogleRegistration()
-                            navController.navigate(Screen.Welcome.route) {
-                                popUpTo(Screen.Welcome.route)
-                                launchSingleTop = true
-                            }
+                            navController.popBackStack()
                         }, onNavigateToLogin = {
                             navController.navigate(Screen.Login.route) {
                                 popUpTo(Screen.Welcome.route) { inclusive = false }

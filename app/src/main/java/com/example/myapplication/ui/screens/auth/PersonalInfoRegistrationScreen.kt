@@ -7,7 +7,6 @@ import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -48,10 +48,10 @@ import com.commandiron.wheel_picker_compose.WheelDatePicker
 import com.commandiron.wheel_picker_compose.core.WheelPickerDefaults
 import com.example.myapplication.R
 import com.example.myapplication.data.model.CountryCodes
+import com.example.myapplication.ui.components.MainTopBar
 import com.example.myapplication.ui.components.OrDivider
 import com.example.myapplication.ui.components.buttons.AlternateButton
 import com.example.myapplication.ui.components.buttons.FormButton
-import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.ui.components.dialogs.CountryCodePickerDialog
 import com.example.myapplication.ui.components.fields.MainFormTextField
@@ -111,24 +111,26 @@ fun PersonalInfoRegistrationScreen(
         }
     }
 
-    Box(modifier = modifier.fillMaxSize().imePadding()) {
-
-
+    Scaffold(
+        topBar = {
+            MainTopBar(
+                onNavigateBack = onNavigateBack,
+                text = stringResource(R.string.personal_info)
+            )
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        modifier = modifier
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(paddingValues)
+                .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Spacer(modifier = Modifier.height(40.dp))
-
-            Text(
-                text = stringResource(R.string.personal_info),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
-            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -253,20 +255,6 @@ fun PersonalInfoRegistrationScreen(
                 )
             }
         }
-
-        MainBackButton(
-            onClick = onNavigateBack,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(16.dp)
-        )
-
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 16.dp)
-        )
     }
 
     if (showCountryPicker) {

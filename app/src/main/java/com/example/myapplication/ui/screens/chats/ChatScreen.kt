@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.chats.MessageItem
-import com.example.myapplication.ui.components.user_components.ProfileImage
+import com.example.myapplication.ui.components.user_components.ProfilePicture
 import com.example.myapplication.utils.shouldShowTimestamp
 import com.example.myapplication.utils.shouldShowProfile
 import com.example.myapplication.utils.formatTimestamp
@@ -39,7 +39,7 @@ fun ChatScreen(
     val coroutineScope = rememberCoroutineScope()
 
     DisposableEffect(Unit) {
-        viewModel.init(chatId)
+        viewModel.init(chatId, receiverId)
         coroutineScope.launch {
             viewModel.markSeen()
         }
@@ -51,11 +51,13 @@ fun ChatScreen(
         }
     }
 
-    val receiverProfileUrl = null
     val currentUserId = viewModel.getCurrentUser()
     val messages by viewModel.messages.collectAsState()
     var text by remember { mutableStateOf("") }
     var isFocused by remember { mutableStateOf(false) }
+
+    val receiverAvatarUrl by viewModel.receiverAvatarUrl.collectAsState()
+    val avatarResource = receiverAvatarUrl ?: R.drawable.user_active
 
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier
@@ -69,7 +71,11 @@ fun ChatScreen(
                 horizontalArrangement = Arrangement.SpaceBetween) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     MainBackButton(onClick = onNavigateBack)
-                    ProfileImage(imageUrl = receiverProfileUrl)
+                    ProfilePicture(
+                        model = avatarResource,
+                        size = 40,
+                        borderSize = 2
+                    )
                     Text(
                         text = viewModel.getUserFullName(receiverId).toString(),
                         modifier = Modifier.padding(start = 8.dp)

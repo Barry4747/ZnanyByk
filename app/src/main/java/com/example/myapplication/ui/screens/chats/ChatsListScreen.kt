@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.R
 import com.example.myapplication.data.model.chats.Chat
-import com.example.myapplication.ui.components.user_components.ProfileImage
+import com.example.myapplication.ui.components.user_components.ProfilePicture
 import com.example.myapplication.viewmodel.chats.ChatsListViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -134,8 +134,8 @@ fun ChatItem(
         }
 
         Spacer(modifier = Modifier.width(8.dp))
-
-        ProfileImage(imageUrl = null, modifier = Modifier.size(32.dp))
+        //TODO: change to receiver avatar url
+        ProfilePicture(model = R.drawable.user_active, size = 32, borderSize = 1)
 
         Spacer(modifier = Modifier.width(12.dp))
 
