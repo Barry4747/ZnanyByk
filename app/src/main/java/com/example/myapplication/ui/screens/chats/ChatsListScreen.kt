@@ -112,6 +112,8 @@ fun ChatItem(
     val currentUserId = viewModel.getCurrentUserId()
     val receiverId = chat.users.firstOrNull { it != currentUserId } ?: ""
     val receiverFirstName = viewModel.getUserFirstName(receiverId) ?: "User"
+    val receiverAvatarUrl = viewModel.getUserAvatarUrl(receiverId)
+    val avatarResource = receiverAvatarUrl ?: R.drawable.user_active
 
     val lastMsgUnseen = !chat.lastMessageSeen && chat.lastMessageSender != currentUserId
 
@@ -134,9 +136,7 @@ fun ChatItem(
         }
 
         Spacer(modifier = Modifier.width(8.dp))
-        //TODO: change to receiver avatar url
-        ProfilePicture(model = R.drawable.user_active, size = 32, borderSize = 1)
-
+        ProfilePicture(model = avatarResource, size = 32, borderSize = 1)
         Spacer(modifier = Modifier.width(12.dp))
 
         Column(modifier = Modifier.weight(1f)) {
