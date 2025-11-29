@@ -15,9 +15,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.values
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.myapplication.ui.components.MainTopBar
+import com.example.myapplication.ui.components.buttons.AlternateButton
+import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.viewmodel.TrainerCategory
 import com.example.myapplication.viewmodel.TrainersViewModel
 import java.text.NumberFormat
@@ -36,11 +40,9 @@ fun FilterScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Filtry") },
-                navigationIcon = {
-
-                }
+            MainTopBar(
+                onNavigateBack = onNavigateBack,
+                text = "Filtry"
             )
         },
         bottomBar = {
@@ -50,21 +52,19 @@ fun FilterScreen(
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                OutlinedButton(
+                AlternateButton(
+                    text = "Wyczyść",
                     onClick = { viewModel.clearFilters() },
                     modifier = Modifier.weight(1f)
-                ) {
-                    Text("Wyczyść")
-                }
-                Button(
+                )
+                MainButton(
+                    text = "Zastosuj",
                     onClick = {
                         viewModel.applyFiltersAndLoad()
                         onNavigateBack()
                     },
                     modifier = Modifier.weight(1f)
-                ) {
-                    Text("Zastosuj")
-                }
+                )
             }
         }
     ) { paddingValues ->
@@ -94,7 +94,12 @@ fun FilterScreen(
                     viewModel.onPriceRangeChanged(range.start.toInt(), range.endInclusive.toInt())
                 },
                 valueRange = 0f..1000f,
-                steps = 49
+                steps = 49,
+                colors = SliderDefaults.colors(
+                    thumbColor = Color.Black,
+                    activeTrackColor = Color.Black,
+                    inactiveTrackColor = Color.LightGray
+                )
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -115,7 +120,12 @@ fun FilterScreen(
                 value = trainersState.minRating,
                 onValueChange = { viewModel.onMinRatingChanged(it) },
                 valueRange = 0f..5f,
-                steps = 9 // (5-0)/0.5 - 1 = 9 kroków co 0.5 gwiazdki
+                steps = 9, // (5-0)/0.5 - 1 = 9 kroków co 0.5 gwiazdki
+                colors = SliderDefaults.colors(
+                    thumbColor = Color.Black,
+                    activeTrackColor = Color.Black,
+                    inactiveTrackColor = Color.LightGray
+                )
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -149,7 +159,14 @@ fun FilterScreen(
                             }
                         } else {
                             null
-                        }
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = Color.Black,
+                            selectedLabelColor = Color.White,
+                            selectedLeadingIconColor = Color.White,
+                            containerColor = Color.White,
+                            labelColor = Color.Black
+                        )
                     )
                 }
             }
