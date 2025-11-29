@@ -1,6 +1,7 @@
 package com.example.myapplication.ui.screens.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -15,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.data.model.gyms.GymLocation
 import com.example.myapplication.data.model.users.Trainer
+import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.map.MainTrainerMarker
 import com.example.myapplication.ui.components.map.TrainerInfoDialog
 import com.example.myapplication.viewmodel.MapViewModel
@@ -141,18 +143,22 @@ fun MapScreen(
             }
         }
 
-        FloatingActionButton(
-            onClick = onNavigateBack,
+        Box(
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .padding(16.dp),
-            containerColor = Color.White,
-            contentColor = Color.Black
+                .padding(16.dp)
+                .background(
+                    color = Color.White,
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                )
+                .border(
+                    width = 1.dp,
+                    color = Color.Black,
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                )
+                .padding(4.dp)
         ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back"
-            )
+            MainBackButton(onNavigateBack)
         }
     }
 

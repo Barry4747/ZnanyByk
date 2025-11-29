@@ -228,11 +228,6 @@ fun AppNavigation(
                         onMapClick = {
                             navController.navigate(Screen.Map.route)
                         },
-                        onLogout = {
-                            navController.navigate(Screen.Welcome.route) {
-                                popUpTo(0) { inclusive = true }
-                            }
-                        },
                         goToFilter = {
                             navController.navigate(Screen.Filter.route)
                         },

@@ -82,10 +82,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.myapplication.ui.components.TrainerProfileCard
+import com.example.myapplication.ui.components.dialogs.SortDialog
 
 @Composable
 fun HomeScreen(
-    onLogout: () -> Unit,
     onMapClick: () -> Unit,
     goToFilter: () -> Unit,
     goToTrainerProfileCard: (Trainer) -> Unit,
@@ -97,7 +98,6 @@ fun HomeScreen(
     val trainersState by trainersViewModel.trainersState.collectAsState()
 
 
-    val user = homeState.user
     val trainers: List<Trainer> = trainersState.trainers
     val errorMessage = homeState.errorMessage
     val context = LocalContext.current
@@ -259,239 +259,7 @@ fun HomeScreen(
                     }
                 }
             }
-
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = onLogout,
-            modifier = Modifier.fillMaxWidth(),
-            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.error
-            )
-        ) {
-            Text(text = "Wyloguj się")
-        }
-
     }
 }
 
-@Composable
-fun TrainerProfileCard(
-    trainer: Trainer,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val context = LocalContext.current
-    val imageLoader = context.imageLoader
-
-
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        content = {
-            Column {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(250.dp)
-                ) {
-                    val imageUrl = trainer.images?.firstOrNull()
-                    val isVideo = imageUrl?.contains(".mp4", ignoreCase = true) == true
-
-                    if (imageUrl != null) {
-                        SubcomposeAsyncImage(
-                            model = imageUrl,
-                            contentDescription = "Zdjęcie trenera: ${trainer.firstName} ${trainer.lastName}",
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop,
-                            loading = {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                                }
-                            },
-                            error = {
-                                Image(
-                                    painter = painterResource(id = R.drawable.placeholder),
-                                    contentDescription = "Błąd ładowania",
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
-                                )
-                            }
-                        )
-                    } else {
-                        Image(
-                            painter = painterResource(id = R.drawable.placeholder),
-                            contentDescription = "Brak zdjęcia",
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-
-                    if (isVideo) {
-                        Image(
-                            painter = painterResource(id = R.drawable.placeholder),
-                            contentDescription = "Brak zdjęcia",
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-
-
-                    RatingIndicator(
-                        rating = trainer.avgRating ?: "0.0", modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(8.dp)
-                                .background(
-                                    color = MaterialTheme.colorScheme.surface,
-                                    shape = RoundedCornerShape(16.dp)
-                                )
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
-
-
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "${trainer.firstName} ${trainer.lastName}",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Text(
-                        text = "${trainer.pricePerHour ?: 0} zł/h",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.tertiary
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "${trainer.experience ?: 0} lata doświadczenia",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp),
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    TrainerCategory.entries
-                        .forEach { categoryEnum ->
-                            if (trainer.categories?.contains(categoryEnum.name) == true) {
-                                Box(
-                                    modifier = Modifier
-                                        .background(
-                                            color = MaterialTheme.colorScheme.secondaryContainer,
-                                            shape = RoundedCornerShape(12.dp)
-                                        )
-                                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                                ) {
-                                    Text(
-                                        text = stringResource(id = categoryEnum.stringResId),
-                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                }
-                            }
-                        }
-                }
-
-
-            }
-        })
-}
-
-
-@Composable
-fun SortDialog(
-    onDismiss: () -> Unit,
-    onSortSelected: (SortOption) -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Sortuj według") },
-        text = {
-            Column {
-                SortOption.entries.forEach { option ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onSortSelected(option) }
-                            .padding(vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(option.displayName)
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Anuluj")
-            }
-        }
-    )
-}
-
-@Composable
-fun RatingIndicator(
-    rating: String,
-    modifier: Modifier = Modifier,
-    size: Dp = 16.dp
-) {
-        Row(
-            modifier = modifier,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Star,
-                contentDescription = "Rating star",
-                tint = Color(0xFFFFC107),
-                modifier = Modifier.size(size)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = rating,
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-}
-
-
-
-fun Modifier.simplePlaceholder(
-    visible: Boolean,
-    color: Color
-): Modifier = this.then(
-    Modifier.background(if (visible) color else Color.Transparent)
-)
