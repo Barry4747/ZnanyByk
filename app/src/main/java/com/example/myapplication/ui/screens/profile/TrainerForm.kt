@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -43,7 +44,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.myapplication.R
 import com.example.myapplication.data.model.users.TrainerCategory
-import com.example.myapplication.ui.components.buttons.MainBackButton
+import com.example.myapplication.ui.components.MainTopBar
 import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.ui.components.buttons.RemoveButton
 import com.example.myapplication.ui.components.chips.MainCategoryChip
@@ -82,16 +83,26 @@ fun TrainerForm(
 ) {
     val context = LocalContext.current
 
-    Box(modifier = modifier.fillMaxSize().imePadding()) {
+    Scaffold(
+        topBar = {
+            MainTopBar(
+                onNavigateBack = onNavigateBack,
+                text = userName.ifBlank { stringResource(R.string.placeholder_username) }
+            )
+        },
+        modifier = modifier
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(paddingValues)
+                .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Spacer(modifier = Modifier.height(80.dp)) // Space for back button header
+            Spacer(modifier = Modifier.height(24.dp))
 
             Text(
                 text = stringResource(titleRes),
@@ -378,23 +389,6 @@ fun TrainerForm(
 
 
             Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        // Back button on top layer - always clickable
-        Row(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            MainBackButton(onClick = onNavigateBack)
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                text = userName.ifBlank { stringResource(R.string.placeholder_username) },
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold
-            )
         }
     }
 }

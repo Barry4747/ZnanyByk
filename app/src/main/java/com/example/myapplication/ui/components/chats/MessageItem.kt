@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.data.model.chats.Message
-import com.example.myapplication.ui.components.user_components.ProfileImage
+import com.example.myapplication.ui.components.user_components.ProfilePicture
 
 @Composable
 fun MessageItem(
@@ -55,14 +55,14 @@ fun MessageItem(
                     )
                 }
             }
-
-            if (showProfile) {
-                Spacer(modifier = Modifier.height(4.dp))
-                ProfileImage(
-                    imageUrl = if (!isCurrentUser) null else null,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
+//TODO
+//            if (showProfile) {
+//                Spacer(modifier = Modifier.height(4.dp))
+//                ProfilePicture(
+//                    imageUrl = if (!isCurrentUser) null else null,
+//                    modifier = Modifier.size(24.dp)
+//                )
+//            }
         }
     }
 }

@@ -43,6 +43,7 @@ import coil.compose.AsyncImage
 import com.example.myapplication.R
 import com.example.myapplication.ui.components.buttons.AlternateButton
 import com.example.myapplication.ui.components.buttons.MainButton
+import com.example.myapplication.ui.components.user_components.ProfilePicture
 import com.example.myapplication.viewmodel.profile.ProfileViewModel
 
 @Composable
@@ -53,7 +54,7 @@ fun ProfileScreen(
     onBecomeTrainer: () -> Unit = {},
     onEditTrainerProfile: () -> Unit = {},
     onLogout: () -> Unit = {},
-    onEditSchedule: () -> Unit = {}, //TODO mati zobacz se to
+    onEditSchedule: () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
@@ -75,17 +76,12 @@ fun ProfileScreen(
         Box(contentAlignment = Alignment.Center) {
             val avatarResource = state.avatarUrl ?: R.drawable.user_active
 
-            AsyncImage(
+            ProfilePicture(
                 model = avatarResource,
-                contentDescription = stringResource(R.string.profile_picture),
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-                    .border(2.dp, Color.Black, CircleShape),
-                error = painterResource(R.drawable.user_active),
-                placeholder = painterResource(R.drawable.user_active)
+                size = 120,
+                borderSize = 2
             )
+
             Icon(
                 imageVector = Icons.Default.AddCircleOutline,
                 contentDescription = stringResource(R.string.add),
@@ -170,7 +166,6 @@ fun ProfileScreen(
                 enabled = false,
                 onClick = { /* No logic */ }
             )
-            // TODO mati zobacz se to
             if (state.userRole == "TRAINER") AlternateButton(
                 text = "Edytuj grafik trenera",
                 onClick = { onEditSchedule() },

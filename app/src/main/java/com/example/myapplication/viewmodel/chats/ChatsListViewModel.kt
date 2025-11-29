@@ -80,5 +80,8 @@ class ChatsListViewModel @Inject constructor(
     fun getUserFullName(uid: String): String? {
         return getUserFirstName(uid) + " " + getUserLastName(uid)
     }
+    fun getUserAvatarUrl(uid: String): String? {
+        return userRepository.getUserSync(uid)?.avatarUrl
+    }
 
 }

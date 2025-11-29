@@ -25,10 +25,23 @@ class ChatViewModel @Inject constructor(
     private val _messages = MutableStateFlow<List<Message>>(emptyList())
     val messages: StateFlow<List<Message>> = _messages
 
-    fun init(chatId: String) {
+    private val _receiverAvatarUrl = MutableStateFlow<String?>(null)
+    val receiverAvatarUrl: StateFlow<String?> = _receiverAvatarUrl
+
+    fun init(chatId: String, receiverId: String) {
         this.chatId = chatId
         this.currentUserId = authRepository.getCurrentUserId().toString()
         listenForMessages()
+        loadReceiverAvatar(receiverId)
+    }
+
+    private fun loadReceiverAvatar(receiverId: String) {
+        viewModelScope.launch {
+            android.util.Log.d("ChatViewModel", "Loading avatar for receiver: $receiverId")
+            val avatarResult = userRepository.getAvatarUrl(receiverId)
+            _receiverAvatarUrl.value = avatarResult.getOrNull()
+            android.util.Log.d("ChatViewModel", "Receiver avatar URL: ${_receiverAvatarUrl.value}")
+        }
     }
 
     private fun listenForMessages() {
@@ -57,6 +70,10 @@ class ChatViewModel @Inject constructor(
     }
     fun getUserFullName(uid: String): String? {
         return getUserFirstName(uid) + " " + getUserLastName(uid)
+    }
+
+    fun getUserAvatarUrl(uid: String): String? {
+        return userRepository.getUserSync(uid)?.avatarUrl
     }
 
     suspend fun markSeen() {
