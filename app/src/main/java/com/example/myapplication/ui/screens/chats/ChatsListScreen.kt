@@ -35,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.R
 import com.example.myapplication.data.model.chats.Chat
 import com.example.myapplication.ui.components.user_components.ProfilePicture
+import com.example.myapplication.viewmodel.chats.ChatUIModel
 import com.example.myapplication.viewmodel.chats.ChatsListViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -46,7 +47,7 @@ fun ChatsListScreen(
     onChatClick: (chatId: String, receiverId: String) -> Unit,
     viewModel: ChatsListViewModel = hiltViewModel()
 ) {
-    val state by viewModel.chats.collectAsState()
+    val state by viewModel.state.collectAsState()
     Column {
         Box(modifier = Modifier
             .fillMaxWidth()
@@ -92,8 +93,8 @@ fun ChatsListScreen(
 
                 else -> {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        items(state.chats) { chat ->
-                            ChatItem(chat = chat, onClick = onChatClick)
+                        items(state.chatItems) { chatItem ->
+                            ChatItem(item = chatItem, onClick = onChatClick)
                             Divider()
                         }
                     }
@@ -105,26 +106,19 @@ fun ChatsListScreen(
 
 @Composable
 fun ChatItem(
-    chat: Chat,
-    onClick: (chatId: String, receiverId: String) -> Unit,
-    viewModel: ChatsListViewModel = hiltViewModel()
+    item: ChatUIModel,
+    onClick: (chatId: String, receiverId: String) -> Unit
 ) {
-    val currentUserId = viewModel.getCurrentUserId()
-    val receiverId = chat.users.firstOrNull { it != currentUserId } ?: ""
-    val receiverFirstName = viewModel.getUserFirstName(receiverId) ?: "User"
-    val receiverAvatarUrl = viewModel.getUserAvatarUrl(receiverId)
-    val avatarResource = receiverAvatarUrl ?: R.drawable.user_active
-
-    val lastMsgUnseen = !chat.lastMessageSeen && chat.lastMessageSender != currentUserId
+    val avatarResource = item.receiverAvatarUrl ?: R.drawable.user_active
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick(chat.id, receiverId) }
+            .clickable { onClick(item.chat.id, item.receiverId) }
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (lastMsgUnseen) {
+        if (item.isUnread) {
             Box(
                 modifier = Modifier
                     .size(10.dp)
@@ -146,12 +140,12 @@ fun ChatItem(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = receiverFirstName,
+                    text = item.receiverName,
                     style = MaterialTheme.typography.titleMedium
                 )
 
                 Text(
-                    text = chat.lastTimestamp.toRelativeTime(),
+                    text = item.chat.lastTimestamp.toRelativeTime(),
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )
@@ -160,9 +154,10 @@ fun ChatItem(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = chat.lastMessage,
+                text = item.chat.lastMessage,
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = if (lastMsgUnseen) FontWeight.Bold else FontWeight.Normal
+                    fontWeight = if (item.isUnread) FontWeight.Bold else FontWeight.Normal,
+                    color = if (item.isUnread) Color.Black else Color.Gray
                 ),
                 maxLines = 1,
                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
