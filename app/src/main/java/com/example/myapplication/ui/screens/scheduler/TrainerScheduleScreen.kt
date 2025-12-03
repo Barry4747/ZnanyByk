@@ -20,10 +20,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.data.model.trainings.TrainingSlot
+import com.example.myapplication.ui.components.buttons.AlternateButton
 import com.example.myapplication.ui.components.dialogs.AddSlotDialog
+import com.example.myapplication.ui.components.dialogs.BulkScheduleDialog
 import com.example.myapplication.ui.components.scheduler.ScheduleCard
 import com.example.myapplication.ui.components.scheduler.ScheduleList
 import com.example.myapplication.ui.components.scheduler.ScheduleTopBar
+import com.example.myapplication.viewmodel.trainer.BulkScheduleConfig
 import com.example.myapplication.viewmodel.trainer.ScheduleViewModel
 
 @Composable
@@ -43,17 +46,29 @@ fun TrainerScheduleScreen(
     var showDialog by remember { mutableStateOf(false) }
     var selectedDay by remember { mutableStateOf("") }
 
+    var showBulkDialog by remember { mutableStateOf(false) }
+
     Column(modifier = modifier.fillMaxSize()) {
-        ScheduleTopBar(onNavigateBack=onNavigateBack)
+        ScheduleTopBar(onNavigateBack = onNavigateBack)
+
         ScheduleList(
             days = days,
             weeklySchedule = weeklySchedule,
             onAddClick = { day ->
                 selectedDay = day
                 showDialog = true
-            }
+            },
+            modifier = Modifier.weight(1f)
         )
+
+        Box(modifier = Modifier.padding(16.dp)) {
+            AlternateButton(
+                onClick = { showBulkDialog = true },
+                text = "Generuj harmonogram"
+            )
+        }
     }
+
 
     if (showDialog) {
         AddSlotDialog(
@@ -63,6 +78,28 @@ fun TrainerScheduleScreen(
                 showDialog = false
             },
             onDismiss = { showDialog = false }
+        )
+    }
+
+    if (showBulkDialog) {
+        BulkScheduleDialog(
+            onDismiss = { showBulkDialog = false },
+            onConfirm = { selectedDays, startH, startM, endH, endM, duration, breakTime ->
+
+                val config = BulkScheduleConfig(
+                    selectedDays = selectedDays,
+                    startHour = startH,
+                    startMinute = startM,
+                    endHour = endH,
+                    endMinute = endM,
+                    durationMinutes = duration,
+                    breakMinutes = breakTime
+                )
+
+                viewModel.applyBulkSchedule(config)
+
+                showBulkDialog = false
+            }
         )
     }
 }
