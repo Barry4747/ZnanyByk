@@ -13,11 +13,12 @@ import com.example.myapplication.data.model.trainings.WeeklySchedule
 @Composable
 fun ScheduleList(
     days: List<String>,
-    weeklySchedule: WeeklySchedule?, // typ z ViewModelu
-    onAddClick: (String) -> Unit
+    weeklySchedule: WeeklySchedule?,
+    onAddClick: (String) -> Unit,
+    modifier: Modifier
 ) {
     LazyColumn(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
