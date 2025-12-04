@@ -6,6 +6,7 @@ import com.example.myapplication.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -22,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.chats.MessageItem
+import com.example.myapplication.ui.components.inputs.MessageInputBar
 import com.example.myapplication.ui.components.user_components.ProfilePicture
 import com.example.myapplication.utils.shouldShowTimestamp
 import com.example.myapplication.utils.shouldShowProfile
@@ -37,6 +39,9 @@ fun ChatScreen(
     viewModel: ChatViewModel = hiltViewModel()
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
+
+
 
     DisposableEffect(Unit) {
         viewModel.init(chatId, receiverId)
@@ -60,8 +65,17 @@ fun ChatScreen(
     val avatarResource = receiverAvatarUrl ?: R.drawable.user_active
     val receiverName by viewModel.receiverName.collectAsState()
 
+    LaunchedEffect(isFocused, messages.size) {
+        if (messages.isNotEmpty()) {
+            listState.scrollToItem(0)
+        }
+    }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .background(Color.White)
+        .imePadding()
+    ) {
         Box(modifier = Modifier
             .fillMaxWidth()
             .height(72.dp)) {
@@ -128,6 +142,7 @@ fun ChatScreen(
         }
 
         LazyColumn(
+            state = listState,
             modifier = Modifier.weight(1f),
             reverseLayout = true,
             verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -155,40 +170,10 @@ fun ChatScreen(
                 .fillMaxWidth()
                 .padding(8.dp)
         ) {
-            TextField(
-                value = text,
-                onValueChange = { text = it },
-                placeholder = {
-                    if (!isFocused) Text(
-                        stringResource(R.string.write_message),
-                        color = Color.Gray
-                    )
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .border(1.dp, Color.Black)
-                    .background(Color.White.copy(alpha = 0.0f))
-                    .onFocusChanged { focusState -> isFocused = focusState.isFocused }
-                    .heightIn(min = 56.dp, max = 150.dp),
-                trailingIcon = {
-                    if (isFocused) {
-                        IconButton(onClick = {
-                            if (text.isNotBlank()) {
-                                viewModel.sendMessage(receiverId, text)
-                                text = ""
-                            }
-                        }) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.send_arrow),
-                                contentDescription = stringResource(R.string.send)
-                            )
-                        }
-                    }
-                },
-                maxLines = 5,
-                textStyle = androidx.compose.ui.text.TextStyle(
-                    color = Color.Black
-                )
+            MessageInputBar(
+                onSendMessage = { messageText ->
+                    viewModel.sendMessage(receiverId, messageText)
+                }
             )
         }
     }

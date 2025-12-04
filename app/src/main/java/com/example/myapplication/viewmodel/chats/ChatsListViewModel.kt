@@ -46,39 +46,6 @@ class ChatsListViewModel @Inject constructor(
         listenForChats()
     }
 
-//    private fun loadChats() {
-//        viewModelScope.launch {
-//            val currentUserId = authRepository.getCurrentUserId()
-//            if (currentUserId == null) {
-//                _chats.value = ChatsListState(
-//                    isLoading = false,
-//                    errorMessage = "Brak zalogowanego użytkownika"
-//                )
-//                return@launch
-//            }
-//
-//            _chats.value = ChatsListState(isLoading = true)
-//
-//            val result = chatRepository.getChatsForUser(currentUserId)
-//
-//            result.fold(
-//                onSuccess = { chatList ->
-//                    val sortedChats = chatList.sortedByDescending { it.lastTimestamp }
-//
-//                    _chats.value = ChatsListState(
-//                        chats = sortedChats,
-//                        isLoading = false
-//                    )
-//                },
-//                onFailure = { exception ->
-//                    _chats.value = ChatsListState(
-//                        isLoading = false,
-//                        errorMessage = exception.message ?: "Błąd podczas wczytywania chatów"
-//                    )
-//                }
-//            )
-//        }
-//    }
     private fun listenForChats() {
         val currentUserId = authRepository.getCurrentUserId()
         if (currentUserId == null) {

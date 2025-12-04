@@ -30,6 +30,8 @@ enum class Destination(
     //można dodać później TRAINERPROFILE, żeby trener miał dodatkową ikonkę
 }
 
+
+
 @Composable
 fun CustomBottomBar(
     navController: NavHostController,
@@ -38,49 +40,59 @@ fun CustomBottomBar(
 ) {
     val currentRoute = currentRoute(navController)
 
-    Row(
+    // Używamy Column jako kontenera na tło i cień
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(height)
             .shadow(8.dp, spotColor = Color.Black.copy(alpha = 0.2f))
             .background(Color.White)
-            .windowInsetsPadding(WindowInsets.navigationBars)
+        // WAŻNE: Nie dodajemy tu windowInsetsPadding, bo zrobimy to Spacerem na dole
     ) {
-        Destination.entries.forEach { destination ->
-            val isSelected = currentRoute == destination.route
+        // 1. Właściwa zawartość paska (ikony) - ma sztywne 72dp
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(height),
+            verticalAlignment = Alignment.CenterVertically // Dodane dla pewności
+        ) {
+            Destination.entries.forEach { destination ->
+                val isSelected = currentRoute == destination.route
 
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clickable {
-                        if (currentRoute != destination.route) {
-                            navController.navigate(destination.route) {
-                                popUpTo(Destination.HOME.route)
-                                launchSingleTop = true
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clickable {
+                            if (currentRoute != destination.route) {
+                                navController.navigate(destination.route) {
+                                    popUpTo(Destination.HOME.route)
+                                    launchSingleTop = true
+                                }
                             }
-                        }
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(
-                        id = if (isSelected) destination.iconActiveRes else destination.iconRes
-                    ),
-                    contentDescription = destination.contentDescription,
-                    modifier = Modifier.size(iconSize)
-                )
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(
+                            id = if (isSelected) destination.iconActiveRes else destination.iconRes
+                        ),
+                        contentDescription = destination.contentDescription,
+                        modifier = Modifier.size(iconSize),
+                        // Opcjonalnie: kolorowanie ikon, jeśli nie są pre-kolorowane w drawable
+                        tint = Color.Unspecified
+                    )
+                }
             }
         }
+
+        // 2. Magiczny Spacer, który "wypycha" tło pod pasek systemowy
+        // Na Androidzie z gestami będzie miał ~0-10dp, na Androidzie z przyciskami ~48dp.
+        Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
     }
 }
-
-
-
 
 @Composable
 fun currentRoute(navController: NavHostController): String? {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     return navBackStackEntry?.destination?.route
 }
-
