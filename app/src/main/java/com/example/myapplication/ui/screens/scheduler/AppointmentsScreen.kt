@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,10 +19,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.R
+import com.example.myapplication.data.model.trainings.Appointment
 import com.example.myapplication.viewmodel.trainer.ScheduleViewModel
 import com.example.myapplication.ui.components.buttons.FormButton
 import com.example.myapplication.ui.components.scheduler.AppointmentCard
 import java.time.LocalDate
+import java.util.Calendar
+import java.util.Date
 
 @Composable
 fun AppointmentsScreen(
@@ -32,12 +36,51 @@ fun AppointmentsScreen(
     var selectedMonthYear by remember { mutableStateOf(LocalDate.now()) }
 
     val appointments by viewModel.appointments.observeAsState(emptyList())
+    val listState = rememberLazyListState()
+
 
     LaunchedEffect(Unit) {
         viewModel.loadAppointmentsForMonthYear(
             selectedMonthYear.monthValue,
             selectedMonthYear.year
         )
+    }
+
+    val sortedAppointments = remember(appointments) {
+        appointments.sortedWith(compareBy<Appointment> { it.date }.thenBy { it.time })
+    }
+
+    LaunchedEffect(sortedAppointments, selectedMonthYear) {
+        val now = LocalDate.now()
+
+        val isCurrentMonthView = selectedMonthYear.monthValue == now.monthValue &&
+                selectedMonthYear.year == now.year
+
+        if (isCurrentMonthView && sortedAppointments.isNotEmpty()) {
+            val currentDate = Date()
+
+            val indexToScroll = sortedAppointments.indexOfFirst { appointment ->
+                val apptDate = appointment.date
+                if (apptDate != null) {
+                    val c = Calendar.getInstance()
+                    c.time = apptDate
+                    val timeParts = appointment.time?.split(":")
+                    val h = timeParts?.getOrNull(0)?.toIntOrNull() ?: 0
+                    val m = timeParts?.getOrNull(1)?.toIntOrNull() ?: 0
+                    c.set(Calendar.HOUR_OF_DAY, h)
+                    c.set(Calendar.MINUTE, m)
+
+                    c.time.after(currentDate)
+                } else {
+                    false
+                }
+            }
+
+            if (indexToScroll != -1) {
+                listState.animateScrollToItem(indexToScroll)
+            } else {
+            }
+        }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -86,7 +129,7 @@ fun AppointmentsScreen(
         }
 
         Box(modifier = Modifier.fillMaxSize()) {
-            if (appointments.isEmpty()) {
+            if (sortedAppointments.isEmpty()) {
                 Text(
                     text = stringResource(R.string.no_workouts_this_month),
                     style = MaterialTheme.typography.bodyLarge,
@@ -95,11 +138,12 @@ fun AppointmentsScreen(
                 )
             } else {
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(appointments.sortedBy { it.date }) { appointment ->
+                    items(sortedAppointments) { appointment ->
                         AppointmentCard(appointment = appointment, onAppointmentChatClick=onAppointmentChatClick)
                     }
                 }
