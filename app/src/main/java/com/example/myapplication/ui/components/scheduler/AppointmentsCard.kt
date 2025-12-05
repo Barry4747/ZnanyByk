@@ -6,9 +6,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,6 +28,7 @@ import com.example.myapplication.R
 import com.example.myapplication.data.model.gyms.Gym
 import com.example.myapplication.data.model.trainings.Appointment
 import com.example.myapplication.data.model.trainings.DayOfTheWeek
+import com.example.myapplication.data.model.users.User
 import com.example.myapplication.ui.components.buttons.MessageButton
 import com.example.myapplication.utils.calculateAppointmentStatus
 import com.example.myapplication.viewmodel.trainer.ScheduleViewModel
@@ -45,7 +49,11 @@ fun AppointmentCard(
     val currentUserId = viewModel.currentUserId.toString()
     val isTrainer = currentUserId == appointment.trainerId.toString()
     val targetUserId = if (isTrainer) appointment.clientId else appointment.trainerId
-    val userData = viewModel.getUserById(targetUserId.toString())
+    var userData by remember { mutableStateOf<User?>(null) }
+
+    LaunchedEffect(targetUserId) {
+        userData = viewModel.getUserById(targetUserId.toString())
+    }
 
     val gym by produceState<Gym?>(initialValue = null, key1 = appointment.gymId) {
         appointment.gymId?.let { id ->

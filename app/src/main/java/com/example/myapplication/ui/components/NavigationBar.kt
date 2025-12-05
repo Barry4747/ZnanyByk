@@ -27,9 +27,7 @@ enum class Destination(
     CHATS("chats", "Chats", R.drawable.chats, R.drawable.chats_active, "Chats"),
     SCHEDULER("scheduler", "Scheduler", R.drawable.scheduler, R.drawable.scheduler_active, "Scheduler"),
     USER("profile", "Profile", R.drawable.user, R.drawable.user_active, "Profile")
-    //można dodać później TRAINERPROFILE, żeby trener miał dodatkową ikonkę
 }
-
 
 
 @Composable
@@ -40,20 +38,17 @@ fun CustomBottomBar(
 ) {
     val currentRoute = currentRoute(navController)
 
-    // Używamy Column jako kontenera na tło i cień
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .shadow(8.dp, spotColor = Color.Black.copy(alpha = 0.2f))
             .background(Color.White)
-        // WAŻNE: Nie dodajemy tu windowInsetsPadding, bo zrobimy to Spacerem na dole
     ) {
-        // 1. Właściwa zawartość paska (ikony) - ma sztywne 72dp
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(height),
-            verticalAlignment = Alignment.CenterVertically // Dodane dla pewności
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Destination.entries.forEach { destination ->
                 val isSelected = currentRoute == destination.route
@@ -78,15 +73,12 @@ fun CustomBottomBar(
                         ),
                         contentDescription = destination.contentDescription,
                         modifier = Modifier.size(iconSize),
-                        // Opcjonalnie: kolorowanie ikon, jeśli nie są pre-kolorowane w drawable
                         tint = Color.Unspecified
                     )
                 }
             }
         }
 
-        // 2. Magiczny Spacer, który "wypycha" tło pod pasek systemowy
-        // Na Androidzie z gestami będzie miał ~0-10dp, na Androidzie z przyciskami ~48dp.
         Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
     }
 }

@@ -23,6 +23,7 @@ import com.example.myapplication.data.model.trainings.Appointment
 import com.example.myapplication.viewmodel.trainer.ScheduleViewModel
 import com.example.myapplication.ui.components.buttons.FormButton
 import com.example.myapplication.ui.components.scheduler.AppointmentCard
+import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.util.Calendar
 import java.util.Date
