@@ -27,7 +27,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -45,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -98,7 +97,7 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(top = 16.dp, start = 16.dp, end = 16.dp),
             verticalArrangement = Arrangement.Top
         ) {
             Text(
@@ -200,11 +199,9 @@ fun HomeScreen(
                 }
 
                 if (showSortDialog) {
-                    var isLocationAvailable = trainersState.userLocation?.let {
+                    val isLocationAvailable = trainersState.userLocation?.let {
                         it.latitude != 0.0 && it.longitude != 0.0
                     } ?: false
-                    Log.d("DIST", "Obiekt location: ${trainersState.userLocation}")
-                    Log.d("DIST", "aaaaa " + isLocationAvailable.toString())
                     SortDialog(
                         onDismiss = { showSortDialog = false },
                         onSortSelected = { sortOption ->
@@ -217,7 +214,12 @@ fun HomeScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = borderColor
+            )
 
             Box(
                 modifier = Modifier.weight(1f),

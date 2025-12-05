@@ -15,7 +15,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-// Modern apps use slightly taller buttons (48dp - 56dp)
 private val BUTTON_HEIGHT = 48.dp
 private val BUTTON_CORNER_RADIUS = 12.dp
 
@@ -25,9 +24,6 @@ fun MainButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    // FIX: Check system theme.
-    // Light Mode = Black Button / White Text
-    // Dark Mode = White Button / Black Text (High contrast)
     containerColor: Color = if (isSystemInDarkTheme()) Color.White else Color.Black,
     contentColor: Color = if (isSystemInDarkTheme()) Color.Black else Color.White
 ) {
@@ -41,8 +37,8 @@ fun MainButton(
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
             contentColor = contentColor,
-            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            disabledContainerColor = Color.LightGray,
+            disabledContentColor = Color.DarkGray
         ),
         elevation = ButtonDefaults.buttonElevation(
             defaultElevation = 4.dp,
@@ -60,6 +56,5 @@ fun MainButton(
 @Preview(showBackground = true)
 @Composable
 fun PreviewMainButton() {
-    // This preview will show the Light Mode version (Black button)
     MainButton(text = "Sign In", onClick = {})
 }

@@ -17,13 +17,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -40,16 +40,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.example.myapplication.R
 import com.example.myapplication.ui.components.GalleryImage
 import com.example.myapplication.ui.components.buttons.MainBackButton
+import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.ui.components.dialogs.FullScreenMediaDialog
 import com.example.myapplication.ui.components.dialogs.RatingDialog
 import com.example.myapplication.ui.components.indicators.RatingIndicator
+import com.example.myapplication.viewmodel.TrainerCategory
 import com.example.myapplication.viewmodel.TrainersViewModel
+import java.util.Locale
 
 data class GalleryItem(
     val uri: String,
@@ -101,49 +105,38 @@ fun TrainerDetailScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
-                        .background(Color.White) // Ensure background behind button is clean
+                        .background(Color.White)
                 ) {
-                    Button(
+                    MainButton(
+                        text = "Umów wizytę",
                         onClick = { onBookClick(selectedTrainer.id ?: "") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Black, // Black Button
-                            contentColor = Color.White
-                        )
-                    ) {
-                        Text(
-                            text = "Umów wizytę",
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
+                        modifier = Modifier.fillMaxWidth(),
+                        containerColor = Color.Black,
+                        contentColor = Color.White
+                    )
                 }
             }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = paddingValues.calculateBottomPadding())
+        ) {
             if (selectedTrainer != null) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
                 ) {
-                    // --- HEADER IMAGE SECTION ---
-                    val imageUrl: Any? = if (selectedTrainer.images?.isNotEmpty() == true) {
-                        selectedTrainer.images!!.let { images ->
-                            if (viewModel.isVideoUrl(images[0])) R.drawable.placeholder else images[0]
-                        }
-                    } else {
-                        R.drawable.placeholder
-                    }
+                    val imageUrl: Any? = selectedTrainer.images?.firstOrNull()?.let { first ->
+                        if (viewModel.isVideoUrl(first)) R.drawable.placeholder else first
+                    } ?: R.drawable.placeholder
 
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(300.dp) // Slightly taller for detail view
+                            .height(300.dp)
                             .background(Color.White)
                     ) {
                         Image(
@@ -151,10 +144,20 @@ fun TrainerDetailScreen(
                             contentDescription = "Zdjęcie trenera: ${selectedTrainer.firstName}",
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop,
-                            alignment = Alignment.TopCenter // Match Card: TopCenter alignment
+                            alignment = Alignment.TopCenter
                         )
 
-                        // "Rate" Button inside Image (Styled like a Chip)
+                        RatingIndicator(
+                            rating = selectedTrainer.avgRating ?: "0.0",
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .statusBarsPadding()
+                                .padding(16.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color.White)
+                                .border(1.dp, borderColor, RoundedCornerShape(12.dp))
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
@@ -176,7 +179,6 @@ fun TrainerDetailScreen(
                         }
                     }
 
-                    // --- INFO SECTION ---
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -199,7 +201,7 @@ fun TrainerDetailScreen(
                                 text = "${selectedTrainer.pricePerHour ?: 0} zł/h",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
-                                color = primaryTextColor // Match Card: Black Price
+                                color = primaryTextColor
                             )
                         }
 
@@ -208,7 +210,7 @@ fun TrainerDetailScreen(
                         Text(
                             text = "${selectedTrainer.experience ?: 0} lat doświadczenia",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = secondaryTextColor // Match Card: Gray subtext
+                            color = secondaryTextColor
                         )
 
                         Spacer(modifier = Modifier.height(4.dp))
@@ -229,29 +231,31 @@ fun TrainerDetailScreen(
 
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        // --- CATEGORIES (Match Card: Dark Gray BG, White Text) ---
                         FlowRow(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            selectedTrainer.categories?.forEach { speciality ->
-                                Box(
-                                    modifier = Modifier
-                                        .background(
-                                            color = chipBackgroundColor, // Dark Gray
-                                            shape = RoundedCornerShape(8.dp)
-                                        )
-                                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                                ) {
-                                    Text(
-                                        text = speciality,
-                                        color = chipTextColor, // White
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                            TrainerCategory.entries
+                                .forEach { categoryEnum ->
+                                    if (selectedTrainer.categories?.contains(categoryEnum.name) == true) {
+                                        Box(
+                                            modifier = Modifier
+                                                .background(
+                                                    color = chipBackgroundColor,
+                                                    shape = RoundedCornerShape(8.dp)
+                                                )
+                                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                                        ) {
+                                            Text(
+                                                text = stringResource(id = categoryEnum.stringResId),
+                                                color = chipTextColor,
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
                                 }
-                            }
                         }
 
                         Spacer(modifier = Modifier.height(32.dp))
@@ -270,11 +274,9 @@ fun TrainerDetailScreen(
                             lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.2
                         )
 
-                        // --- GALLERY SECTION ---
                         var galleryImages: List<String> = selectedTrainer.images ?: emptyList()
                         if (galleryImages.isNotEmpty()) {
                             val firstItem = galleryImages.first()
-                            // Logic: Skip first image if it's the one shown in header (unless it's a video)
                             if (!viewModel.isVideoUrl(firstItem)) {
                                 galleryImages = galleryImages.drop(1)
                             }
@@ -301,7 +303,6 @@ fun TrainerDetailScreen(
                             ) {
                                 items(galleryImages) { imageUrl ->
                                     val isVideo = viewModel.isVideoUrl(imageUrl)
-                                    // Wrap GalleryImage to enforce shape/border consistency
                                     Box(
                                         modifier = Modifier
                                             .clip(RoundedCornerShape(12.dp))
@@ -315,7 +316,7 @@ fun TrainerDetailScreen(
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(80.dp)) // Space for bottom button
+                        Spacer(modifier = Modifier.height(80.dp))
                     }
                 }
             } else {
@@ -327,19 +328,12 @@ fun TrainerDetailScreen(
                 }
             }
 
-            MainBackButton(onNavigateBack)
-
-            if (selectedTrainer != null) {
-                RatingIndicator(
-                    rating = selectedTrainer.avgRating ?: "0.0",
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(top = 40.dp, end = 16.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White)
-                        .border(1.dp, borderColor, RoundedCornerShape(12.dp))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                )
+            Box(
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(top = 8.dp, start = 8.dp)
+            ) {
+                MainBackButton(onNavigateBack)
             }
         }
     }

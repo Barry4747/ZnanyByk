@@ -112,7 +112,6 @@ fun TrainerForm(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- HOURLY RATE WITH FIXED PLN SUFFIX ---
             MainFormTextField(
                 value = hourlyRate,
                 onValueChange = onHourlyRateChange,
@@ -132,17 +131,15 @@ fun TrainerForm(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // --- GYM SELECTOR (LOOKS LIKE DROPDOWN) ---
-            // FIXED: Używamy Boxa z nakładką (overlay), aby przechwycić kliknięcie
             Box(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 MainFormTextField(
                     value = selectedGymName ?: stringResource(R.string.my_gym),
-                    onValueChange = {}, // Ignorowane, bo readOnly
+                    onValueChange = {},
                     label = stringResource(R.string.my_gym),
-                    enabled = true, // Pozostawiamy true dla estetyki (nie wyszarzone)
-                    readOnly = true, // Klawiatura się nie otworzy
+                    enabled = true,
+                    readOnly = true,
                     trailingIcon = {
                         Icon(
                             imageVector = Icons.Default.ArrowDropDown,
@@ -152,7 +149,6 @@ fun TrainerForm(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Niewidoczna nakładka, która przechwytuje kliknięcie
                 Box(
                     modifier = Modifier
                         .matchParentSize()
@@ -191,7 +187,6 @@ fun TrainerForm(
                     .padding(start = 8.dp, bottom = 4.dp)
             )
 
-            // --- MEDIA PREVIEWS WITH STYLING ---
             Box(modifier = Modifier.height(140.dp)) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),

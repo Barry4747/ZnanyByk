@@ -311,7 +311,7 @@ fun PersonalInfoRegistrationScreen(
                             border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
                         )
                     ) { snappedDateValue ->
-                        snappedDate = snappedDateValue // <-- update controlled state
+                        snappedDate = snappedDateValue
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))

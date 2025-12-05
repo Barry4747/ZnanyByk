@@ -32,6 +32,9 @@ private val LightColorScheme = lightColorScheme(
     surface = Color(0xFFFFFBFE),
     onPrimary = Color.White,
     onSecondary = Color.White,
+    //darkTheme: Boolean = isSystemInDarkTheme(),
+
+    // Dynamic color OFF !!!!
     onTertiary = Color.White,
     onBackground = Color(0xFF1C1B1F),
     onSurface = Color(0xFF1C1B1F),
@@ -42,9 +45,6 @@ private val LightColorScheme = lightColorScheme(
 fun MyApplicationTheme(
     //In the future dark or light theme!!!
     darkTheme: Boolean = false,
-    //darkTheme: Boolean = isSystemInDarkTheme(),
-
-    // Dynamic color OFF !!!!
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {

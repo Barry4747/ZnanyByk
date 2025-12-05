@@ -18,7 +18,6 @@ import androidx.media3.ui.PlayerView
 fun ExoPlayerView(mediaUrl: String) {
     val context = LocalContext.current
 
-    // 1. Inicjalizacja ExoPlayera
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
             setMediaItem(MediaItem.fromUri(mediaUrl.toUri()))
@@ -26,21 +25,16 @@ fun ExoPlayerView(mediaUrl: String) {
         }
     }
 
-    // 2. Zarządzanie cyklem życia (KLUCZOWE)
     DisposableEffect(key1 = Unit) {
-        // Rozpocznij odtwarzanie, gdy kompozycja jest aktywna
         exoPlayer.playWhenReady = true
 
         onDispose {
-            // Zatrzymaj i zwolnij zasoby, gdy kompozycja znika
             exoPlayer.release()
         }
     }
 
-    // 3. Wyświetlenie odtwarzacza za pomocą AndroidView
     AndroidView(
         factory = {
-            // PlayerView to UI opakowujące ExoPlayer
             PlayerView(context).apply {
                 player = exoPlayer
                 useController = true

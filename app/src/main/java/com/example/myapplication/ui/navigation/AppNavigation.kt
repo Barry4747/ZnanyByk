@@ -439,7 +439,7 @@ fun AppNavigation(
                         navController.navigate(Screen.Welcome.route) {
                             popUpTo(0) { inclusive = true }
                         }
-                }, //TODO mati zobacz se to
+                },
                         onEditSchedule = {
                         navController.navigate("trainer_schedule") {
                             launchSingleTop = true

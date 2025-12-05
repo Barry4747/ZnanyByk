@@ -1,9 +1,8 @@
 package com.example.myapplication.viewmodel
 
 import android.app.Application
-
+import android.location.Location
 import android.util.Log
-
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import coil.imageLoader
@@ -17,13 +16,11 @@ import com.example.myapplication.data.repository.GymRepository
 import com.example.myapplication.data.repository.TrainerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import android.location.Location
 import javax.inject.Inject
 import kotlin.math.round
 
@@ -79,8 +76,8 @@ data class TrainersState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val priceMin: Int = 0,
-    val priceMax: Int = 1000, // Domyślna wartość, zostanie nadpisana
-    val maxPriceFromTrainers: Int = 1000, // Nowe pole do przechowywania maksimum z danych
+    val priceMax: Int = 1000,
+    val maxPriceFromTrainers: Int = 1000,
     val selectedCategories: Set<String> = emptySet(),
     val minRating: Float = 0.0f,
     val sortBy: SortOption = SortOption.RATING_DESC,
@@ -131,7 +128,7 @@ class TrainersViewModel @Inject constructor(
                         isLoading = false, 
                         trainers = trainers,
                         maxPriceFromTrainers = maxPrice,
-                        priceMax = maxPrice // Ustawiamy suwak na maksimum przy pierwszym ładowaniu
+                        priceMax = maxPrice
                     )
                 }
                 preloadTrainerImages(trainers)
@@ -211,7 +208,7 @@ class TrainersViewModel @Inject constructor(
         _trainersState.update {
             it.copy(
                 priceMin = 0,
-                priceMax = it.maxPriceFromTrainers, // Używamy dynamicznego maksimum
+                priceMax = it.maxPriceFromTrainers,
                 selectedCategories = emptySet(),
                 minRating = 0.0f
             )
@@ -222,20 +219,17 @@ class TrainersViewModel @Inject constructor(
         _trainersState.update { it.copy(sortBy = sortOption) }
 
         viewModelScope.launch {
-            // Obsługa sortowania po dystansie (wymaga operacji asynchronicznych)
             if (sortOption == SortOption.DISTANCE_ASC) {
-                loadCurrentUserLocation() // Upewnij się, że mamy lokalizację
+                loadCurrentUserLocation()
                 val currentState = _trainersState.value
                 val userLoc = currentState.userLocation
 
                 if (userLoc != null && userLoc.latitude != 0.0) {
                     _trainersState.update { it.copy(isLoading = true) }
 
-                    // Pobierz lokalizacje siłowni dla każdego trenera i oblicz dystans
-                    // Używamy mapowania, aby przypisać dystans do trenera
                     val trainersWithDistances = currentState.trainers.map { trainer ->
                         val gymId = trainer.gymId
-                        var distance = Double.MAX_VALUE // Domyślnie bardzo daleko, jeśli brak danych
+                        var distance = Double.MAX_VALUE
 
                         if (gymId != null) {
                             val gym = gymRepository.getGymById(gymId).getOrNull()
@@ -250,16 +244,13 @@ class TrainersViewModel @Inject constructor(
                         trainer to distance
                     }
 
-                    // Sortuj listę par po dystansie i wyciągnij trenerów
                     val sortedList = trainersWithDistances.sortedBy { it.second }.map { it.first }
 
                     _trainersState.update { it.copy(trainers = sortedList, isLoading = false) }
                 } else {
                     Log.d("SORT", "Brak lokalizacji użytkownika, nie można posortować po dystansie.")
-                    // Opcjonalnie: obsługa błędu lub brak akcji
                 }
             } else {
-                // Standardowe sortowanie synchroniczne dla pozostałych opcji
                 _trainersState.update { currentState ->
                     val sortedList = when (sortOption) {
                         SortOption.PRICE_ASC -> currentState.trainers.sortedBy { it.pricePerHour }
@@ -291,7 +282,6 @@ class TrainersViewModel @Inject constructor(
     fun selectTrainer(trainer: Trainer) {
         _trainersState.update { it.copy(selectedTrainer = trainer) }
         loadCurrentUserRating(trainer)
-        // Wywołanie obliczania dystansu w momencie wyboru trenera
         viewModelScope.launch {
             calculateDistanceToSelectedTrainer()
         }
@@ -302,7 +292,7 @@ class TrainersViewModel @Inject constructor(
         val currentUserId = authRepository.getCurrentUserId()
         val userRating = trainer.ratings?.get(currentUserId)
         _trainersState.update {
-            it.copy(currentUserRating = userRating ?: 0) // Zapisz ocenę w stanie
+            it.copy(currentUserRating = userRating ?: 0)
         }
     }
 
@@ -344,7 +334,6 @@ class TrainersViewModel @Inject constructor(
         return results[0] / 1000.0
     }
 
-    // Zmieniona nazwa i poprawne aktualizowanie stanu
     suspend fun calculateDistanceToSelectedTrainer() {
         loadCurrentUserLocation()
         val userLoc = _trainersState.value.userLocation
@@ -361,7 +350,6 @@ class TrainersViewModel @Inject constructor(
             dist = round(dist * 10.0) / 10.0
             Log.d("DIST", "Obliczony dystans: $dist km")
             
-            // Aktualizacja stanu, aby UI mogło zareagować
             _trainersState.update { it.copy(distanceToTrainer = dist) }
         } else {
             Log.d("DIST", "Nie można obliczyć dystansu. Brak lokalizacji użytkownika lub siłowni.")
@@ -384,14 +372,13 @@ class TrainersViewModel @Inject constructor(
 
         viewModelScope.launch {
             val result = trainerRepository.updateRating(
-                trainerId = trainerId, // <-- Pewny String
+                trainerId = trainerId,
                 userId = currentUserId,
                 rating = rating
             )
 
             result.onSuccess {
                 Log.d("TrainersVM", "Ocena pomyślnie zaktualizowana w bazie.")
-                // Po sukcesie, odśwież dane trenera, aby pobrać nową średnią
                 refreshSelectedTrainerData()
             }.onFailure { error ->
                 _trainersState.update { it.copy(errorMessage = "Nie udało się zapisać oceny.") }

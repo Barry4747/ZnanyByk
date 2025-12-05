@@ -34,7 +34,7 @@ import androidx.compose.ui.window.Dialog
 fun RatingDialog(
     onDismissRequest: () -> Unit,
     onSubmit: (rating: Int) -> Unit,
-    initialRating: Int = 0 // Zmieniono domyślnie na 0 (brak oceny), ale 3 też jest ok
+    initialRating: Int = 0
 ) {
     Dialog(onDismissRequest = onDismissRequest) {
         Card(
@@ -53,7 +53,6 @@ fun RatingDialog(
 
                 var currentRating by remember { mutableIntStateOf(if (initialRating == 0) 0 else initialRating) }
 
-                // Tutaj wstawiamy nasze gwiazdki zamiast slidera
                 StarRatingBar(
                     rating = currentRating,
                     onRatingChanged = { newRating ->
@@ -61,7 +60,6 @@ fun RatingDialog(
                     }
                 )
 
-                // Tekst pomocniczy (opcjonalny)
                 Text(
                     text = if (currentRating > 0) "Twoja ocena: $currentRating/5" else "Wybierz ocenę",
                     style = MaterialTheme.typography.bodyMedium
@@ -81,7 +79,7 @@ fun RatingDialog(
                                 onSubmit(currentRating)
                             }
                         },
-                        enabled = currentRating > 0 // Przycisk aktywny tylko gdy wybrano ocenę
+                        enabled = currentRating > 0
                     ) {
                         Text("Zatwierdź")
                     }
@@ -105,10 +103,10 @@ fun StarRatingBar(
             Icon(
                 imageVector = if (i <= rating) Icons.Filled.Star else Icons.Outlined.Star,
                 contentDescription = "Gwiazdka $i",
-                tint = if (i <= rating) Color(0xFFFFC107) else Color.Gray, // Złoty kolor dla pełnych gwiazdek
+                tint = if (i <= rating) Color(0xFFFFC107) else Color.Gray,
                 modifier = Modifier
-                    .size(40.dp) // Rozmiar gwiazdki
-                    .clickable { onRatingChanged(i) } // Kliknięcie ustawia ocenę
+                    .size(40.dp)
+                    .clickable { onRatingChanged(i) }
                     .padding(4.dp)
             )
         }

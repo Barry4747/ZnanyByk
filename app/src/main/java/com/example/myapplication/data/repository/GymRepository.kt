@@ -40,7 +40,6 @@ class GymRepository @Inject constructor() {
 
     suspend fun searchGyms(query: String): Result<List<Gym>> {
         return try {
-            // Pobieramy wszystkie (dla uproszczenia, przy dużej bazie warto indeksować w Algolia/Elastic)
             val snapshot = gymsCollection.get().await()
             val lowerQuery = query.lowercase()
             val gyms = snapshot.documents.mapNotNull { doc ->

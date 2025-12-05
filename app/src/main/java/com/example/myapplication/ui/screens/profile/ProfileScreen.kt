@@ -146,14 +146,14 @@ fun ProfileScreen(
                 text = stringResource(R.string.language),
                 detail = stringResource(R.string.polish),
                 enabled = false,
-                onClick = { /* No logic */ }
+                onClick = { /* can add langauge later */ }
             )
 
             FormButtonWithDetail(
                 text = stringResource(R.string.currency),
                 detail = "PLN, zł",
                 enabled = false,
-                onClick = { /* No logic */ }
+                onClick = { /* can add langauge later */ }
             )
             if (state.userRole == "TRAINER")
                 Spacer(modifier = Modifier.height(24.dp))

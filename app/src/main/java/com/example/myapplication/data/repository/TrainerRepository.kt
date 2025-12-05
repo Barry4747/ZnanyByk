@@ -160,9 +160,7 @@ class TrainerRepository @Inject constructor() {
             val trainers = snapshot.documents.mapNotNull { document ->
                 Log.d("TRAINER_REPO_MAP", "Przetwarzam dokument o ID: ${document.id}")
 
-                // Konwertuj dokument...
                 val trainerWithoutId = document.toObject(Trainer::class.java)
-
 
                 val trainerWithId = trainerWithoutId?.copy(id = document.id)
 
@@ -170,10 +168,9 @@ class TrainerRepository @Inject constructor() {
 
             }
 
-
             Log.d(
                 "TRAINER_REPO",
-                "Trenerzy: ${trainers.map { "${it.firstName} ${it.lastName} (ID: ${it.id})" }}" // Teraz możesz wyświetlić ID
+                "Trenerzy: ${trainers.map { "${it.firstName} ${it.lastName} (ID: ${it.id})" }}"
             )
 
             for (trainer in trainers) {
@@ -197,7 +194,6 @@ class TrainerRepository @Inject constructor() {
         return try {
             var trainers: List<Trainer> = getAllTrainers().getOrThrow()
 
-            // Filtrowanie po query (nazwa, opis, kategorie, etc.)
             if (query.isNotBlank()) {
                 val lowerQuery = query.lowercase()
                 trainers = trainers.filter { trainer ->
@@ -205,13 +201,12 @@ class TrainerRepository @Inject constructor() {
                     val lastName = trainer.lastName?.lowercase() ?: ""
                     val fullName = "$firstName $lastName"
 
-                    // Sprawdź, czy query pasuje do imienia, nazwiska LUB pełnej nazwy
                     firstName.contains(lowerQuery) ||
                             lastName.contains(lowerQuery) ||
                             fullName.contains(lowerQuery)
                 }
             }
-            // Filtrowanie po kategoriach
+
             if (categories.isNotEmpty()) {
                 trainers = trainers.filter { trainer ->
                     trainer.categories?.any { it in categories } == true
@@ -219,12 +214,10 @@ class TrainerRepository @Inject constructor() {
                 }
             }
 
-            // Filtrowanie po cenie
             trainers = trainers.filter {
                 val price = it.pricePerHour ?: 0
                 price in minPrice..maxPrice
             }
-
 
             Log.d(
                 "TRAINER_REPO", "📊 Znaleziono ${trainers.size} przefiltrowanych trenerów. " +
@@ -246,10 +239,8 @@ class TrainerRepository @Inject constructor() {
         return if (!trainer.ratings.isNullOrEmpty()) {
             val ratingsValues = trainer.ratings.values
 
-            // 2. Na tej kolekcji wartości wywołujemy .average(), tak jak wcześniej
             val average = ratingsValues.average()
 
-            // 3. Formatujemy wynik do dwóch miejsc po przecinku
             "%.2f".format(average)
         } else {
             "0.00"
