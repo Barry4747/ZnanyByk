@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.myapplication.ui.components.MainTopBar
 import com.example.myapplication.ui.components.buttons.PaymentButton
 import com.example.myapplication.ui.components.payment.PaymentFormView
 import com.example.myapplication.ui.components.payment.SuccessView
@@ -67,27 +68,7 @@ fun PaymentScreen(
     Scaffold(
         containerColor = Color.White,
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        "Podsumowanie",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = Color.Black
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Wróć",
-                            tint = Color.Black
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White
-                )
-            )
+            MainTopBar(text="Podsumowanie", onNavigateBack = onNavigateBack)
         }
     ) { paddingValues ->
         Box(

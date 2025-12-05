@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.screens.booking
 
+import MainProgressIndicator
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -25,6 +26,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.myapplication.ui.components.MainTopBar
+import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.viewmodel.booking.BookingViewModel
 import java.time.DayOfWeek
 import java.time.Instant
@@ -97,35 +100,15 @@ fun BookingScreen(
     Scaffold(
         containerColor = Color.White,
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        "Rezerwacja",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = Color.Black
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color.Black
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White
-                )
-            )
-        },
+            MainTopBar(text="Rezerwacja", onNavigateBack = onNavigateBack)
+                 },
         bottomBar = {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(24.dp)
             ) {
-                Button(
+                MainButton(
                     onClick = {
                         state.selectedSlot?.let { slot ->
                             state.selectedCategory?.let { category ->
@@ -140,27 +123,9 @@ fun BookingScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Black,
-                        contentColor = Color.White,
-                        disabledContainerColor = Color(0xFFF0F0F0),
-                        disabledContentColor = Color.Gray
-                    ),
                     enabled = isButtonEnabled,
-                    elevation = ButtonDefaults.buttonElevation(
-                        defaultElevation = 0.dp,
-                        pressedElevation = 4.dp
-                    )
-                ) {
-                    Text(
-                        text = "Przejdź do płatności",
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    )
-                }
+                    text = "Przejdź do płatności"
+                )
             }
         }
     ) { paddingValues ->
@@ -256,8 +221,7 @@ fun BookingScreen(
 
             Box(modifier = Modifier.fillMaxSize()) {
                 if (state.isLoading) {
-                    CircularProgressIndicator(
-                        color = Color.Black,
+                    MainProgressIndicator(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 } else if (state.availableSlots.isEmpty()) {
