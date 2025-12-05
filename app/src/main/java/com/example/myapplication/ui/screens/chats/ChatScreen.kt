@@ -98,32 +98,6 @@ fun ChatScreen(
                     )
 
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = {
-                        if (text.isNotBlank()) {
-                            viewModel.sendMessage(receiverId, text)
-                            text = ""
-                        }
-                    }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.phone),
-                            contentDescription = stringResource(R.string.send),
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
-                    IconButton(onClick = {
-                        if (text.isNotBlank()) {
-                            viewModel.sendMessage(receiverId, text)
-                            text = ""
-                        }
-                    }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.video),
-                            contentDescription = stringResource(R.string.send),
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
-                }
             }
             Box(
                 modifier = Modifier
