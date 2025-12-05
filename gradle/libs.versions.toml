@@ -25,6 +25,7 @@ uiText = "1.9.4"
 mapsCompose = "2.14.0"
 playServicesMaps = "18.1.0"
 foundationLayout = "1.9.4"
+foundation = "1.9.5"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
@@ -61,6 +62,7 @@ androidx-compose-ui-text = { group = "androidx.compose.ui", name = "ui-text", ve
 maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "mapsCompose" }
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "foundationLayout" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

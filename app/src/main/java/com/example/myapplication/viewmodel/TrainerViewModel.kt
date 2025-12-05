@@ -9,23 +9,42 @@ import androidx.lifecycle.viewModelScope
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.example.myapplication.R
+import com.example.myapplication.data.model.gyms.GymLocation
 import com.example.myapplication.data.model.users.Trainer
-import com.example.myapplication.data.repository.AuthRepository // <-- KROK 1: DODAJ IMPORT
+import com.example.myapplication.data.model.users.UserLocation
+import com.example.myapplication.data.repository.AuthRepository
+import com.example.myapplication.data.repository.GymRepository
 import com.example.myapplication.data.repository.TrainerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import android.location.Location
 import javax.inject.Inject
+import kotlin.math.round
 
 enum class SortOption(val displayName: String) {
     PRICE_ASC("Cena: Rosnąco"),
     PRICE_DESC("Cena: Malejąco"),
-    RATING_DESC("Ocena: Malejąco")
+    RATING_DESC("Ocena: Malejąco"),
+    DISTANCE_ASC("Odległość: Najbliżej")
 }
 
+enum class SuggestionType {
+    TRAINER,
+    GYM
+}
+
+data class SearchSuggestion(
+    val id: String,
+    val title: String,
+    val subtitle: String? = null,
+    val type: SuggestionType
+)
 
 enum class TrainerCategory(val stringResId: Int) {
     CROSSFIT(R.string.category_crossfit),
@@ -60,18 +79,24 @@ data class TrainersState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val priceMin: Int = 0,
-    val priceMax: Int = 1000,
+    val priceMax: Int = 1000, // Domyślna wartość, zostanie nadpisana
+    val maxPriceFromTrainers: Int = 1000, // Nowe pole do przechowywania maksimum z danych
     val selectedCategories: Set<String> = emptySet(),
     val minRating: Float = 0.0f,
     val sortBy: SortOption = SortOption.RATING_DESC,
     val searchQuery: String = "",
-    val currentUserRating: Int = 0)
+    val currentUserRating: Int = 0,
+    var userLocation: UserLocation? = null,
+    var distanceToTrainer: Double? = null,
+    val suggestions: List<SearchSuggestion> = emptyList()
+)
 
 @HiltViewModel
 class TrainersViewModel @Inject constructor(
     private val app: Application,
     private val trainerRepository: TrainerRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val gymRepository: GymRepository
 ) : AndroidViewModel(app) {
 
     private val _trainersState = MutableStateFlow(TrainersState())
@@ -100,8 +125,14 @@ class TrainersViewModel @Inject constructor(
             )
 
             result.onSuccess { trainers ->
+                val maxPrice = trainers.maxOfOrNull { it.pricePerHour ?: 0 } ?: 1000
                 _trainersState.update {
-                    it.copy(isLoading = false, trainers = trainers)
+                    it.copy(
+                        isLoading = false, 
+                        trainers = trainers,
+                        maxPriceFromTrainers = maxPrice,
+                        priceMax = maxPrice // Ustawiamy suwak na maksimum przy pierwszym ładowaniu
+                    )
                 }
                 preloadTrainerImages(trainers)
             }.onFailure { error ->
@@ -116,6 +147,34 @@ class TrainersViewModel @Inject constructor(
 
     fun onSearchQueryChanged(query: String) {
         _trainersState.update { it.copy(searchQuery = query) }
+        updateSearchSuggestions(query)
+    }
+    
+    fun updateSearchSuggestions(query: String) {
+        if (query.length < 2) {
+             _trainersState.update { it.copy(suggestions = emptyList()) }
+             return
+        }
+        viewModelScope.launch {
+             val trainersDeferred = async { trainerRepository.getFilteredTrainers(query) }
+             val gymsDeferred = async { gymRepository.searchGyms(query) } 
+             
+             val trainersResult = trainersDeferred.await()
+             val gymsResult = gymsDeferred.await()
+             
+             val trainers = trainersResult.getOrNull() ?: emptyList()
+             val gyms = gymsResult.getOrNull() ?: emptyList()
+             
+             val suggestions = mutableListOf<SearchSuggestion>()
+             suggestions.addAll(trainers.map { SearchSuggestion(it.id ?: "", "${it.firstName} ${it.lastName}", "Trener", SuggestionType.TRAINER) })
+             suggestions.addAll(gyms.map { SearchSuggestion(it.id, it.gymName, it.gymLocation.shortFormattedAddress ?: "Siłownia", SuggestionType.GYM) })
+             
+             _trainersState.update { it.copy(suggestions = suggestions) }
+        }
+    }
+
+    fun clearSuggestions() {
+        _trainersState.update { it.copy(suggestions = emptyList()) }
     }
 
     fun onPriceRangeChanged(min: Int, max: Int) {
@@ -152,7 +211,7 @@ class TrainersViewModel @Inject constructor(
         _trainersState.update {
             it.copy(
                 priceMin = 0,
-                priceMax = 500,
+                priceMax = it.maxPriceFromTrainers, // Używamy dynamicznego maksimum
                 selectedCategories = emptySet(),
                 minRating = 0.0f
             )
@@ -162,13 +221,55 @@ class TrainersViewModel @Inject constructor(
     fun onSortOptionSelected(sortOption: SortOption) {
         _trainersState.update { it.copy(sortBy = sortOption) }
 
-        _trainersState.update { currentState ->
-            val sortedList = when (sortOption) {
-                SortOption.PRICE_ASC -> currentState.trainers.sortedBy { it.pricePerHour }
-                SortOption.PRICE_DESC -> currentState.trainers.sortedByDescending { it.pricePerHour }
-                SortOption.RATING_DESC -> currentState.trainers.sortedByDescending { it.avgRating }
+        viewModelScope.launch {
+            // Obsługa sortowania po dystansie (wymaga operacji asynchronicznych)
+            if (sortOption == SortOption.DISTANCE_ASC) {
+                loadCurrentUserLocation() // Upewnij się, że mamy lokalizację
+                val currentState = _trainersState.value
+                val userLoc = currentState.userLocation
+
+                if (userLoc != null && userLoc.latitude != 0.0) {
+                    _trainersState.update { it.copy(isLoading = true) }
+
+                    // Pobierz lokalizacje siłowni dla każdego trenera i oblicz dystans
+                    // Używamy mapowania, aby przypisać dystans do trenera
+                    val trainersWithDistances = currentState.trainers.map { trainer ->
+                        val gymId = trainer.gymId
+                        var distance = Double.MAX_VALUE // Domyślnie bardzo daleko, jeśli brak danych
+
+                        if (gymId != null) {
+                            val gym = gymRepository.getGymById(gymId).getOrNull()
+                            val gymLoc = gym?.gymLocation
+                            if (gymLoc != null) {
+                                distance = calculateDistanceInKm(
+                                    userLoc.latitude, userLoc.longitude,
+                                    gymLoc.latitude, gymLoc.longitude
+                                )
+                            }
+                        }
+                        trainer to distance
+                    }
+
+                    // Sortuj listę par po dystansie i wyciągnij trenerów
+                    val sortedList = trainersWithDistances.sortedBy { it.second }.map { it.first }
+
+                    _trainersState.update { it.copy(trainers = sortedList, isLoading = false) }
+                } else {
+                    Log.d("SORT", "Brak lokalizacji użytkownika, nie można posortować po dystansie.")
+                    // Opcjonalnie: obsługa błędu lub brak akcji
+                }
+            } else {
+                // Standardowe sortowanie synchroniczne dla pozostałych opcji
+                _trainersState.update { currentState ->
+                    val sortedList = when (sortOption) {
+                        SortOption.PRICE_ASC -> currentState.trainers.sortedBy { it.pricePerHour }
+                        SortOption.PRICE_DESC -> currentState.trainers.sortedByDescending { it.pricePerHour }
+                        SortOption.RATING_DESC -> currentState.trainers.sortedByDescending { it.avgRating }
+                        else -> currentState.trainers
+                    }
+                    currentState.copy(trainers = sortedList)
+                }
             }
-            currentState.copy(trainers = sortedList)
         }
     }
 
@@ -190,6 +291,10 @@ class TrainersViewModel @Inject constructor(
     fun selectTrainer(trainer: Trainer) {
         _trainersState.update { it.copy(selectedTrainer = trainer) }
         loadCurrentUserRating(trainer)
+        // Wywołanie obliczania dystansu w momencie wyboru trenera
+        viewModelScope.launch {
+            calculateDistanceToSelectedTrainer()
+        }
     }
 
 
@@ -198,6 +303,69 @@ class TrainersViewModel @Inject constructor(
         val userRating = trainer.ratings?.get(currentUserId)
         _trainersState.update {
             it.copy(currentUserRating = userRating ?: 0) // Zapisz ocenę w stanie
+        }
+    }
+
+    private fun loadCurrentUserLocation() {
+        val currentLocation = authRepository.getCurrentLocation()
+        _trainersState.update {
+            it.copy(userLocation = currentLocation)
+        }
+    }
+
+    suspend fun getTrainersWithGymLocations(): List<Pair<Trainer, GymLocation>> {
+        val trainersResult = trainerRepository.getAllTrainers()
+        if (trainersResult.isFailure) return emptyList()
+        val trainers = trainersResult.getOrNull() ?: emptyList()
+        val result = mutableListOf<Pair<Trainer, GymLocation>>()
+        for (trainer in trainers) {
+            val gymLocation = trainer.gymId?.let { gymId ->
+                gymRepository.getGymById(gymId).getOrNull()?.gymLocation
+            }
+            if (gymLocation != null) {
+                result.add(trainer to gymLocation)
+            }
+        }
+        return result
+    }
+
+    suspend fun getSelectedTrainerGymLocation(): GymLocation? {
+        val selectedTrainer = _trainersState.value.selectedTrainer ?: return null
+        val gymId = selectedTrainer.gymId ?: return null
+        return gymRepository.getGymById(gymId).getOrNull()?.gymLocation
+    }
+
+    fun calculateDistanceInKm(
+        lat1: Double, lon1: Double,
+        lat2: Double, lon2: Double
+    ): Double {
+        val results = FloatArray(1)
+        Location.distanceBetween(lat1, lon1, lat2, lon2, results)
+        return results[0] / 1000.0
+    }
+
+    // Zmieniona nazwa i poprawne aktualizowanie stanu
+    suspend fun calculateDistanceToSelectedTrainer() {
+        loadCurrentUserLocation()
+        val userLoc = _trainersState.value.userLocation
+        Log.d("DIST", "User location: $userLoc")
+        val gymLoc = getSelectedTrainerGymLocation()
+
+        if (userLoc != null && gymLoc != null && userLoc.latitude != 0.0 && userLoc.longitude != 0.0) {
+            var dist =  calculateDistanceInKm(
+                gymLoc.latitude,
+                gymLoc.longitude,
+                userLoc.latitude,
+                userLoc.longitude
+            )
+            dist = round(dist * 10.0) / 10.0
+            Log.d("DIST", "Obliczony dystans: $dist km")
+            
+            // Aktualizacja stanu, aby UI mogło zareagować
+            _trainersState.update { it.copy(distanceToTrainer = dist) }
+        } else {
+            Log.d("DIST", "Nie można obliczyć dystansu. Brak lokalizacji użytkownika lub siłowni.")
+            _trainersState.update { it.copy(distanceToTrainer = null) }
         }
     }
 
@@ -255,5 +423,22 @@ class TrainersViewModel @Inject constructor(
 
     fun isVideoUrl(url: String): Boolean {
         return url.contains(".mp4", ignoreCase = true)
+    }
+    
+    fun onSuggestionClicked(suggestion: SearchSuggestion) {
+        if (suggestion.type == SuggestionType.TRAINER) {
+             viewModelScope.launch {
+                 searchTrainers(suggestion.title)
+                 clearSuggestions()
+                 _trainersState.update { it.copy(searchQuery = suggestion.title) }
+             }
+        } else if (suggestion.type == SuggestionType.GYM) {
+             viewModelScope.launch {
+                 val allTrainers = trainerRepository.getAllTrainers().getOrNull() ?: emptyList()
+                 val filtered = allTrainers.filter { it.gymId == suggestion.id }
+                 _trainersState.update { it.copy(trainers = filtered, searchQuery = suggestion.title) }
+                 clearSuggestions()
+             }
+        }
     }
 }

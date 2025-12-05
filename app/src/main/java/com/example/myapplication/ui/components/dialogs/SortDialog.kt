@@ -22,7 +22,8 @@ import com.example.myapplication.viewmodel.SortOption
 fun SortDialog(
     currentSortOption: SortOption = SortOption.PRICE_ASC,
     onDismiss: () -> Unit,
-    onSortSelected: (SortOption) -> Unit
+    onSortSelected: (SortOption) -> Unit,
+    isLocationAvailable: Boolean
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,

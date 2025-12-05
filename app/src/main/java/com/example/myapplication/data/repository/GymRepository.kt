@@ -37,4 +37,22 @@ class GymRepository @Inject constructor() {
             Result.failure(e)
         }
     }
+
+    suspend fun searchGyms(query: String): Result<List<Gym>> {
+        return try {
+            // Pobieramy wszystkie (dla uproszczenia, przy dużej bazie warto indeksować w Algolia/Elastic)
+            val snapshot = gymsCollection.get().await()
+            val lowerQuery = query.lowercase()
+            val gyms = snapshot.documents.mapNotNull { doc ->
+                val gym = doc.toObject(Gym::class.java)?.copy(id = doc.id)
+                gym
+            }.filter { gym ->
+                gym.gymName.lowercase().contains(lowerQuery) ||
+                        gym.gymLocation.formattedAddress.lowercase().contains(lowerQuery)
+            }
+            Result.success(gyms)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

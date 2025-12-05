@@ -105,6 +105,7 @@ dependencies {
     implementation("androidx.compose.animation:animation:1.7.5")
     implementation("com.google.accompanist:accompanist-permissions:0.34.0")
     implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.compose.foundation)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

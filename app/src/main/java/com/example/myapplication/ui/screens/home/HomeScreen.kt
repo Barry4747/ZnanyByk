@@ -2,7 +2,9 @@ package com.example.myapplication.ui.screens.home
 
 import MainProgressIndicator
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,11 +28,17 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -46,21 +55,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.SubcomposeAsyncImage
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.example.myapplication.R
 import com.example.myapplication.data.model.users.Trainer
-import com.example.myapplication.ui.components.TrainerProfileCard
 import com.example.myapplication.ui.components.dialogs.SortDialog
 import com.example.myapplication.viewmodel.HomeViewModel
+import com.example.myapplication.viewmodel.SortOption
+import com.example.myapplication.viewmodel.SuggestionType
+import com.example.myapplication.viewmodel.TrainerCategory
 import com.example.myapplication.viewmodel.TrainersViewModel
+import androidx.compose.foundation.layout.FlowRow
 
 @Composable
 fun HomeScreen(
@@ -80,13 +98,20 @@ fun HomeScreen(
     val imageLoader = context.imageLoader
 
     var showSortDialog by remember { mutableStateOf(false) }
-    var searchTrainerText by remember { mutableStateOf("") }
+    var searchTrainerText by remember { mutableStateOf(trainersState.searchQuery) }
+    val focusManager = LocalFocusManager.current
 
     // Define consistent styling variables to match TrainerCard
     val primaryColor = Color.Black
     val borderColor = Color.DarkGray
     val backgroundColor = Color.White
     val shape = RoundedCornerShape(12.dp)
+
+    // Obsługa przycisku "Wstecz", aby zamknąć sugestie
+    BackHandler(enabled = trainersState.suggestions.isNotEmpty()) {
+        trainersViewModel.clearSuggestions()
+        focusManager.clearFocus()
+    }
 
     LaunchedEffect(Unit) {
         trainersViewModel.loadInitialTrainers()
@@ -110,8 +135,8 @@ fun HomeScreen(
 
         // --- Search Row ---
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().zIndex(10f), // Ensure search row is on top for suggestions
+            verticalAlignment = Alignment.Top, // Align top to allow suggestions to flow down
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // Styled Map Button (Box matching border/shape of Text Field)
@@ -132,38 +157,85 @@ fun HomeScreen(
                 )
             }
 
-            // Styled Search Field
-            OutlinedTextField(
-                value = searchTrainerText,
-                onValueChange = { searchTrainerText = it },
-                label = { Text(stringResource(R.string.search)) },
-                modifier = Modifier.weight(1f),
-                shape = shape, // 12.dp
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = primaryColor,
-                    unfocusedBorderColor = borderColor,
-                    focusedLabelColor = primaryColor,
-                    unfocusedLabelColor = Color.Gray,
-                    cursorColor = primaryColor,
-                    focusedLeadingIconColor = primaryColor,
-                    unfocusedLeadingIconColor = Color.Gray,
-                    focusedContainerColor = backgroundColor,
-                    unfocusedContainerColor = backgroundColor
-                ),
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = stringResource(R.string.search_icon)
+            // Styled Search Field with Suggestions
+            Box(modifier = Modifier.weight(1f)) {
+                OutlinedTextField(
+                    value = searchTrainerText,
+                    onValueChange = { 
+                        searchTrainerText = it
+                        trainersViewModel.onSearchQueryChanged(it)
+                        if (it.isEmpty()) {
+                            trainersViewModel.applyFiltersAndLoad() // Wróć do pełnej listy
+                        }
+                    },
+                    label = { Text(stringResource(R.string.search)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = shape, // 12.dp
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = primaryColor,
+                        unfocusedBorderColor = borderColor,
+                        focusedLabelColor = primaryColor,
+                        unfocusedLabelColor = Color.Gray,
+                        cursorColor = primaryColor,
+                        focusedLeadingIconColor = primaryColor,
+                        unfocusedLeadingIconColor = Color.Gray,
+                        focusedContainerColor = backgroundColor,
+                        unfocusedContainerColor = backgroundColor
+                    ),
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = stringResource(R.string.search_icon)
+                        )
+                    },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(
+                        onSearch = {
+                            trainersViewModel.searchTrainers(searchTrainerText)
+                            trainersViewModel.clearSuggestions()
+                            focusManager.clearFocus()
+                        }
                     )
-                },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(
-                    onSearch = {
-                        trainersViewModel.searchTrainers(searchTrainerText)
-                    }
                 )
-            )
+
+                // Suggestions Dropdown
+                if (trainersState.suggestions.isNotEmpty()) {
+                    Card(
+                        modifier = Modifier
+                            .padding(top = 60.dp) // Offset to appear below the text field
+                            .fillMaxWidth()
+                            .heightIn(max = 250.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White)
+                    ) {
+                        LazyColumn {
+                            items(trainersState.suggestions) { suggestion ->
+                                ListItem(
+                                    headlineContent = { Text(suggestion.title, fontWeight = FontWeight.Bold) },
+                                    supportingContent = { 
+                                        if (suggestion.subtitle != null) Text(suggestion.subtitle, style = MaterialTheme.typography.bodySmall) 
+                                    },
+                                    leadingContent = {
+                                        Icon(
+                                            imageVector = if (suggestion.type == SuggestionType.TRAINER) Icons.Default.Person else Icons.Default.FitnessCenter,
+                                            contentDescription = null,
+                                            tint = primaryColor
+                                        )
+                                    },
+                                    modifier = Modifier
+                                        .clickable {
+                                            searchTrainerText = suggestion.title
+                                            trainersViewModel.onSuggestionClicked(suggestion)
+                                            focusManager.clearFocus()
+                                        }
+                                        .fillMaxWidth()
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -225,12 +297,20 @@ fun HomeScreen(
             }
 
             if (showSortDialog) {
+                // Poprawione sprawdzanie lokalizacji
+                var isLocationAvailable = trainersState.userLocation?.let {
+                    it.latitude != 0.0 && it.longitude != 0.0 
+                } ?: false
+                Log.d("DIST", "Obiekt location: ${trainersState.userLocation}")
+                Log.d("DIST", "aaaaa " + isLocationAvailable.toString())
                 SortDialog(
                     onDismiss = { showSortDialog = false },
                     onSortSelected = { sortOption ->
                         trainersViewModel.onSortOptionSelected(sortOption)
                         showSortDialog = false
-                    }
+                    },
+                    currentSortOption = trainersState.sortBy, // Przekazujemy aktualną opcję
+                    isLocationAvailable = isLocationAvailable // Przekazujemy dostępność lokalizacji
                 )
             }
         }
@@ -300,3 +380,196 @@ fun HomeScreen(
         }
     }
 }
+
+@Composable
+fun TrainerProfileCard(
+    trainer: Trainer,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val imageLoader = context.imageLoader
+
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        content = {
+            Column {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                ) {
+                    val imageUrl = trainer.images?.firstOrNull()
+                    val isVideo = imageUrl?.contains(".mp4", ignoreCase = true) == true
+
+                    if (imageUrl != null) {
+                        SubcomposeAsyncImage(
+                            model = imageUrl,
+                            contentDescription = "Zdjęcie trenera: ${trainer.firstName} ${trainer.lastName}",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop,
+                            loading = {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                                }
+                            },
+                            error = {
+                                Image(
+                                    painter = painterResource(id = R.drawable.placeholder),
+                                    contentDescription = "Błąd ładowania",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(id = R.drawable.placeholder),
+                            contentDescription = "Brak zdjęcia",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+
+                    if (isVideo) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.3f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.PlayArrow,
+                                contentDescription = "Odtwórz wideo",
+                                tint = Color.White,
+                                modifier = Modifier.size(48.dp)
+                            )
+                        }
+                    }
+
+
+                    RatingIndicator(
+                        rating = trainer.avgRating ?: "0.0", modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+
+
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "${trainer.firstName} ${trainer.lastName}",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = "${trainer.pricePerHour ?: 0} zł/h",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "${trainer.experience ?: 0} lata doświadczenia",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp),
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    TrainerCategory.entries
+                        .forEach { categoryEnum ->
+                            if (trainer.categories?.contains(categoryEnum.name) == true) {
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            color = MaterialTheme.colorScheme.secondaryContainer,
+                                            shape = RoundedCornerShape(12.dp)
+                                        )
+                                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                                ) {
+                                    Text(
+                                        text = stringResource(id = categoryEnum.stringResId),
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+                        }
+                }
+
+
+            }
+        })
+}
+
+
+@Composable
+fun RatingIndicator(
+    rating: String,
+    modifier: Modifier = Modifier,
+    size: Dp = 16.dp
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Star,
+            contentDescription = "Rating star",
+            tint = Color(0xFFFFC107),
+            modifier = Modifier.size(size)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = rating,
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }
+}
+
+fun Modifier.simplePlaceholder(
+    visible: Boolean,
+    color: Color
+): Modifier = this.then(
+    Modifier.background(if (visible) color else Color.Transparent)
+)
