@@ -170,9 +170,9 @@ fun AppointmentCard(
                         contentDescription = null,
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-
+                    val location = gym?.gymLocation?.formattedAddress
                     Text(
-                        text = "${gym?.gymLocation?.formattedAddress}"
+                        text = location?: "Brak informacji"
                     )
                 }
             }
