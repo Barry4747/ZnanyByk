@@ -27,6 +27,7 @@ fun PaymentScreen(
     trainerId: String,
     dateMillis: Long,
     time: String,
+    title: String,
     onPaymentSuccess: () -> Unit,
     onNavigateBack: () -> Unit,
     viewModel: PaymentViewModel = hiltViewModel()
@@ -120,7 +121,7 @@ fun PaymentScreen(
                     PaymentButton(
                         isProcessing = state is PaymentUiState.Processing,
                         onClick = {
-                            viewModel.processPayment(trainerId, dateMillis, time)
+                            viewModel.processPayment(trainerId, dateMillis, time, title)
                         }
                     )
 

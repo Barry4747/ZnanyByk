@@ -1,20 +1,30 @@
 package com.example.myapplication.ui.screens.booking
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.myapplication.data.model.trainings.WeeklySchedule
-import com.example.myapplication.ui.components.MainTopBar
-import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.viewmodel.booking.BookingViewModel
 import java.time.DayOfWeek
 import java.time.Instant
@@ -25,7 +35,7 @@ import java.time.ZoneId
 @Composable
 fun BookingScreen(
     trainerId: String,
-    onNavigateToPayment: (String, Long, String) -> Unit,
+    onNavigateToPayment: (String, Long, String, String) -> Unit,
     onNavigateBack: () -> Unit,
     viewModel: BookingViewModel = hiltViewModel()
 ) {
@@ -35,7 +45,7 @@ fun BookingScreen(
 
     val state by viewModel.uiState.collectAsState()
 
-val datePickerState = rememberDatePickerState(
+    val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis(),
         selectableDates = remember(state.schedule, state.appointments) {
             object : SelectableDates {
@@ -43,9 +53,7 @@ val datePickerState = rememberDatePickerState(
                     val dateToCheck = Instant.ofEpochMilli(utcTimeMillis)
                         .atZone(ZoneId.of("UTC"))
                         .toLocalDate()
-
                     val today = LocalDate.now()
-
                     if (dateToCheck.isBefore(today)) return false
 
                     val rawSlots = when (dateToCheck.dayOfWeek) {
@@ -67,19 +75,13 @@ val datePickerState = rememberDatePickerState(
                             ?.toLocalDate()
                         apptDate == dateToCheck
                     }
-
-                    val isFull = appointmentsOnDay.size >= rawSlots.size
-
-                    return !isFull
+                    return appointmentsOnDay.size < rawSlots.size
                 }
 
-                override fun isSelectableYear(year: Int): Boolean {
-                    return year >= LocalDate.now().year
-                }
+                override fun isSelectableYear(year: Int) = year >= LocalDate.now().year
             }
         }
     )
-
 
     LaunchedEffect(datePickerState.selectedDateMillis) {
         datePickerState.selectedDateMillis?.let { millis ->
@@ -90,75 +92,213 @@ val datePickerState = rememberDatePickerState(
         }
     }
 
-    Scaffold(
-        topBar = { MainTopBar(onNavigateBack = onNavigateBack, text = "Umów trening") },
-        bottomBar = {
-            MainButton(
-                onClick = {
-                    state.selectedSlot?.let { slot ->
-                        val dateMillis = state.selectedDate
-                            .atStartOfDay(ZoneId.systemDefault())
-                            .toInstant()
-                            .toEpochMilli()
+    val isButtonEnabled = state.selectedSlot != null && state.selectedCategory != null
 
-                        onNavigateToPayment(state.trainerId, dateMillis, slot.time ?: "")
+    Scaffold(
+        containerColor = Color.White,
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        "Rezerwacja",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = Color.Black
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.Black
+                        )
                     }
                 },
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                enabled = state.selectedSlot != null,
-                text = "Przejdź do płatności"
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color.White
+                )
             )
+        },
+        bottomBar = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+            ) {
+                Button(
+                    onClick = {
+                        state.selectedSlot?.let { slot ->
+                            state.selectedCategory?.let { category ->
+                                val dateMillis = state.selectedDate
+                                    .atStartOfDay(ZoneId.systemDefault())
+                                    .toInstant()
+                                    .toEpochMilli()
+                                onNavigateToPayment(state.trainerId, dateMillis, slot.time ?: "", category)
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Black,
+                        contentColor = Color.White,
+                        disabledContainerColor = Color(0xFFF0F0F0),
+                        disabledContentColor = Color.Gray
+                    ),
+                    enabled = isButtonEnabled,
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = 0.dp,
+                        pressedElevation = 4.dp
+                    )
+                ) {
+                    Text(
+                        text = "Przejdź do płatności",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    )
+                }
+            }
         }
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .background(Color.White)
+        ) {
             DatePicker(
                 state = datePickerState,
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = Modifier.padding(horizontal = 8.dp),
                 showModeToggle = false,
                 title = null,
                 headline = null,
                 colors = DatePickerDefaults.colors(
-                    disabledDayContentColor = Color.LightGray.copy(alpha = 0.6f),
-                    disabledSelectedDayContentColor = Color.Gray,
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = Color.White,
+                    selectedDayContainerColor = Color.Black,
+                    selectedDayContentColor = Color.White,
+                    todayDateBorderColor = Color.Black,
+                    todayContentColor = Color.Black,
+                    dayContentColor = Color.Black,
+                    weekdayContentColor = Color.Gray,
+                    currentYearContentColor = Color.Black,
+                    selectedYearContainerColor = Color.Black,
+                    selectedYearContentColor = Color.White,
+                    disabledDayContentColor = Color.LightGray.copy(alpha = 0.4f),
+                    disabledSelectedDayContentColor = Color.LightGray
                 )
             )
 
-            HorizontalDivider()
-
-            Text(
-                text = "Dostępne godziny:",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(16.dp)
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 24.dp),
+                thickness = 1.dp,
+                color = Color(0xFFF0F0F0)
             )
 
-            if (state.isLoading) {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-            } else if (state.availableSlots.isEmpty()) {
-                Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+            AnimatedVisibility(
+                visible = state.categories.isNotEmpty(),
+                enter = fadeIn() + expandVertically()
+            ) {
+                Column {
                     Text(
-                        if (state.appointments.isNotEmpty()) "Brak wolnych miejsc w tym dniu." else "Wybierz datę.",
-                        color = MaterialTheme.colorScheme.secondary
+                        text = "RODZAJ TRENINGU",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        ),
+                        color = Color.Gray,
+                        modifier = Modifier.padding(start = 24.dp, top = 24.dp, bottom = 12.dp)
                     )
+
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(state.categories) { category ->
+                            val isSelected = state.selectedCategory == category
+
+                            Surface(
+                                selected = isSelected,
+                                onClick = { viewModel.onCategorySelected(category) },
+                                shape = CircleShape,
+                                border = if (isSelected) null else BorderStroke(1.dp, Color(0xFFE0E0E0)),
+                                color = if (isSelected) Color.Black else Color.White,
+                                contentColor = if (isSelected) Color.White else Color.Black,
+                                modifier = Modifier.height(40.dp)
+                            ) {
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier.padding(horizontal = 20.dp)
+                                ) {
+                                    Text(
+                                        text = category,
+                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
-            } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 80.dp),
-                    contentPadding = PaddingValues(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(state.availableSlots) { slot ->
-                        val isSelected = slot == state.selectedSlot
-                        FilterChip(
-                            selected = isSelected,
-                            onClick = { viewModel.onSlotSelected(slot) },
-                            label = { Text(slot.time ?: "--:--", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.primary,
-                                selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-                            )
-                        )
+            }
+
+            Text(
+                text = "DOSTĘPNE GODZINY",
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                ),
+                color = Color.Gray,
+                modifier = Modifier.padding(start = 24.dp, top = 24.dp, bottom = 12.dp)
+            )
+
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (state.isLoading) {
+                    CircularProgressIndicator(
+                        color = Color.Black,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                } else if (state.availableSlots.isEmpty()) {
+                    Text(
+                        text = if (state.appointments.isNotEmpty()) "Brak terminów" else "Wybierz datę",
+                        color = Color.LightGray,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(minSize = 85.dp),
+                        contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(state.availableSlots) { slot ->
+                            val isSelected = slot == state.selectedSlot
+
+                            Surface(
+                                selected = isSelected,
+                                onClick = { viewModel.onSlotSelected(slot) },
+                                shape = RoundedCornerShape(12.dp),
+                                border = if (isSelected) null else BorderStroke(1.dp, Color(0xFFE0E0E0)),
+                                color = if (isSelected) Color.Black else Color.White,
+                                contentColor = if (isSelected) Color.White else Color.Black,
+                                modifier = Modifier
+                                    .height(48.dp)
+                                    .animateContentSize()
+                            ) {
+                                Box(
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = slot.time ?: "--:--",
+                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

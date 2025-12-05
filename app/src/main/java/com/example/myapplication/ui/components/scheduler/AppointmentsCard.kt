@@ -172,7 +172,7 @@ fun AppointmentCard(
                     Spacer(modifier = Modifier.width(4.dp))
 
                     Text(
-                        text = "${gym?.gymName}, ${gym?.gymLocation}"
+                        text = "${gym?.gymLocation?.formattedAddress}"
                     )
                 }
             }

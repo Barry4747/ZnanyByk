@@ -286,28 +286,31 @@ fun AppNavigation(
 
                         BookingScreen(
                             trainerId = trainerId,
-                            onNavigateToPayment = { tId, dateMillis, time ->
-                                navController.navigate("payment/$tId/$dateMillis/$time")
+                            onNavigateToPayment = { tId, dateMillis, time, title ->
+                                navController.navigate("payment/$tId/$dateMillis/$time/$title")
                             },
                             onNavigateBack = navController::popBackStack
                         )
                     }
                     composable(
-                        route = "payment/{trainerId}/{dateMillis}/{time}",
+                        route = "payment/{trainerId}/{dateMillis}/{time}/{title}",
                         arguments = listOf(
                             navArgument("trainerId") { type = NavType.StringType },
                             navArgument("dateMillis") { type = NavType.LongType },
-                            navArgument("time") { type = NavType.StringType }
+                            navArgument("time") { type = NavType.StringType },
+                            navArgument("title") { type = NavType.StringType }
                         )
                     ) { backStackEntry ->
                         val trainerId = backStackEntry.arguments?.getString("trainerId") ?: return@composable
                         val dateMillis = backStackEntry.arguments?.getLong("dateMillis") ?: return@composable
                         val time = backStackEntry.arguments?.getString("time") ?: return@composable
+                        val title = backStackEntry.arguments?.getString("title") ?: return@composable
 
                         PaymentScreen(
                             trainerId = trainerId,
                             dateMillis = dateMillis,
                             time = time,
+                            title = title,
                             onNavigateBack = { navController.popBackStack() },
                             onPaymentSuccess = {
                                 navController.navigate("home_flow") {

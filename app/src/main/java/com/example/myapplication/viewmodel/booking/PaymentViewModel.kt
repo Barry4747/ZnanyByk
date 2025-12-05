@@ -6,6 +6,7 @@ import com.example.myapplication.data.model.trainings.Appointment
 import com.example.myapplication.data.model.trainings.DayOfTheWeek
 import com.example.myapplication.data.repository.AuthRepository
 import com.example.myapplication.data.repository.ScheduleRepository
+import com.example.myapplication.data.repository.TrainerRepository
 import com.example.myapplication.data.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,12 +32,13 @@ sealed class PaymentUiState {
 class PaymentViewModel @Inject constructor(
     private val repository: ScheduleRepository,
     private val authRepository: AuthRepository,
+    private val trainerRepository: TrainerRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<PaymentUiState>(PaymentUiState.Idle)
     val uiState: StateFlow<PaymentUiState> = _uiState.asStateFlow()
 
-    fun processPayment(trainerId: String, dateMillis: Long, time: String) {
+    fun processPayment(trainerId: String, dateMillis: Long, time: String, title: String) {
         viewModelScope.launch {
             _uiState.value = PaymentUiState.Processing
 
@@ -65,7 +67,10 @@ class PaymentViewModel @Inject constructor(
                 java.time.DayOfWeek.SUNDAY -> DayOfTheWeek.SUNDAY
                 else -> null
             }
-            //todo to narazie troche zamockowane
+
+            val gymId = trainerRepository.getTrainerById(trainerId).getOrNull()?.gymId
+
+
             val newAppointment = Appointment(
                 trainerId = trainerId,
                 clientId = currentUserId,
@@ -73,8 +78,9 @@ class PaymentViewModel @Inject constructor(
                 time = time,
                 duration = 60,
                 dayOfWeek = dayOfWeekEnum,
-                title = "Trening Personalny",
-                createdAt = null
+                title = title,
+                createdAt = null,
+                gymId = gymId
             )
 
             repository.addAppointment(newAppointment, onSuccess = {
