@@ -37,20 +37,17 @@ fun MessageInputBar(
     var text by remember { mutableStateOf("") }
     var isFocused by remember { mutableStateOf(false) }
 
-    // Kolor tła dla pola tekstowego (jasnoszary)
     val inputFieldBackgroundColor = Color(0xFFF3F4F6)
-    // Kolor ikony wysyłania (np. primary color z Twojego motywu lub własny niebieski)
-    val sendIconColor = MaterialTheme.colorScheme.primary
+    val sendIconColor = Color.Black
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color.White) // Tło całego paska na dole
+            .background(Color.White)
             .padding(horizontal = 8.dp, vertical = 8.dp),
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // Pole tekstowe
         TextField(
             value = text,
             onValueChange = { text = it },
@@ -63,26 +60,22 @@ fun MessageInputBar(
             },
             modifier = Modifier
                 .weight(1f)
-                // Kluczowe dla wyglądu "pigułki":
                 .clip(RoundedCornerShape(24.dp))
                 .background(inputFieldBackgroundColor)
                 .onFocusChanged { focusState -> isFocused = focusState.isFocused }
-                .heightIn(min = 50.dp, max = 150.dp), // Trochę mniejsza wysokość minimalna wygląda zgrabniej
+                .heightIn(min = 50.dp, max = 150.dp),
             maxLines = 5,
             textStyle = MaterialTheme.typography.bodyMedium.copy(
                 color = Color.Black
             ),
-            // Magia usuwania domyślnych stylów Material Design (podkreśleń, tła):
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
                 disabledContainerColor = Color.Transparent,
-                cursorColor = MaterialTheme.colorScheme.primary,
-                focusedIndicatorColor = Color.Transparent, // Usuwa podkreślenie paska
-                unfocusedIndicatorColor = Color.Transparent, // Usuwa podkreślenie paska
+                cursorColor = Color.Black,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
             ),
-            // Ikona wysyłania wewnątrz pola (opcjonalnie, jeśli chcesz jak w Messengerze)
-            // Jeśli wolisz ikonę obok pola, usuń trailingIcon stąd i odkomentuj IconButton poniżej.
             trailingIcon = {
                 val showSendButton = isFocused || text.isNotBlank()
                 if (showSendButton) {
@@ -93,13 +86,12 @@ fun MessageInputBar(
                                 text = ""
                             }
                         },
-                        // Dodajemy trochę paddingu, żeby ikona nie była przyklejona do krawędzi
+
                         modifier = Modifier.padding(end = 4.dp)
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.send_arrow),
                             contentDescription = stringResource(R.string.send),
-                            // Kolorujemy ikonę tylko gdy jest tekst do wysłania
                             tint = if (text.isNotBlank()) sendIconColor else Color.Gray,
                             modifier = Modifier.size(24.dp)
                         )
@@ -107,32 +99,5 @@ fun MessageInputBar(
                 }
             }
         )
-
-        // OPCJA ALTERNATYWNA: Przycisk wysyłania OBOK pola (jak w WhatsApp)
-        // Jeśli wolisz ten styl, zakomentuj trailingIcon w TextField powyżej i odkomentuj to:
-        /*
-        val showSendButton = text.isNotBlank()
-        AnimatedVisibility(visible = showSendButton) {
-             IconButton(
-                onClick = {
-                    if (text.isNotBlank()) {
-                        onSendMessage(text)
-                        text = ""
-                    }
-                },
-                modifier = Modifier
-                    .padding(bottom = 4.dp) // Wyrównanie do dołu przy wielowierszowym tekście
-                    .clip(CircleShape)
-                    .background(sendIconColor) // Kolorowe tło dla przycisku
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.send_arrow),
-                    contentDescription = stringResource(R.string.send),
-                    tint = Color.White,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
-        */
     }
 }

@@ -2,11 +2,13 @@ package com.example.myapplication.viewmodel.trainer
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import com.example.myapplication.data.model.gyms.Gym
 import com.example.myapplication.data.model.trainings.Appointment
 import com.example.myapplication.data.model.trainings.TrainingSlot
 import com.example.myapplication.data.model.users.User
 import com.example.myapplication.data.model.trainings.WeeklySchedule
 import com.example.myapplication.data.repository.AuthRepository
+import com.example.myapplication.data.repository.GymRepository
 import com.example.myapplication.data.repository.ScheduleRepository
 import com.example.myapplication.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,9 +28,10 @@ class ScheduleViewModel @Inject constructor(
     private val repository: ScheduleRepository,
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
+    private val gymRepository: GymRepository,
 ) : ViewModel() {
 
-    private val currentUserId = authRepository.getCurrentUserId()
+    val currentUserId = authRepository.getCurrentUserId()
 
     val weeklySchedule: LiveData<WeeklySchedule> = repository.weeklySchedule
     val appointments: LiveData<List<Appointment>> = repository.appointments
@@ -128,28 +131,19 @@ class ScheduleViewModel @Inject constructor(
     }
 
     fun applyBulkSchedule(config: BulkScheduleConfig) {
-        // 1. Generujemy mapę nowych slotów, używając Twojej istniejącej metody
         val newSlotsMap = generateSlots(config)
 
-        // 2. Pobieramy aktualny harmonogram (lub tworzymy pusty)
         val currentSchedule = weeklySchedule.value ?: WeeklySchedule()
 
-        // 3. Funkcja lokalna do łączenia list: obecne + nowe
         fun mergeSlots(existing: List<TrainingSlot>?, new: List<TrainingSlot>?): List<TrainingSlot> {
             if (new.isNullOrEmpty()) return existing.orEmpty()
 
-            // Łączymy listy
             val combined = existing.orEmpty() + new
 
-            // distinctBy { it.time } - zapobiega dodaniu slotu na tę samą godzinę (np. drugi raz 12:00)
-            // sortedByTime() - używamy Twojego extension function do sortowania
             return combined
                 .distinctBy { it.time }
                 .sortedByTime()
         }
-
-        // 4. Tworzymy nowy obiekt harmonogramu z zaktualizowanymi dniami
-        // Używamy kluczy "Monday", "Tuesday" itd., bo takie zwraca Twoja funkcja generateSlots
         val updatedSchedule = currentSchedule.copy(
             monday = mergeSlots(currentSchedule.monday, newSlotsMap["Monday"]),
             tuesday = mergeSlots(currentSchedule.tuesday, newSlotsMap["Tuesday"]),
@@ -160,7 +154,6 @@ class ScheduleViewModel @Inject constructor(
             sunday = mergeSlots(currentSchedule.sunday, newSlotsMap["Sunday"])
         )
 
-        // 5. Zapisujemy do repozytorium
         repository.setWeeklySchedule(currentUserId, updatedSchedule)
     }
 
@@ -188,5 +181,9 @@ class ScheduleViewModel @Inject constructor(
             val minute = parts?.getOrNull(1) ?: 0
             hour * 60 + minute
         }
+    }
+
+    suspend fun getGymById(id: String): Gym? {
+        return gymRepository.getGymById(id).getOrNull()
     }
 }

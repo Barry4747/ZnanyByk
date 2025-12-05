@@ -1,15 +1,18 @@
 package com.example.myapplication.viewmodel.booking
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.model.trainings.Appointment
 import com.example.myapplication.data.model.trainings.TrainingSlot
 import com.example.myapplication.data.model.trainings.WeeklySchedule
 import com.example.myapplication.data.repository.ScheduleRepository
+import com.example.myapplication.data.repository.TrainerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
@@ -24,12 +27,15 @@ data class BookingUiState(
     val selectedSlot: TrainingSlot? = null,
     val trainerId: String = "",
     val schedule: WeeklySchedule = WeeklySchedule(),
-    val appointments: List<Appointment> = emptyList()
+    val appointments: List<Appointment> = emptyList(),
+    val categories: List<String> = emptyList(),
+    val selectedCategory: String? = null
 )
 
 @HiltViewModel
 class BookingViewModel @Inject constructor(
-    private val repository: ScheduleRepository
+    private val repository: ScheduleRepository,
+    private val trainerRepository: TrainerRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(BookingUiState())
@@ -57,6 +63,20 @@ class BookingViewModel @Inject constructor(
 
         repository.getWeeklySchedule(trainerId)
         repository.getAppointments(trainerId)
+
+        viewModelScope.launch {
+            try {
+                val trainer = trainerRepository.getTrainerById(trainerId)
+                _uiState.update {
+                    it.copy(
+                        categories = trainer.getOrNull()?.categories ?: emptyList(),
+                        selectedCategory = trainer.getOrNull()?.categories?.firstOrNull()
+                    )
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     fun onDateSelected(date: LocalDate) {
@@ -66,6 +86,10 @@ class BookingViewModel @Inject constructor(
             repository.weeklySchedule.value ?: WeeklySchedule(),
             repository.appointments.value ?: emptyList()
         )
+    }
+
+    fun onCategorySelected(category: String) {
+        _uiState.update { it.copy(selectedCategory = category) }
     }
 
     fun onSlotSelected(slot: TrainingSlot) {

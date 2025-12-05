@@ -6,6 +6,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,9 +22,11 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.myapplication.R
+import com.example.myapplication.data.model.gyms.Gym
 import com.example.myapplication.data.model.trainings.Appointment
 import com.example.myapplication.data.model.trainings.DayOfTheWeek
 import com.example.myapplication.ui.components.buttons.MessageButton
+import com.example.myapplication.utils.calculateAppointmentStatus
 import com.example.myapplication.viewmodel.trainer.ScheduleViewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -32,13 +37,24 @@ fun AppointmentCard(
     onAppointmentChatClick: (chatId: String, receiverId: String) -> Unit,
     viewModel: ScheduleViewModel = hiltViewModel()
 ) {
+    val (isPast, isToday) = remember(appointment) {
+        calculateAppointmentStatus(appointment)
+    }
     val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
-    val isPast = appointment.date?.before(Date()) ?: false
-    val userData = viewModel.getUserById(appointment.trainerId.toString())
 
-    val statusColor = if (isPast) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary
-    val statusText = if (isPast) "Zakończony" else "Zaplanowany"
+    val currentUserId = viewModel.currentUserId.toString()
+    val isTrainer = currentUserId == appointment.trainerId.toString()
+    val targetUserId = if (isTrainer) appointment.clientId else appointment.trainerId
+    val userData = viewModel.getUserById(targetUserId.toString())
 
+    val gym by produceState<Gym?>(initialValue = null, key1 = appointment.gymId) {
+        appointment.gymId?.let { id ->
+            value = viewModel.getGymById(id)
+        }
+    }
+
+    val statusColor = if (isPast) Color(0xFFBE3737) else if (isToday) Color(0xFF4CAF50) else Color.Black
+    val statusText = if (isPast) "Zakończony" else if (isToday) "Dzisiaj" else "Zaplanowany"
     val dayOfWeekText = when (appointment.dayOfWeek) {
         DayOfTheWeek.MONDAY -> "Poniedziałek"
         DayOfTheWeek.TUESDAY -> "Wtorek"
@@ -155,9 +171,9 @@ fun AppointmentCard(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
 
-//                    Text(
-//                        text = "${}, ${dateFormat.format(appointment.date ?: Date())}"
-//                    )
+                    Text(
+                        text = "${gym?.gymLocation?.formattedAddress}"
+                    )
                 }
             }
 

@@ -12,7 +12,8 @@ data class Appointment(
     var dayOfWeek: DayOfTheWeek? = null,
     var time: String? = null,
     var duration: Int? = null,
-    var title: String? = null
+    var title: String? = null,
+    var gymId: String? = null
 )
 
 enum class DayOfTheWeek {
