@@ -2,11 +2,13 @@ package com.example.myapplication.viewmodel.trainer
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import com.example.myapplication.data.model.gyms.Gym
 import com.example.myapplication.data.model.trainings.Appointment
 import com.example.myapplication.data.model.trainings.TrainingSlot
 import com.example.myapplication.data.model.users.User
 import com.example.myapplication.data.model.trainings.WeeklySchedule
 import com.example.myapplication.data.repository.AuthRepository
+import com.example.myapplication.data.repository.GymRepository
 import com.example.myapplication.data.repository.ScheduleRepository
 import com.example.myapplication.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,6 +28,7 @@ class ScheduleViewModel @Inject constructor(
     private val repository: ScheduleRepository,
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
+    private val gymRepository: GymRepository,
 ) : ViewModel() {
 
     val currentUserId = authRepository.getCurrentUserId()
@@ -178,5 +181,9 @@ class ScheduleViewModel @Inject constructor(
             val minute = parts?.getOrNull(1) ?: 0
             hour * 60 + minute
         }
+    }
+
+    suspend fun getGymById(id: String): Gym? {
+        return gymRepository.getGymById(id).getOrNull()
     }
 }
