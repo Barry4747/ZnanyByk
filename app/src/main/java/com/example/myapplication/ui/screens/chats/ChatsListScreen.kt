@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.R
 import com.example.myapplication.data.model.chats.Chat
+import com.example.myapplication.ui.components.chats.ChatItem
 import com.example.myapplication.ui.components.user_components.ProfilePicture
 import com.example.myapplication.viewmodel.chats.ChatUIModel
 import com.example.myapplication.viewmodel.chats.ChatsListViewModel
@@ -104,67 +105,7 @@ fun ChatsListScreen(
     }
 }
 
-@Composable
-fun ChatItem(
-    item: ChatUIModel,
-    onClick: (chatId: String, receiverId: String) -> Unit
-) {
-    val avatarResource = item.receiverAvatarUrl ?: R.drawable.user_active
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick(item.chat.id, item.receiverId) }
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        if (item.isUnread) {
-            Box(
-                modifier = Modifier
-                    .size(10.dp)
-                    .clip(CircleShape)
-                    .background(Color.Red)
-            )
-        } else {
-            Spacer(modifier = Modifier.width(10.dp))
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-        ProfilePicture(model = avatarResource, size = 32, borderSize = 1)
-        Spacer(modifier = Modifier.width(12.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = item.receiverName,
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                Text(
-                    text = item.chat.lastTimestamp.toRelativeTime(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
-                )
-            }
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = item.chat.lastMessage,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = if (item.isUnread) FontWeight.Bold else FontWeight.Normal,
-                    color = if (item.isUnread) Color.Black else Color.Gray
-                ),
-                maxLines = 1,
-                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-            )
-        }
-    }
-}
 
 fun Long.toRelativeTime(): String {
     val now = System.currentTimeMillis()
