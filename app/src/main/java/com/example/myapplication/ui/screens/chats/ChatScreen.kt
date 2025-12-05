@@ -58,6 +58,8 @@ fun ChatScreen(
 
     val receiverAvatarUrl by viewModel.receiverAvatarUrl.collectAsState()
     val avatarResource = receiverAvatarUrl ?: R.drawable.user_active
+    val receiverName by viewModel.receiverName.collectAsState()
+
 
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier
@@ -77,7 +79,7 @@ fun ChatScreen(
                         borderSize = 2
                     )
                     Text(
-                        text = viewModel.getUserFullName(receiverId).toString(),
+                        text = receiverName,
                         modifier = Modifier.padding(start = 8.dp)
                     )
 

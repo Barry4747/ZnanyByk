@@ -37,6 +37,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -79,6 +80,7 @@ import com.example.myapplication.viewmodel.SuggestionType
 import com.example.myapplication.viewmodel.TrainerCategory
 import com.example.myapplication.viewmodel.TrainersViewModel
 import androidx.compose.foundation.layout.FlowRow
+import com.example.myapplication.ui.components.buttons.MapFloatingButton
 
 @Composable
 fun HomeScreen(
@@ -117,60 +119,32 @@ fun HomeScreen(
         trainersViewModel.loadInitialTrainers()
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(backgroundColor) // Ensure clean white background
-            .padding(16.dp), // Increased padding slightly for better breathing room
-        verticalArrangement = Arrangement.Top
-    ) {
-        Text(
-            text = stringResource(R.string.find_your_trainer),
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold,
-            color = primaryColor
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // --- Search Row ---
-        Row(
-            modifier = Modifier.fillMaxWidth().zIndex(10f), // Ensure search row is on top for suggestions
-            verticalAlignment = Alignment.Top, // Align top to allow suggestions to flow down
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+    Box(modifier = modifier.fillMaxSize().background(backgroundColor)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
         ) {
-            // Styled Map Button (Box matching border/shape of Text Field)
-            Box(
+            Column(
                 modifier = Modifier
-                    .size(56.dp) // Height matches default OutlinedTextField height
-                    .border(1.dp, borderColor, shape)
-                    .clip(shape)
-                    .clickable { onMapClick() }
-                    .background(backgroundColor),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Top
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.map_search_icon),
-                    contentDescription = "Search on map",
-                    tint = primaryColor,
-                    modifier = Modifier.size(24.dp)
+                Text(
+                    text = stringResource(R.string.find_your_trainer),
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = primaryColor
                 )
-            }
 
-            // Styled Search Field with Suggestions
-            Box(modifier = Modifier.weight(1f)) {
+                Spacer(modifier = Modifier.height(24.dp))
+
                 OutlinedTextField(
                     value = searchTrainerText,
-                    onValueChange = { 
-                        searchTrainerText = it
-                        trainersViewModel.onSearchQueryChanged(it)
-                        if (it.isEmpty()) {
-                            trainersViewModel.applyFiltersAndLoad() // Wróć do pełnej listy
-                        }
-                    },
+                    onValueChange = { searchTrainerText = it },
                     label = { Text(stringResource(R.string.search)) },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = shape, // 12.dp
+                    shape = shape,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = primaryColor,
                         unfocusedBorderColor = borderColor,
@@ -193,191 +167,159 @@ fun HomeScreen(
                     keyboardActions = KeyboardActions(
                         onSearch = {
                             trainersViewModel.searchTrainers(searchTrainerText)
-                            trainersViewModel.clearSuggestions()
-                            focusManager.clearFocus()
                         }
                     )
                 )
 
-                // Suggestions Dropdown
-                if (trainersState.suggestions.isNotEmpty()) {
-                    Card(
-                        modifier = Modifier
-                            .padding(top = 60.dp) // Offset to appear below the text field
-                            .fillMaxWidth()
-                            .heightIn(max = 250.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White)
-                    ) {
-                        LazyColumn {
-                            items(trainersState.suggestions) { suggestion ->
-                                ListItem(
-                                    headlineContent = { Text(suggestion.title, fontWeight = FontWeight.Bold) },
-                                    supportingContent = { 
-                                        if (suggestion.subtitle != null) Text(suggestion.subtitle, style = MaterialTheme.typography.bodySmall) 
-                                    },
-                                    leadingContent = {
-                                        Icon(
-                                            imageVector = if (suggestion.type == SuggestionType.TRAINER) Icons.Default.Person else Icons.Default.FitnessCenter,
-                                            contentDescription = null,
-                                            tint = primaryColor
-                                        )
-                                    },
-                                    modifier = Modifier
-                                        .clickable {
-                                            searchTrainerText = suggestion.title
-                                            trainersViewModel.onSuggestionClicked(suggestion)
-                                            focusManager.clearFocus()
-                                        }
-                                        .fillMaxWidth()
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
+                Spacer(modifier = Modifier.height(12.dp))
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // --- Filter & Sort Buttons ---
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            OutlinedButton(
-                onClick = { goToFilter() },
-                modifier = Modifier
-                    .weight(1f)
-                    .height(50.dp),
-                shape = shape,
-                border = BorderStroke(1.dp, borderColor),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = primaryColor,
-                    containerColor = backgroundColor
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.FilterList,
-                    contentDescription = "Filtruj",
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Filtruj",
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            OutlinedButton(
-                onClick = {
-                    showSortDialog = true
-                    Log.d("Filtry", trainersState.toString())
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .height(50.dp),
-                shape = shape,
-                border = BorderStroke(1.dp, borderColor),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = primaryColor,
-                    containerColor = backgroundColor
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Sort,
-                    contentDescription = "Sortuj",
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Sortuj",
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            if (showSortDialog) {
-                // Poprawione sprawdzanie lokalizacji
-                var isLocationAvailable = trainersState.userLocation?.let {
-                    it.latitude != 0.0 && it.longitude != 0.0 
-                } ?: false
-                Log.d("DIST", "Obiekt location: ${trainersState.userLocation}")
-                Log.d("DIST", "aaaaa " + isLocationAvailable.toString())
-                SortDialog(
-                    onDismiss = { showSortDialog = false },
-                    onSortSelected = { sortOption ->
-                        trainersViewModel.onSortOptionSelected(sortOption)
-                        showSortDialog = false
-                    },
-                    currentSortOption = trainersState.sortBy, // Przekazujemy aktualną opcję
-                    isLocationAvailable = isLocationAvailable // Przekazujemy dostępność lokalizacji
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Box(
-            modifier = Modifier.weight(1f),
-            contentAlignment = Alignment.Center
-        ) {
-            if (!homeState.isLoading) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp) // Increased spacing for card separation
-                ) {
-                    items(trainers) { trainer ->
-                        TrainerProfileCard(
-                            trainer = trainer,
-                            onClick = {
-                                if (trainer.images?.isNotEmpty() == true) {
-                                    val imageUrl = trainer.images[0]
-                                    val request = ImageRequest.Builder(context)
-                                        .data(imageUrl)
-                                        .build()
-                                    imageLoader.enqueue(request)
-                                }
-                                trainersViewModel.selectTrainer(trainer)
-                                goToTrainerProfileCard(trainer)
-                            }
-                        )
-                    }
-                }
-            }
-
-            if (homeState.isLoading) {
-                MainProgressIndicator()
-            } else if (errorMessage != null) {
-                Card(
+                // --- Filter & Sort Buttons ---
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = shape,
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f)
-                    )
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                    OutlinedButton(
+                        onClick = { goToFilter() },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(50.dp),
+                        shape = shape,
+                        border = BorderStroke(1.dp, borderColor),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = primaryColor,
+                            containerColor = backgroundColor
+                        )
                     ) {
-                        Text(
-                            text = stringResource(R.string.error),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.error
+                        Icon(
+                            imageVector = Icons.Default.FilterList,
+                            contentDescription = "Filtruj",
+                            modifier = Modifier.size(20.dp)
                         )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = errorMessage,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface
+                            text = "Filtruj",
+                            fontWeight = FontWeight.Bold
                         )
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            showSortDialog = true
+                            Log.d("Filtry", trainersState.toString())
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(50.dp),
+                        shape = shape,
+                        border = BorderStroke(1.dp, borderColor),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = primaryColor,
+                            containerColor = backgroundColor
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Sort,
+                            contentDescription = "Sortuj",
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Sortuj",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    if (showSortDialog) {
+                        // Poprawione sprawdzanie lokalizacji
+                        var isLocationAvailable = trainersState.userLocation?.let {
+                            it.latitude != 0.0 && it.longitude != 0.0
+                        } ?: false
+                        Log.d("DIST", "Obiekt location: ${trainersState.userLocation}")
+                        Log.d("DIST", "aaaaa " + isLocationAvailable.toString())
+                        SortDialog(
+                            onDismiss = { showSortDialog = false },
+                            onSortSelected = { sortOption ->
+                                trainersViewModel.onSortOptionSelected(sortOption)
+                                showSortDialog = false
+                            },
+                            currentSortOption = trainersState.sortBy, // Przekazujemy aktualną opcję
+                            isLocationAvailable = isLocationAvailable // Przekazujemy dostępność lokalizacji
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
+            Box(
+                modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                if (!homeState.isLoading) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(16.dp) // Increased spacing for card separation
+                    ) {
+                        items(trainers) { trainer ->
+                            TrainerProfileCard(
+                                trainer = trainer,
+                                onClick = {
+                                    if (trainer.images?.isNotEmpty() == true) {
+                                        val imageUrl = trainer.images[0]
+                                        val request = ImageRequest.Builder(context)
+                                            .data(imageUrl)
+                                            .build()
+                                        imageLoader.enqueue(request)
+                                    }
+                                    trainersViewModel.selectTrainer(trainer)
+                                    goToTrainerProfileCard(trainer)
+                                }
+                            )
+                        }
+                    }
+                }
+
+                if (homeState.isLoading) {
+                    MainProgressIndicator()
+                } else if (errorMessage != null) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = shape,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f)
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = stringResource(R.string.error),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.error
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = errorMessage,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
                 }
             }
         }
+
+        MapFloatingButton(
+            onClick = onMapClick,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(24.dp)
+        )
     }
 }
 

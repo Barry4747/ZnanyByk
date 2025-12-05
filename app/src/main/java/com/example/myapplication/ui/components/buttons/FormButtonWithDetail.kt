@@ -55,7 +55,7 @@ fun FormButtonWithDetail(
         border = BorderStroke(
             width = BORDER_WIDTH,
             color = if (enabled) {
-                Color.Gray
+                Color.Black
             } else {
                 MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_CONTAINER_ALPHA)
             }
@@ -91,8 +91,6 @@ fun FormButtonWithDetail(
         }
     }
 }
-
-// --- Preview ---
 
 @Preview(showBackground = true)
 @Composable

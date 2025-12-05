@@ -27,12 +27,15 @@ class ChatViewModel @Inject constructor(
 
     private val _receiverAvatarUrl = MutableStateFlow<String?>(null)
     val receiverAvatarUrl: StateFlow<String?> = _receiverAvatarUrl
+    private val _receiverName = MutableStateFlow<String>("")
+    val receiverName: StateFlow<String> = _receiverName
 
     fun init(chatId: String, receiverId: String) {
         this.chatId = chatId
         this.currentUserId = authRepository.getCurrentUserId().toString()
         listenForMessages()
         loadReceiverAvatar(receiverId)
+        loadReceiverName(receiverId)
     }
 
     private fun loadReceiverAvatar(receiverId: String) {
@@ -43,7 +46,15 @@ class ChatViewModel @Inject constructor(
             android.util.Log.d("ChatViewModel", "Receiver avatar URL: ${_receiverAvatarUrl.value}")
         }
     }
-
+    private fun loadReceiverName(receiverId: String) {
+        viewModelScope.launch {
+            val user = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                userRepository.getUserSync(receiverId)
+            }
+            val fullName = if (user != null) "${user.firstName} ${user.lastName}" else "Nieznany"
+            _receiverName.value = fullName
+        }
+    }
     private fun listenForMessages() {
         viewModelScope.launch {
             chatRepository.getMessagesForChatFlow(chatId).collect { msgs ->
@@ -60,16 +71,6 @@ class ChatViewModel @Inject constructor(
 
     fun getCurrentUser(): String? {
         return authRepository.getCurrentUserId()
-    }
-
-    fun getUserLastName(uid: String): String? {
-        return userRepository.getUserSync(uid)?.lastName
-    }
-    fun getUserFirstName(uid: String): String? {
-        return userRepository.getUserSync(uid)?.firstName
-    }
-    fun getUserFullName(uid: String): String? {
-        return getUserFirstName(uid) + " " + getUserLastName(uid)
     }
 
     fun getUserAvatarUrl(uid: String): String? {
