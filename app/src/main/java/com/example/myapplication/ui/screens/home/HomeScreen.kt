@@ -139,37 +139,84 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                OutlinedTextField(
-                    value = searchTrainerText,
-                    onValueChange = { searchTrainerText = it },
-                    label = { Text(stringResource(R.string.search)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = shape,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = primaryColor,
-                        unfocusedBorderColor = borderColor,
-                        focusedLabelColor = primaryColor,
-                        unfocusedLabelColor = Color.Gray,
-                        cursorColor = primaryColor,
-                        focusedLeadingIconColor = primaryColor,
-                        unfocusedLeadingIconColor = Color.Gray,
-                        focusedContainerColor = backgroundColor,
-                        unfocusedContainerColor = backgroundColor
-                    ),
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = stringResource(R.string.search_icon)
+                // --- Search Row with Suggestions ---
+                Box(modifier = Modifier.fillMaxWidth().zIndex(10f)) { // zIndex to ensure suggestions are on top
+                    OutlinedTextField(
+                        value = searchTrainerText,
+                        onValueChange = { 
+                            searchTrainerText = it
+                            trainersViewModel.onSearchQueryChanged(it)
+                            if (it.isEmpty()) {
+                                trainersViewModel.applyFiltersAndLoad()
+                            }
+                        },
+                        label = { Text(stringResource(R.string.search)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = shape,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = primaryColor,
+                            unfocusedBorderColor = borderColor,
+                            focusedLabelColor = primaryColor,
+                            unfocusedLabelColor = Color.Gray,
+                            cursorColor = primaryColor,
+                            focusedLeadingIconColor = primaryColor,
+                            unfocusedLeadingIconColor = Color.Gray,
+                            focusedContainerColor = backgroundColor,
+                            unfocusedContainerColor = backgroundColor
+                        ),
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = stringResource(R.string.search_icon)
+                            )
+                        },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(
+                            onSearch = {
+                                trainersViewModel.searchTrainers(searchTrainerText)
+                                trainersViewModel.clearSuggestions()
+                                focusManager.clearFocus()
+                            }
                         )
-                    },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(
-                        onSearch = {
-                            trainersViewModel.searchTrainers(searchTrainerText)
-                        }
                     )
-                )
+
+                    if (trainersState.suggestions.isNotEmpty()) {
+                        Card(
+                            modifier = Modifier
+                                .padding(top = 60.dp)
+                                .fillMaxWidth()
+                                .heightIn(max = 250.dp),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White)
+                        ) {
+                            LazyColumn {
+                                items(trainersState.suggestions) { suggestion ->
+                                    ListItem(
+                                        headlineContent = { Text(suggestion.title, fontWeight = FontWeight.Bold) },
+                                        supportingContent = { 
+                                            if (suggestion.subtitle != null) Text(suggestion.subtitle, style = MaterialTheme.typography.bodySmall) 
+                                        },
+                                        leadingContent = {
+                                            Icon(
+                                                imageVector = if (suggestion.type == SuggestionType.TRAINER) Icons.Default.Person else Icons.Default.FitnessCenter,
+                                                contentDescription = null,
+                                                tint = primaryColor
+                                            )
+                                        },
+                                        modifier = Modifier
+                                            .clickable {
+                                                searchTrainerText = suggestion.title
+                                                trainersViewModel.onSuggestionClicked(suggestion)
+                                                focusManager.clearFocus()
+                                            }
+                                            .fillMaxWidth()
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(12.dp))
 
