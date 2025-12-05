@@ -340,9 +340,6 @@ fun AppNavigation(
                 }
 
 
-
-
-
             composable(Screen.RegisterTrainer.route) {
                 TrainerRegistrationScreen(onNavigateBack = {
                     navController.navigate("home_flow") {

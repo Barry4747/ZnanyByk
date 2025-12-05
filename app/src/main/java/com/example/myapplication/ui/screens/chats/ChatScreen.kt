@@ -1,33 +1,25 @@
 package com.example.myapplication.ui.screens.chats
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import com.example.myapplication.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.myapplication.ui.components.buttons.MainBackButton
 import com.example.myapplication.ui.components.chats.MessageItem
 import com.example.myapplication.ui.components.inputs.MessageInputBar
 import com.example.myapplication.ui.components.user_components.ProfilePicture
-import com.example.myapplication.utils.shouldShowTimestamp
 import com.example.myapplication.utils.shouldShowProfile
-import com.example.myapplication.utils.formatTimestamp
+import com.example.myapplication.utils.getSmartTimestamp
 import com.example.myapplication.viewmodel.chats.ChatViewModel
 import kotlinx.coroutines.launch
 
@@ -124,17 +116,24 @@ fun ChatScreen(
         ) {
             itemsIndexed(messages) { index, message ->
                 val isCurrentUser = message.senderId == currentUserId
-                val previousMessage = messages.getOrNull(index - 1)
 
-                val showProfile = shouldShowProfile(index, messages, currentUserId)
-                val showTimestamp = shouldShowTimestamp(message.timestamp, previousMessage?.timestamp)
-                val timestampText = formatTimestamp(message.timestamp, previousMessage?.timestamp)
+                val newerMessage = messages.getOrNull(index - 1)
+
+                val olderMessage = messages.getOrNull(index + 1)
+
+                val showProfile = shouldShowProfile(
+                    index,
+                    messages,
+                    currentUserId
+                )
+                val timestampText = getSmartTimestamp(message.timestamp, olderMessage?.timestamp)
 
                 MessageItem(
                     message = message,
+                    avatarResource = avatarResource,
                     isCurrentUser = isCurrentUser,
                     showProfile = showProfile,
-                    timestamp = if (showTimestamp) timestampText else ""
+                    timestamp = timestampText
                 )
             }
         }
