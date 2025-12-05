@@ -19,9 +19,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.myapplication.R
 
 @Composable
 fun SuccessView() {
@@ -48,13 +50,13 @@ fun SuccessView() {
         Spacer(modifier = Modifier.height(32.dp))
 
         Text(
-            text = "Gotowe!",
+            text = stringResource(R.string.ready),
             style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
             color = Color.Black
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Twój trening został pomyślnie opłacony\ni zarezerwowany.",
+            text = stringResource(R.string.payment_success_message),
             style = MaterialTheme.typography.bodyLarge,
             color = Color.Gray,
             textAlign = TextAlign.Center

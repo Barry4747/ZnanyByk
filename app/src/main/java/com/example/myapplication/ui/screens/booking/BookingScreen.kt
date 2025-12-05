@@ -21,11 +21,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.myapplication.R
 import com.example.myapplication.ui.components.MainTopBar
 import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.viewmodel.booking.BookingViewModel
@@ -40,7 +42,7 @@ fun BookingScreen(
     trainerId: String,
     onNavigateToPayment: (String, Long, String, String) -> Unit,
     onNavigateBack: () -> Unit,
-    viewModel: BookingViewModel = hiltViewModel()
+    viewModel: BookingViewModel = hiltViewModel(),
 ) {
     LaunchedEffect(trainerId) {
         viewModel.init(trainerId)
@@ -100,7 +102,7 @@ fun BookingScreen(
     Scaffold(
         containerColor = Color.White,
         topBar = {
-            MainTopBar(text="Rezerwacja", onNavigateBack = onNavigateBack)
+            MainTopBar(text= stringResource(R.string.reservation), onNavigateBack = onNavigateBack)
                  },
         bottomBar = {
             Box(
@@ -124,7 +126,7 @@ fun BookingScreen(
                         .fillMaxWidth()
                         .height(56.dp),
                     enabled = isButtonEnabled,
-                    text = "Przejdź do płatności"
+                    text = stringResource(R.string.move_to_payment)
                 )
             }
         }
@@ -169,7 +171,7 @@ fun BookingScreen(
             ) {
                 Column {
                     Text(
-                        text = "RODZAJ TRENINGU",
+                        text = stringResource(R.string.training_type),
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.sp
@@ -210,7 +212,7 @@ fun BookingScreen(
             }
 
             Text(
-                text = "DOSTĘPNE GODZINY",
+                text = stringResource(R.string.available_hours),
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
@@ -226,7 +228,9 @@ fun BookingScreen(
                     )
                 } else if (state.availableSlots.isEmpty()) {
                     Text(
-                        text = if (state.appointments.isNotEmpty()) "Brak terminów" else "Wybierz datę",
+                        text = if (state.appointments.isNotEmpty()) stringResource(R.string.no_meetings_available) else stringResource(
+                            R.string.pick_date
+                        ),
                         color = Color.LightGray,
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.align(Alignment.Center)
@@ -257,7 +261,7 @@ fun BookingScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = slot.time ?: "--:--",
+                                        text = slot.time ?: stringResource(R.string.date_placeholder),
                                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
                                     )
                                 }

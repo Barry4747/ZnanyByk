@@ -1,13 +1,16 @@
 package com.example.myapplication.viewmodel.chats
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myapplication.R
 import com.example.myapplication.data.model.chats.Chat
 import com.example.myapplication.data.model.users.User
 import com.example.myapplication.data.repository.AuthRepository
 import com.example.myapplication.data.repository.ChatRepository
 import com.example.myapplication.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,7 +36,8 @@ data class ChatsListState(
 class ChatsListViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val authRepository: AuthRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    @ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
     private val _chats = MutableStateFlow<ChatsListState>(ChatsListState(isLoading = true))
@@ -49,7 +53,7 @@ class ChatsListViewModel @Inject constructor(
     private fun listenForChats() {
         val currentUserId = authRepository.getCurrentUserId()
         if (currentUserId == null) {
-            _state.value = ChatsListState(errorMessage = "Brak zalogowanego użytkownika")
+            _state.value = ChatsListState(errorMessage = appContext.getString(R.string.no_user_logged_in))
             return
         }
 
@@ -62,7 +66,7 @@ class ChatsListViewModel @Inject constructor(
 
                         val user = userRepository.getUserSync(receiverId)
 
-                        val receiverName = user?.firstName ?: "Użytkownik"
+                        val receiverName = user?.firstName ?: appContext.getString(R.string.user)
                         val receiverAvatar = user?.avatarUrl
 
                         val isUnread = !chat.lastMessageSeen && chat.lastMessageSender != currentUserId

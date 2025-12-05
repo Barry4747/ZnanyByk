@@ -27,10 +27,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.myapplication.R
 import com.example.myapplication.ui.components.buttons.PaymentButton
 
 @Composable
@@ -56,7 +58,7 @@ fun PaymentFormView(
                 .padding(24.dp)
         ) {
             Text(
-                text = "TRENING",
+                text = stringResource(R.string.training),
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, letterSpacing = 1.sp),
                 color = Color.Gray
             )
@@ -92,9 +94,9 @@ fun PaymentFormView(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Do zapłaty", color = Color.Gray, style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(R.string.to_pay), color = Color.Gray, style = MaterialTheme.typography.bodyLarge)
                 Text(
-                    "120.00 PLN",
+                    stringResource(R.string.pln_mock),
                     color = Color.Black,
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                 )
@@ -104,7 +106,7 @@ fun PaymentFormView(
         Spacer(modifier = Modifier.height(32.dp))
 
         Text(
-            text = "METODA PŁATNOŚCI",
+            text = stringResource(R.string.payment_method),
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, letterSpacing = 1.sp),
             color = Color.Gray,
             modifier = Modifier.padding(bottom = 12.dp)
@@ -127,8 +129,8 @@ fun PaymentFormView(
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
-                    Text("Visa **** 4242", fontWeight = FontWeight.SemiBold, color = Color.Black)
-                    Text("Wygasa 12/26", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Text(stringResource(R.string.card_mock), fontWeight = FontWeight.SemiBold, color = Color.Black)
+                    Text(stringResource(R.string.expires_mock), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(
@@ -147,7 +149,9 @@ fun PaymentFormView(
                 text = errorMessage,
                 color = Color.Red,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(bottom = 12.dp).align(Alignment.CenterHorizontally),
+                modifier = Modifier
+                    .padding(bottom = 12.dp)
+                    .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center
             )
         }
@@ -162,7 +166,7 @@ fun PaymentFormView(
         ) {
             Icon(Icons.Default.Lock, contentDescription = null, tint = Color.LightGray, modifier = Modifier.size(12.dp))
             Spacer(modifier = Modifier.width(4.dp))
-            Text("Płatność jest bezpieczna i szyfrowana", style = MaterialTheme.typography.labelSmall, color = Color.LightGray)
+            Text(stringResource(R.string.payment_safety_message), style = MaterialTheme.typography.labelSmall, color = Color.LightGray)
         }
     }
 }

@@ -12,10 +12,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.myapplication.R
 import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.ui.components.buttons.MainTextButton
 import com.example.myapplication.ui.components.inputs.TimeInputSimple
@@ -27,8 +29,22 @@ fun BulkScheduleDialog(
     onConfirm: (Set<String>, Int, Int, Int, Int, Int, Int) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val days = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
-    val dayLabels = listOf("Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd")
+    val days = listOf(stringResource(com.example.myapplication.R.string.monday),
+        stringResource(com.example.myapplication.R.string.tuesday),
+        stringResource(com.example.myapplication.R.string.wednesday),
+        stringResource(com.example.myapplication.R.string.thursday),
+        stringResource(com.example.myapplication.R.string.friday),
+        stringResource(com.example.myapplication.R.string.saturday),
+        stringResource(R.string.sunday))
+    val dayLabels = listOf(
+        stringResource(R.string.monday_short_pl),
+        stringResource(R.string.tuesday_short_pl),
+        stringResource(R.string.wendsday_short_pl),
+        stringResource(R.string.thursday_short_pl),
+        stringResource(R.string.friday_short_pl),
+        stringResource(R.string.saturday_short_pl),
+        stringResource(R.string.sunday_short_pl)
+    )
     var selectedDays by remember { mutableStateOf(setOf<String>()) }
 
     var startHour by remember { mutableStateOf(8) }
@@ -42,14 +58,14 @@ fun BulkScheduleDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Generator Harmonogramu") },
+        title = { Text(stringResource(R.string.schedule_generator)) },
         text = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text("Wybierz dni:", style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.pick_days), style = MaterialTheme.typography.labelLarge)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -71,7 +87,7 @@ fun BulkScheduleDialog(
 
                 HorizontalDivider()
 
-                Text("Zakres godzin (Od - Do):", style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.hours_in_between), style = MaterialTheme.typography.labelLarge)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     TimeInputSimple(startHour, startMinute) { h, m -> startHour = h; startMinute = m }
                     Text(" - ", modifier = Modifier.padding(horizontal = 8.dp))
@@ -84,14 +100,14 @@ fun BulkScheduleDialog(
                     OutlinedTextField(
                         value = durationText,
                         onValueChange = { durationText = it },
-                        label = { Text("Czas (min)") },
+                        label = { Text(stringResource(R.string.time_min)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
                     OutlinedTextField(
                         value = breakText,
                         onValueChange = { breakText = it },
-                        label = { Text("Przerwa (min)") },
+                        label = { Text(stringResource(R.string.break_min)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
@@ -107,11 +123,11 @@ fun BulkScheduleDialog(
                         onConfirm(selectedDays, startHour, startMinute, endHour, endMinute, duration, breakTime)
                     }
                 },
-                text = "Generuj"
+                text = stringResource(R.string.generate)
             )
         },
         dismissButton = {
-            MainTextButton(onClick = onDismiss, text = "Anuluj")
+            MainTextButton(onClick = onDismiss, text = stringResource(R.string.cancel_v3))
         }
     )
 }

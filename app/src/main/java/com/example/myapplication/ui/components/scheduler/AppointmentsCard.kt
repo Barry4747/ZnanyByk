@@ -62,15 +62,17 @@ fun AppointmentCard(
     }
 
     val statusColor = if (isPast) Color(0xFFBE3737) else if (isToday) Color(0xFF4CAF50) else Color.Black
-    val statusText = if (isPast) "Zakończony" else if (isToday) "Dzisiaj" else "Zaplanowany"
+    val statusText = if (isPast) stringResource(R.string.finished) else if (isToday) stringResource(
+        R.string.today
+    ) else stringResource(R.string.planned)
     val dayOfWeekText = when (appointment.dayOfWeek) {
-        DayOfTheWeek.MONDAY -> "Poniedziałek"
-        DayOfTheWeek.TUESDAY -> "Wtorek"
-        DayOfTheWeek.WEDNESDAY -> "Środa"
-        DayOfTheWeek.THURSDAY -> "Czwartek"
-        DayOfTheWeek.FRIDAY -> "Piątek"
-        DayOfTheWeek.SATURDAY -> "Sobota"
-        DayOfTheWeek.SUNDAY -> "Niedziela"
+        DayOfTheWeek.MONDAY -> stringResource(R.string.monday)
+        DayOfTheWeek.TUESDAY -> stringResource(R.string.tuesday)
+        DayOfTheWeek.WEDNESDAY -> stringResource(R.string.wendsday_short_pl)
+        DayOfTheWeek.THURSDAY -> stringResource(R.string.thursday)
+        DayOfTheWeek.FRIDAY -> stringResource(R.string.friday)
+        DayOfTheWeek.SATURDAY -> stringResource(R.string.saturday)
+        DayOfTheWeek.SUNDAY -> stringResource(R.string.sunday)
         null -> ""
     }
 

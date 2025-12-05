@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.R
@@ -28,7 +29,7 @@ fun MapFloatingButton(
     ) {
         Icon(
             painter = painterResource(id = R.drawable.map_search_icon),
-            contentDescription = "Search on map",
+            contentDescription = stringResource(R.string.search_on_map),
             modifier = Modifier.size(24.dp)
         )
     }

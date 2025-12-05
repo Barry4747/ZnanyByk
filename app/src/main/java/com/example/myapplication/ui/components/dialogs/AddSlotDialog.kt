@@ -16,8 +16,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.myapplication.R
 import com.example.myapplication.ui.components.pickers.TimePickerRow
 
 @Composable
@@ -32,7 +34,7 @@ fun AddSlotDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Dodaj nowy slot - $day") },
+        title = { Text(stringResource(R.string.add_new_slot_day_input, day)) },
         text = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 TimePickerRow(
@@ -47,7 +49,7 @@ fun AddSlotDialog(
                 OutlinedTextField(
                     value = durationText,
                     onValueChange = { durationText = it },
-                    label = { Text("Czas trwania (minuty)") },
+                    label = { Text(stringResource(R.string.duration_time_minute)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(0.8f)
@@ -62,12 +64,12 @@ fun AddSlotDialog(
                     onConfirm(formattedTime, duration)
                 }
             }) {
-                Text("Dodaj")
+                Text(stringResource(R.string.add_v2))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Anuluj")
+                Text(stringResource(R.string.cancel_v2))
             }
         }
     )

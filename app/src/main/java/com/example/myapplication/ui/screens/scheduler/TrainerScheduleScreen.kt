@@ -15,10 +15,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.myapplication.R
 import com.example.myapplication.data.model.trainings.TrainingSlot
 import com.example.myapplication.ui.components.buttons.AlternateButton
 import com.example.myapplication.ui.components.dialogs.AddSlotDialog
@@ -41,7 +43,15 @@ fun TrainerScheduleScreen(
     }
 
     val weeklySchedule by viewModel.weeklySchedule.observeAsState()
-    val days = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+    val days = listOf(
+        stringResource(R.string.monday),
+        stringResource(R.string.tuesday),
+        stringResource(R.string.wednesday),
+        stringResource(R.string.thursday),
+        stringResource(R.string.friday),
+        stringResource(R.string.saturday),
+        stringResource(R.string.sunday)
+    )
 
     var showDialog by remember { mutableStateOf(false) }
     var selectedDay by remember { mutableStateOf("") }
@@ -64,7 +74,7 @@ fun TrainerScheduleScreen(
         Box(modifier = Modifier.padding(16.dp)) {
             AlternateButton(
                 onClick = { showBulkDialog = true },
-                text = "Generuj harmonogram"
+                text = stringResource(R.string.generate_schedule)
             )
         }
     }

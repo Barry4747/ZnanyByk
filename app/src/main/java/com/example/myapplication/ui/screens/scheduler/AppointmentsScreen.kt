@@ -122,7 +122,11 @@ fun AppointmentsScreen(
                 .padding(16.dp)
         ) {
             FormButton(
-                text = "${selectedMonthYear.monthValue}.${selectedMonthYear.year}",
+                text = stringResource(
+                    R.string.month_year_input,
+                    selectedMonthYear.monthValue,
+                    selectedMonthYear.year
+                ),
                 onClick = { showMonthYearPicker = true },
                 enabled = true,
                 modifier = Modifier.fillMaxWidth()

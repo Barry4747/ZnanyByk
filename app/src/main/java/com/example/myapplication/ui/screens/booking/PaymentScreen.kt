@@ -25,11 +25,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.myapplication.R
 import com.example.myapplication.ui.components.MainTopBar
 import com.example.myapplication.ui.components.buttons.PaymentButton
 import com.example.myapplication.ui.components.payment.PaymentFormView
@@ -68,7 +70,7 @@ fun PaymentScreen(
     Scaffold(
         containerColor = Color.White,
         topBar = {
-            MainTopBar(text="Podsumowanie", onNavigateBack = onNavigateBack)
+            MainTopBar(text= stringResource(R.string.summary), onNavigateBack = onNavigateBack)
         }
     ) { paddingValues ->
         Box(

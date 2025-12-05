@@ -27,10 +27,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.myapplication.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -65,7 +67,7 @@ fun MonthYearPicker(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    "Wybierz miesiąc i rok",
+                    stringResource(R.string.pick_month_and_year),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = androidx.compose.ui.graphics.Color.Black,
@@ -95,13 +97,13 @@ fun MonthYearPicker(
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Anuluj", color = androidx.compose.ui.graphics.Color.Black)
+                        Text(stringResource(R.string.cancel_v4), color = androidx.compose.ui.graphics.Color.Black)
                     }
                     TextButton(onClick = {
                         onConfirm(selectedMonth + 1, years[selectedYear])
                         onDismiss()
                     }) {
-                        Text("OK", color = androidx.compose.ui.graphics.Color.Black)
+                        Text(stringResource(R.string.ok_caps), color = androidx.compose.ui.graphics.Color.Black)
                     }
                 }
             }
@@ -143,7 +145,10 @@ private fun RevoPicker(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(itemHeight)
-                .background(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+                .background(
+                    androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.1f),
+                    RoundedCornerShape(8.dp)
+                )
         )
         LazyColumn(
             state = listState,
