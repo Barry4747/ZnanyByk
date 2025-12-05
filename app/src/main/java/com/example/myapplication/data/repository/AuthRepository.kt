@@ -17,6 +17,7 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.example.myapplication.data.model.users.User
+import com.example.myapplication.data.model.users.UserLocation
 
 data class GoogleSignInResult(
     val uid: String,
@@ -139,6 +140,10 @@ class AuthRepository @Inject constructor(
 
     fun getCurrentUserId(): String? {
         return _currentUser.value?.uid
+    }
+
+    fun getCurrentLocation(): UserLocation? {
+        return cachedUserData?.second?.location
     }
 
     fun logoutUser() {

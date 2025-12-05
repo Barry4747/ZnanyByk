@@ -17,21 +17,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -46,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
@@ -220,8 +213,16 @@ fun TrainerDetailScreen(
 
                         Spacer(modifier = Modifier.height(4.dp))
 
+                        Log.d("DIST", trainersState.distanceToTrainer.toString())
+
+                        val distanceText = if (trainersState.distanceToTrainer != null) {
+                            "${String.format("%.1f", trainersState.distanceToTrainer)} km od ciebie  •  "
+                        } else {
+                            ""
+                        }
+
                         Text(
-                            text = "${selectedTrainer.gymId ?: "-"} km od ciebie  •  ${selectedTrainer.ratings?.size ?: 0} ocen",
+                            text = "$distanceText${selectedTrainer.ratings?.size ?: 0} ocen",
                             style = MaterialTheme.typography.bodyMedium,
                             color = secondaryTextColor
                         )
