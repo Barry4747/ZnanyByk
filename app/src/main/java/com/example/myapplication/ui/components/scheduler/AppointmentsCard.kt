@@ -66,13 +66,13 @@ fun AppointmentCard(
         R.string.today
     ) else stringResource(R.string.planned)
     val dayOfWeekText = when (appointment.dayOfWeek) {
-        DayOfTheWeek.MONDAY -> stringResource(R.string.monday)
-        DayOfTheWeek.TUESDAY -> stringResource(R.string.tuesday)
-        DayOfTheWeek.WEDNESDAY -> stringResource(R.string.wendsday_short_pl)
-        DayOfTheWeek.THURSDAY -> stringResource(R.string.thursday)
-        DayOfTheWeek.FRIDAY -> stringResource(R.string.friday)
-        DayOfTheWeek.SATURDAY -> stringResource(R.string.saturday)
-        DayOfTheWeek.SUNDAY -> stringResource(R.string.sunday)
+        DayOfTheWeek.MONDAY -> "Poniedziałek"
+        DayOfTheWeek.TUESDAY -> "Wtorek"
+        DayOfTheWeek.WEDNESDAY -> "Środa"
+        DayOfTheWeek.THURSDAY -> "Czwartek"
+        DayOfTheWeek.FRIDAY -> "Piątek"
+        DayOfTheWeek.SATURDAY -> "Sobota"
+        DayOfTheWeek.SUNDAY -> "Niedziela"
         null -> ""
     }
 
