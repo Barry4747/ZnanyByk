@@ -161,6 +161,26 @@ class ChatRepository @Inject constructor() {
         batch.commit().await()
     }
 
+    fun getChatsForUserFlow(userId: String): Flow<List<Chat>> = callbackFlow {
+        val query = chatsCollection
+            .whereArrayContains("users", userId)
+            .orderBy("lastTimestamp", Query.Direction.DESCENDING)
+
+        val listener = query.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                close(error)
+                return@addSnapshotListener
+            }
+
+            val chats = snapshot?.documents?.mapNotNull { doc ->
+                doc.toObject(Chat::class.java)?.copy(id = doc.id)
+            } ?: emptyList()
+
+            trySend(chats)
+        }
+
+        awaitClose { listener.remove() }
+    }
 
 
 }

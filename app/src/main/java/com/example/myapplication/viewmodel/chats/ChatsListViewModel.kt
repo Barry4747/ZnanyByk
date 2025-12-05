@@ -8,14 +8,23 @@ import com.example.myapplication.data.repository.AuthRepository
 import com.example.myapplication.data.repository.ChatRepository
 import com.example.myapplication.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+data class ChatUIModel(
+    val chat: Chat,
+    val receiverId: String,
+    val receiverName: String,
+    val receiverAvatarUrl: String?,
+    val isUnread: Boolean
+)
+
 data class ChatsListState(
-    val user: User? = null,
-    val chats: List<Chat> = emptyList(),
+    val chatItems: List<ChatUIModel> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null
 )
@@ -30,41 +39,49 @@ class ChatsListViewModel @Inject constructor(
     private val _chats = MutableStateFlow<ChatsListState>(ChatsListState(isLoading = true))
     val chats: StateFlow<ChatsListState> = _chats
 
+    private val _state = MutableStateFlow(ChatsListState(isLoading = true))
+    val state: StateFlow<ChatsListState> = _state
+
     init {
-        loadChats()
+        listenForChats()
     }
 
-    private fun loadChats() {
+    private fun listenForChats() {
+        val currentUserId = authRepository.getCurrentUserId()
+        if (currentUserId == null) {
+            _state.value = ChatsListState(errorMessage = "Brak zalogowanego użytkownika")
+            return
+        }
+
         viewModelScope.launch {
-            val currentUserId = authRepository.getCurrentUserId()
-            if (currentUserId == null) {
-                _chats.value = ChatsListState(
-                    isLoading = false,
-                    errorMessage = "Brak zalogowanego użytkownika"
-                )
-                return@launch
-            }
+            chatRepository.getChatsForUserFlow(currentUserId).collect { chats ->
 
-            _chats.value = ChatsListState(isLoading = true)
+                val uiModels = withContext(Dispatchers.IO) {
+                    chats.map { chat ->
+                        val receiverId = chat.users.firstOrNull { it != currentUserId } ?: ""
 
-            val result = chatRepository.getChatsForUser(currentUserId)
+                        val user = userRepository.getUserSync(receiverId)
 
-            result.fold(
-                onSuccess = { chatList ->
-                    val sortedChats = chatList.sortedByDescending { it.lastTimestamp }
+                        val receiverName = user?.firstName ?: "Użytkownik"
+                        val receiverAvatar = user?.avatarUrl
 
-                    _chats.value = ChatsListState(
-                        chats = sortedChats,
-                        isLoading = false
-                    )
-                },
-                onFailure = { exception ->
-                    _chats.value = ChatsListState(
-                        isLoading = false,
-                        errorMessage = exception.message ?: "Błąd podczas wczytywania chatów"
-                    )
+                        val isUnread = !chat.lastMessageSeen && chat.lastMessageSender != currentUserId
+
+                        ChatUIModel(
+                            chat = chat,
+                            receiverId = receiverId,
+                            receiverName = receiverName,
+                            receiverAvatarUrl = receiverAvatar,
+                            isUnread = isUnread
+                        )
+                    }
                 }
-            )
+
+                _state.value = ChatsListState(
+                    chatItems = uiModels,
+                    isLoading = false
+                )
+            }
         }
     }
 
