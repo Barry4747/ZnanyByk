@@ -28,7 +28,7 @@ class HomeViewModel @Inject constructor(
     private val trainerRepository: TrainerRepository
 ) : ViewModel() {
 
-    private val _homeState = MutableStateFlow(HomeState())
+    private val _homeState = MutableStateFlow(HomeState(isLoading = true))
     val homeState: StateFlow<HomeState> = _homeState.asStateFlow()
 
     init {
