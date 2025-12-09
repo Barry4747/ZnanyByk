@@ -1,0 +1,10 @@
+package com.example.myapplication.data.model.chats
+
+data class Chat(
+    val id: String = "",
+    val users: List<String> = emptyList(),
+    val lastMessage: String = "",
+    val lastTimestamp: Long = 0L,
+    val lastMessageSender: String = "",
+    val lastMessageSeen: Boolean = false
+)
