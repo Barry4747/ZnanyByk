@@ -2,7 +2,6 @@ package com.example.myapplication.data.repository
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import com.example.myapplication.data.model.users.Trainer
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -108,7 +107,6 @@ class TrainerRepository @Inject constructor() {
                 Result.failure(Exception("Nie znaleziono trenera o podanym adresie e-mail: $email"))
             }
         } catch (e: Exception) {
-            Log.e("TrainerRepository", "Błąd podczas wyszukiwania trenera po emailu", e)
             Result.failure(e)
         }
     }
@@ -119,12 +117,8 @@ class TrainerRepository @Inject constructor() {
             trainerCollection.document(trainerId)
                 .update(ratingField, rating)
                 .await()
-            Log.d("RatingDialog", "Trener oceniony na w bazie: $rating")
-            Log.d("RatingDialog", "RatingField: $trainerId")
             Result.success(Unit)
         } catch (e: Exception) {
-
-            Log.e("TrainerRepository", "Error updating rating for trainer $trainerId", e)
             Result.failure(e)
 
         }
@@ -158,7 +152,6 @@ class TrainerRepository @Inject constructor() {
         return try {
             val snapshot = trainerCollection.get().await()
             val trainers = snapshot.documents.mapNotNull { document ->
-                Log.d("TRAINER_REPO_MAP", "Przetwarzam dokument o ID: ${document.id}")
 
                 val trainerWithoutId = document.toObject(Trainer::class.java)
 
@@ -167,11 +160,6 @@ class TrainerRepository @Inject constructor() {
                 trainerWithId
 
             }
-
-            Log.d(
-                "TRAINER_REPO",
-                "Trenerzy: ${trainers.map { "${it.firstName} ${it.lastName} (ID: ${it.id})" }}"
-            )
 
             for (trainer in trainers) {
                 val avgRating = getTrainerAvgRating(trainer)
@@ -219,26 +207,15 @@ class TrainerRepository @Inject constructor() {
                 price in minPrice..maxPrice
             }
 
-            Log.d("FILTER", minRating.toString())
 
             trainers = trainers.filter {
                 val rating = it.avgRating?.replace(',', '.')?.toFloatOrNull() ?: 0.0f
-                Log.d("FILTER", it.avgRating.toString())
                 rating >= minRating
             }
 
 
-            Log.d(
-                "TRAINER_REPO", "📊 Znaleziono ${trainers.size} przefiltrowanych trenerów. " +
-                        "Query: '$query', MinRating: $minRating, Price: $minPrice-$maxPrice, " +
-                        "Categories: ${categories.size}"
-            )
-
-            Log.d("Trainers", trainers.toString())
-
             Result.success(trainers)
         } catch (e: Exception) {
-            Log.e("TRAINER_REPO", "Błąd podczas pobierania lub filtrowania trenerów", e)
             Result.failure(e)
         }
     }

@@ -1,7 +1,7 @@
 package com.example.myapplication.di
 
-import com.example.myapplication.util.DefaultStringsProvider
-import com.example.myapplication.util.StringsProvider
+import com.example.myapplication.utils.DefaultStringsProvider
+import com.example.myapplication.utils.StringsProvider
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

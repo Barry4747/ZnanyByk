@@ -178,7 +178,7 @@ fun PersonalInfoRegistrationScreen(
                 
                 MainFormTextField(
                     value = phoneNumber,
-                    onValueChange = { 
+                    onValueChange = {
                         phoneNumber = it.filter { char -> char.isDigit() }
                     },
                     label = stringResource(R.string.phone_number_opt),
