@@ -102,6 +102,9 @@ class TrainersViewModel @Inject constructor(
     private val _trainersState = MutableStateFlow(TrainersState())
     val trainersState: StateFlow<TrainersState> = _trainersState.asStateFlow()
 
+    init {
+        loadCurrentUserLocation()
+    }
 
     fun loadInitialTrainers() {
         if (!trainersState.value.firstLoad || trainersState.value.isLoading) return
@@ -355,7 +358,14 @@ class TrainersViewModel @Inject constructor(
     fun calculateDistanceInKm(
         lat1: Double, lon1: Double,
         lat2: Double, lon2: Double
-    ): Double {
+    ): Double? {
+        if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) {
+            return null
+        }
+        if (lat1 == 0.0 && lon1 == 0.0) return null
+        if (lat2 == 0.0 && lon2 == 0.0) return null
+
+        loadCurrentUserLocation()
         val results = FloatArray(1)
         Location.distanceBetween(lat1, lon1, lat2, lon2, results)
         return results[0] / 1000.0
@@ -374,7 +384,7 @@ class TrainersViewModel @Inject constructor(
                 userLoc.latitude,
                 userLoc.longitude
             )
-            dist = round(dist * 10.0) / 10.0
+            dist = round(dist?.times(10.0) ?: 0.0) / 10.0
             Log.d("DIST", "Obliczony dystans: $dist km")
             
             _trainersState.update { it.copy(distanceToTrainer = dist) }

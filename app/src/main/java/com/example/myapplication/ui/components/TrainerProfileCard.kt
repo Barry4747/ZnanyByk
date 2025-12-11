@@ -48,6 +48,7 @@ import com.example.myapplication.viewmodel.TrainersViewModel
 fun TrainerProfileCard(
     trainer: Trainer,
     onClick: () -> Unit,
+    distance: Double? = null,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -167,6 +168,16 @@ fun TrainerProfileCard(
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
+
+                if (distance != null) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "%.1f km od Ciebie".format(distance),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 

@@ -4,6 +4,7 @@ import MainProgressIndicator
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -133,9 +134,6 @@ fun HomeScreen(
                     onValueChange = { 
                         searchTrainerText = it
                         trainersViewModel.onSearchQueryChanged(it)
-                        if (it.isEmpty()) {
-                            trainersViewModel.applyFiltersAndLoad()
-                        }
                     },
                     label = { Text(stringResource(R.string.search)) },
                     modifier = Modifier.fillMaxWidth(),
@@ -340,6 +338,19 @@ fun HomeScreen(
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             items(trainers) { trainer ->
+                                val userLocation = trainersState.userLocation
+                                val gym = trainersViewModel.getGymOfTrainer(trainer)
+                                val distance = if (userLocation != null && gym != null) {
+                                    trainersViewModel.calculateDistanceInKm(
+                                        lat1 = userLocation.latitude,
+                                        lon1 = userLocation.longitude,
+                                        lat2 = gym.gymLocation.latitude,
+                                        lon2 = gym.gymLocation.longitude
+                                    )
+                                } else {
+                                    null
+                                }
+
                                 TrainerProfileCard(
                                     trainer = trainer,
                                     onClick = {
@@ -352,7 +363,8 @@ fun HomeScreen(
                                         }
                                         trainersViewModel.selectTrainer(trainer)
                                         goToTrainerProfileCard(trainer)
-                                    }
+                                    },
+                                    distance = distance
                                 )
                             }
                         }
