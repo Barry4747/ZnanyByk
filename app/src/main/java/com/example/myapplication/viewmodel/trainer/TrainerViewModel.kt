@@ -1,4 +1,4 @@
-package com.example.myapplication.viewmodel
+package com.example.myapplication.viewmodel.trainer
 
 import android.app.Application
 import android.location.Location

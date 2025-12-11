@@ -45,8 +45,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.ui.components.MainTopBar
 import com.example.myapplication.ui.components.buttons.AlternateButton
 import com.example.myapplication.ui.components.buttons.MainButton
-import com.example.myapplication.viewmodel.TrainerCategory
-import com.example.myapplication.viewmodel.TrainersViewModel
+import com.example.myapplication.viewmodel.trainer.TrainerCategory
+import com.example.myapplication.viewmodel.trainer.TrainersViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable

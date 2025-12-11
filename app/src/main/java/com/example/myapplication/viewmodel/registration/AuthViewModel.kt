@@ -87,13 +87,6 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun logout() {
-        viewModelScope.launch {
-            authRepository.logoutUser()
-            _authState.value = AuthState()
-        }
-    }
-
     fun resetPassword(email: String) {
         viewModelScope.launch {
             _authState.value = _authState.value.copy(isLoading = true, errorMessage = null, passwordResetMessage = null)
@@ -112,10 +105,6 @@ class AuthViewModel @Inject constructor(
                     )
                 }
         }
-    }
-
-    fun clearPasswordResetMessage() {
-        _authState.value = _authState.value.copy(passwordResetMessage = null)
     }
 
     private suspend fun handleGoogleSignInResult(uid: String) {

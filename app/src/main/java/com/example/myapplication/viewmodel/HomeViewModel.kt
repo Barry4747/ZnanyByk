@@ -93,9 +93,4 @@ class HomeViewModel @Inject constructor(
 
         }
     }
-
-    fun logout() {
-        authRepository.logoutUser()
-        _homeState.value = HomeState()
-    }
 }

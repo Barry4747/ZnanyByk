@@ -4,7 +4,6 @@ import MainProgressIndicator
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -69,8 +68,8 @@ import com.example.myapplication.ui.components.TrainerProfileCard
 import com.example.myapplication.ui.components.buttons.MapFloatingButton
 import com.example.myapplication.ui.components.dialogs.SortDialog
 import com.example.myapplication.viewmodel.HomeViewModel
-import com.example.myapplication.viewmodel.SuggestionType
-import com.example.myapplication.viewmodel.TrainersViewModel
+import com.example.myapplication.viewmodel.trainer.SuggestionType
+import com.example.myapplication.viewmodel.trainer.TrainersViewModel
 
 @Composable
 fun HomeScreen(

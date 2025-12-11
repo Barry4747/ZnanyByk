@@ -3,7 +3,6 @@ package com.example.myapplication.viewmodel.chats
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.model.chats.Chat
-import com.example.myapplication.data.model.users.User
 import com.example.myapplication.data.repository.AuthRepository
 import com.example.myapplication.data.repository.ChatRepository
 import com.example.myapplication.data.repository.UserRepository
@@ -94,11 +93,4 @@ class ChatsListViewModel @Inject constructor(
     fun getUserFirstName(uid: String): String? {
         return userRepository.getUserSync(uid)?.firstName
     }
-    fun getUserFullName(uid: String): String? {
-        return getUserFirstName(uid) + " " + getUserLastName(uid)
-    }
-    fun getUserAvatarUrl(uid: String): String? {
-        return userRepository.getUserSync(uid)?.avatarUrl
-    }
-
 }

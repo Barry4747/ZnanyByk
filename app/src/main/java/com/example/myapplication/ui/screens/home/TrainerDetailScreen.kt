@@ -24,7 +24,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -51,9 +50,8 @@ import com.example.myapplication.ui.components.buttons.MainButton
 import com.example.myapplication.ui.components.dialogs.FullScreenMediaDialog
 import com.example.myapplication.ui.components.dialogs.RatingDialog
 import com.example.myapplication.ui.components.indicators.RatingIndicator
-import com.example.myapplication.viewmodel.TrainerCategory
-import com.example.myapplication.viewmodel.TrainersViewModel
-import java.util.Locale
+import com.example.myapplication.viewmodel.trainer.TrainerCategory
+import com.example.myapplication.viewmodel.trainer.TrainersViewModel
 
 data class GalleryItem(
     val uri: String,

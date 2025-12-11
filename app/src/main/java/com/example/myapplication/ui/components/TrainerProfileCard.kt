@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,14 +34,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.SubcomposeAsyncImage
 import com.example.myapplication.R
 import com.example.myapplication.data.model.users.Trainer
 import com.example.myapplication.ui.components.indicators.RatingIndicator
-import com.example.myapplication.viewmodel.TrainerCategory
-import com.example.myapplication.viewmodel.TrainersViewModel
+import com.example.myapplication.viewmodel.trainer.TrainerCategory
 
 @Composable
 fun TrainerProfileCard(
