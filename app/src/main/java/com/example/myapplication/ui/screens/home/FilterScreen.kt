@@ -161,7 +161,7 @@ fun FilterScreen(
                     viewModel.onPriceRangeChanged(range.start.toInt(), range.endInclusive.toInt())
                 },
                 valueRange = 0f..trainersState.maxPriceFromTrainers.toFloat(),
-                steps = 49,
+                steps = (trainersState.maxPriceFromTrainers.toFloat()/10.0).toInt(),
                 colors = SliderDefaults.colors(
                     thumbColor = Color.Black,
                     activeTrackColor = Color.Black,
@@ -187,7 +187,7 @@ fun FilterScreen(
                 value = trainersState.minRating,
                 onValueChange = { viewModel.onMinRatingChanged(it) },
                 valueRange = 0f..5f,
-                steps = 9,
+                steps = 49,
                 colors = SliderDefaults.colors(
                     thumbColor = Color.Black,
                     activeTrackColor = Color.Black,

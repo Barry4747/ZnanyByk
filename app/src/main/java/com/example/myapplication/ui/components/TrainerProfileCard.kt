@@ -35,16 +35,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.SubcomposeAsyncImage
 import com.example.myapplication.R
 import com.example.myapplication.data.model.users.Trainer
 import com.example.myapplication.ui.components.indicators.RatingIndicator
 import com.example.myapplication.viewmodel.TrainerCategory
+import com.example.myapplication.viewmodel.TrainersViewModel
 
 @Composable
 fun TrainerProfileCard(
     trainer: Trainer,
     onClick: () -> Unit,
+    distance: Double? = null,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -164,6 +168,16 @@ fun TrainerProfileCard(
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
+
+                if (distance != null) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "%.1f km od Ciebie".format(distance),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 

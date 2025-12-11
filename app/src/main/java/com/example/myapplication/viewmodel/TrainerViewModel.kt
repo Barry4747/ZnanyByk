@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.example.myapplication.R
+import com.example.myapplication.data.model.gyms.Gym
 import com.example.myapplication.data.model.gyms.GymLocation
 import com.example.myapplication.data.model.users.Trainer
 import com.example.myapplication.data.model.users.UserLocation
@@ -85,7 +86,9 @@ data class TrainersState(
     val currentUserRating: Int = 0,
     var userLocation: UserLocation? = null,
     var distanceToTrainer: Double? = null,
-    val suggestions: List<SearchSuggestion> = emptyList()
+    val suggestions: List<SearchSuggestion> = emptyList(),
+    var firstLoad: Boolean = true,
+    val gymsById: Map<String, Gym> = emptyMap()
 )
 
 @HiltViewModel
@@ -99,17 +102,46 @@ class TrainersViewModel @Inject constructor(
     private val _trainersState = MutableStateFlow(TrainersState())
     val trainersState: StateFlow<TrainersState> = _trainersState.asStateFlow()
 
+    init {
+        loadCurrentUserLocation()
+    }
 
     fun loadInitialTrainers() {
-        if (trainersState.value.trainers.isNotEmpty() || trainersState.value.isLoading) {
+        if (!trainersState.value.firstLoad || trainersState.value.isLoading) return
+
+        val state = _trainersState.value
+        if (state.searchQuery.isNotEmpty() || state.selectedCategories.isNotEmpty() || state.priceMax < state.maxPriceFromTrainers || state.minRating > 0 || state.priceMin > 0) {
+            applyFiltersAndLoad()
             return
         }
-        applyFiltersAndLoad()
+
+        viewModelScope.launch {
+            _trainersState.update { it.copy(isLoading = true) }
+
+            val allTrainersResult = trainerRepository.getAllTrainers()
+            allTrainersResult.onSuccess { allTrainers ->
+                val maxPrice = allTrainers.maxOfOrNull { it.pricePerHour ?: 0 } ?: 1000
+                val gymsMap = fetchGymsForTrainers(allTrainers)
+
+                _trainersState.update {
+                    it.copy(
+                        isLoading = false,
+                        firstLoad = false,
+                        trainers = allTrainers,
+                        gymsById = gymsMap,
+                        maxPriceFromTrainers = maxPrice,
+                        priceMax = maxPrice
+                    )
+                }
+                preloadTrainerImages(allTrainers)
+            }.onFailure { error ->
+                _trainersState.update { it.copy(isLoading = false, firstLoad = false, errorMessage = error.message) }
+            }
+        }
     }
 
     fun applyFiltersAndLoad() {
         viewModelScope.launch {
-
             val currentState = _trainersState.value
             _trainersState.update { it.copy(isLoading = true, errorMessage = null) }
 
@@ -118,27 +150,35 @@ class TrainersViewModel @Inject constructor(
                 maxPrice = currentState.priceMax,
                 categories = currentState.selectedCategories,
                 minRating = currentState.minRating,
-                query = ""
+                query = currentState.searchQuery
             )
 
-            result.onSuccess { trainers ->
-                val maxPrice = trainers.maxOfOrNull { it.pricePerHour ?: 0 } ?: 1000
+            result.onSuccess { filteredTrainers ->
+                val gymsMap = fetchGymsForTrainers(filteredTrainers)
                 _trainersState.update {
                     it.copy(
-                        isLoading = false, 
-                        trainers = trainers,
-                        maxPriceFromTrainers = maxPrice,
-                        priceMax = maxPrice
+                        isLoading = false,
+                        firstLoad = false,
+                        trainers = filteredTrainers,
+                        gymsById = gymsMap
                     )
                 }
-                preloadTrainerImages(trainers)
+                preloadTrainerImages(filteredTrainers)
             }.onFailure { error ->
                 _trainersState.update {
-                    it.copy(isLoading = false, errorMessage = error.message)
+                    it.copy(isLoading = false, firstLoad = false, errorMessage = error.message)
                 }
             }
+        }
+    }
 
-            Log.d("TrainersViewModel", trainersState.value.trainers.toString())
+    private suspend fun fetchGymsForTrainers(trainers: List<Trainer>): Map<String, Gym> {
+        val gymIds = trainers.mapNotNull { it.gymId }.distinct()
+        return if (gymIds.isNotEmpty()) {
+            val gymsResult = gymRepository.getGymsByIds(gymIds)
+            gymsResult.getOrNull() ?: emptyMap()
+        } else {
+            emptyMap()
         }
     }
 
@@ -203,16 +243,22 @@ class TrainersViewModel @Inject constructor(
         _trainersState.update { it.copy(minRating = rating) }
     }
 
-
     fun clearFilters() {
-        _trainersState.update {
-            it.copy(
+        _trainersState.update { state ->
+            state.copy(
                 priceMin = 0,
-                priceMax = it.maxPriceFromTrainers,
+                priceMax = state.maxPriceFromTrainers,
                 selectedCategories = emptySet(),
-                minRating = 0.0f
+                minRating = 0.0f,
+                searchQuery = ""
             )
         }
+        applyFiltersAndLoad()
+    }
+
+    fun getGymOfTrainer(trainer: Trainer): Gym? {
+        Log.d("GYMS", "Gym IDs: ${_trainersState.value.gymsById}")
+        return trainer.gymId?.let { _trainersState.value.gymsById[it] }
     }
 
     fun onSortOptionSelected(sortOption: SortOption) {
@@ -228,19 +274,13 @@ class TrainersViewModel @Inject constructor(
                     _trainersState.update { it.copy(isLoading = true) }
 
                     val trainersWithDistances = currentState.trainers.map { trainer ->
-                        val gymId = trainer.gymId
-                        var distance = Double.MAX_VALUE
-
-                        if (gymId != null) {
-                            val gym = gymRepository.getGymById(gymId).getOrNull()
-                            val gymLoc = gym?.gymLocation
-                            if (gymLoc != null) {
-                                distance = calculateDistanceInKm(
-                                    userLoc.latitude, userLoc.longitude,
-                                    gymLoc.latitude, gymLoc.longitude
-                                )
-                            }
-                        }
+                        val gym = getGymOfTrainer(trainer)
+                        val distance = gym?.gymLocation?.let {
+                            calculateDistanceInKm(
+                                userLoc.latitude, userLoc.longitude,
+                                it.latitude, it.longitude
+                            )
+                        } ?: Double.MAX_VALUE
                         trainer to distance
                     }
 
@@ -267,17 +307,8 @@ class TrainersViewModel @Inject constructor(
     fun searchTrainers(query: String) {
         _trainersState.update { it.copy(searchQuery = query) }
 
-        viewModelScope.launch {
-            try {
-                val trainersList = trainerRepository.getFilteredTrainers(query).getOrThrow()
-                _trainersState.update { it.copy(trainers = trainersList) }
-            } catch (e: Exception) {
-            } finally {
-                _trainersState.update { it.copy(isLoading = false) }
-            }
-        }
+        applyFiltersAndLoad()
     }
-
 
     fun selectTrainer(trainer: Trainer) {
         _trainersState.update { it.copy(selectedTrainer = trainer) }
@@ -286,7 +317,6 @@ class TrainersViewModel @Inject constructor(
             calculateDistanceToSelectedTrainer()
         }
     }
-
 
     private fun loadCurrentUserRating(trainer: Trainer) {
         val currentUserId = authRepository.getCurrentUserId()
@@ -328,7 +358,14 @@ class TrainersViewModel @Inject constructor(
     fun calculateDistanceInKm(
         lat1: Double, lon1: Double,
         lat2: Double, lon2: Double
-    ): Double {
+    ): Double? {
+        if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) {
+            return null
+        }
+        if (lat1 == 0.0 && lon1 == 0.0) return null
+        if (lat2 == 0.0 && lon2 == 0.0) return null
+
+        loadCurrentUserLocation()
         val results = FloatArray(1)
         Location.distanceBetween(lat1, lon1, lat2, lon2, results)
         return results[0] / 1000.0
@@ -347,7 +384,7 @@ class TrainersViewModel @Inject constructor(
                 userLoc.latitude,
                 userLoc.longitude
             )
-            dist = round(dist * 10.0) / 10.0
+            dist = round(dist?.times(10.0) ?: 0.0) / 10.0
             Log.d("DIST", "Obliczony dystans: $dist km")
             
             _trainersState.update { it.copy(distanceToTrainer = dist) }

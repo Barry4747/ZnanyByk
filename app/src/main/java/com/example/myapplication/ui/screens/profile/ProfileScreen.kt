@@ -139,21 +139,21 @@ fun ProfileScreen(
             FormButtonWithDetail(
                 text = stringResource(R.string.localization),
                 detail = state.userAddress.ifEmpty { stringResource(R.string.no_given_address) },
-                onClick = { onEditLocation() }
+                onClick = { onEditLocation() },
             )
 
             FormButtonWithDetail(
                 text = stringResource(R.string.language),
                 detail = stringResource(R.string.polish),
                 enabled = false,
-                onClick = { /* can add langauge later */ }
+                onClick = { }
             )
 
             FormButtonWithDetail(
                 text = stringResource(R.string.currency),
                 detail = "PLN, zł",
                 enabled = false,
-                onClick = { /* can add langauge later */ }
+                onClick = {  }
             )
 
 

@@ -219,6 +219,15 @@ class TrainerRepository @Inject constructor() {
                 price in minPrice..maxPrice
             }
 
+            Log.d("FILTER", minRating.toString())
+
+            trainers = trainers.filter {
+                val rating = it.avgRating?.replace(',', '.')?.toFloatOrNull() ?: 0.0f
+                Log.d("FILTER", it.avgRating.toString())
+                rating >= minRating
+            }
+
+
             Log.d(
                 "TRAINER_REPO", "📊 Znaleziono ${trainers.size} przefiltrowanych trenerów. " +
                         "Query: '$query', MinRating: $minRating, Price: $minPrice-$maxPrice, " +

@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun SortScreen(
     onNavigateBack: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 )
 {
     Column(
