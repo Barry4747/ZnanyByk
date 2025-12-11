@@ -155,13 +155,15 @@ fun ProfileScreen(
                 enabled = false,
                 onClick = { /* can add langauge later */ }
             )
-            if (state.userRole == "TRAINER")
-                Spacer(modifier = Modifier.height(24.dp))
-                AlternateButton(
+
+
+        }
+        if (state.userRole == "TRAINER") {
+            Spacer(modifier = Modifier.height(24.dp))
+            AlternateButton(
                 text = "Edytuj grafik trenera",
                 onClick = { onEditSchedule() },
             )
-
         }
 
         Spacer(modifier = Modifier.height(48.dp))

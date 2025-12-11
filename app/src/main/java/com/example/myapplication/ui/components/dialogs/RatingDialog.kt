@@ -29,6 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.example.myapplication.ui.components.buttons.MainButton
+import com.example.myapplication.ui.components.buttons.MainTextButton
 
 @Composable
 fun RatingDialog(
@@ -69,20 +71,17 @@ fun RatingDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(onClick = onDismissRequest) {
-                        Text("Anuluj")
-                    }
+                    MainTextButton(onClick = onDismissRequest, text="Anuluj")
                     Spacer(modifier = Modifier.width(8.dp))
-                    Button(
+                    MainButton(
                         onClick = {
                             if (currentRating > 0) {
                                 onSubmit(currentRating)
                             }
                         },
-                        enabled = currentRating > 0
-                    ) {
-                        Text("Zatwierdź")
-                    }
+                        enabled = currentRating > 0,
+                        text="Zatwuerdź"
+                    )
                 }
             }
         }
