@@ -3,11 +3,7 @@ package com.example.myapplication.ui.components.scheduler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +15,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.data.model.trainings.TrainingSlot
 import com.example.myapplication.ui.components.buttons.RoundAddButton
+import com.example.myapplication.utils.getPolishDayName
+import java.util.Locale
 
 @Composable
 fun ScheduleCard(
@@ -26,13 +24,15 @@ fun ScheduleCard(
     slots: List<TrainingSlot>,
     onAddClick: () -> Unit,
 ) {
+    val polishDayName = getPolishDayName(day)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
         Text(
-            text = day.replaceFirstChar { it.uppercase() },
+            text = polishDayName,
             style = MaterialTheme.typography.titleMedium.copy(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
@@ -97,5 +97,4 @@ private fun SlotColumn(
         }
     }
 }
-
 
