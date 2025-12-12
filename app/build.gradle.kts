@@ -29,7 +29,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.example.myapplication.CustomTestRunner"
 
         val mapsApiKey = localProperties.getProperty("MAPS_API_KEY") ?: ""
         buildConfigField("String", "MAPS_API_KEY", "\"$mapsApiKey\"")
@@ -117,4 +117,10 @@ dependencies {
 
     implementation("androidx.compose.runtime:runtime-livedata:1.6.0")
     ksp(libs.hilt.compiler)
+
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test:runner:1.5.2")
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.51.1") // Użyj tej samej wersji co hilt.android w libs
+    kspAndroidTest("com.google.dagger:hilt-android-compiler:2.51.1")
 }

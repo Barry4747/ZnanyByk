@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -138,7 +139,7 @@ fun CredentialsRegistrationScreen(
                     keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Next
                 ),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().testTag("reg_email")
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -166,7 +167,7 @@ fun CredentialsRegistrationScreen(
                 supportingText = if (registrationState.passwordValidationError != null &&
                     registrationState.registrationCredentials.password.isNotBlank())
                     registrationState.passwordValidationError else null,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().testTag("reg_pass")
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -189,7 +190,7 @@ fun CredentialsRegistrationScreen(
                         Icon(imageVector = image, contentDescription = null)
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().testTag("reg_repeat_pass")
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -207,7 +208,7 @@ fun CredentialsRegistrationScreen(
                         onNavigateToPersonalInfo()
                     },
                     enabled = viewModel.isFormValid(),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().testTag("reg_continue_btn")
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))

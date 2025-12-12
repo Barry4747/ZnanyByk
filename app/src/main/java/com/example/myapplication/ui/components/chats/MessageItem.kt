@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.data.model.chats.Message
@@ -37,6 +38,7 @@ fun MessageItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 1.dp)
+            .testTag("messageItem_${message.id}")
     ) {
         if (timestamp.isNotEmpty()) {
             Text(
@@ -46,6 +48,7 @@ fun MessageItem(
                 modifier = Modifier
                     .padding(top = 16.dp, bottom = 8.dp)
                     .align(Alignment.CenterHorizontally)
+                    .testTag("messageTimestamp")
             )
         }
 
@@ -72,14 +75,14 @@ fun MessageItem(
             Surface(
                 shape = bubbleShape,
                 color = bubbleColor,
-                modifier = Modifier.widthIn(max = maxBubbleWidth)
+                modifier = Modifier.widthIn(max = maxBubbleWidth).testTag("messageBubble")
             ) {
                 Text(
                     text = message.text.trim(),
                     color = textColor,
                     fontSize = 16.sp,
                     lineHeight = 22.sp,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp).testTag("messageText")
                 )
             }
         }

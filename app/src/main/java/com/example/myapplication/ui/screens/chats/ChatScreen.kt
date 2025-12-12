@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.myapplication.ui.components.buttons.MainBackButton
@@ -109,7 +110,7 @@ fun ChatScreen(
 
         LazyColumn(
             state = listState,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).testTag("messages_list"),
             reverseLayout = true,
             verticalArrangement = Arrangement.spacedBy(4.dp),
             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)

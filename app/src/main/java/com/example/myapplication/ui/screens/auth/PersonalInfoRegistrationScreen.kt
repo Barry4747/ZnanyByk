@@ -37,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -135,6 +136,7 @@ fun PersonalInfoRegistrationScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             MainFormTextField(
+                modifier = Modifier.testTag("reg_firstname"),
                 value = firstName,
                 onValueChange = { firstName = it },
                 label = stringResource(R.string.first_name),
@@ -144,6 +146,7 @@ fun PersonalInfoRegistrationScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             MainFormTextField(
+                modifier = Modifier.testTag("reg_lastname"),
                 value = lastName,
                 onValueChange = { lastName = it },
                 label = stringResource(R.string.last_name),
@@ -230,7 +233,7 @@ fun PersonalInfoRegistrationScreen(
                         )
                     },
                     enabled = firstName.isNotBlank() && lastName.isNotBlank(),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().testTag("reg_create_btn"),
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))

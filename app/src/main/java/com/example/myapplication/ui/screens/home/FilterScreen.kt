@@ -37,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -86,7 +87,7 @@ fun FilterScreen(
                 AlternateButton(
                     text = "Wyczyść",
                     onClick = { viewModel.clearFilters() },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).testTag("filter_clear_btn")
                 )
                 MainButton(
                     text = "Zastosuj",
@@ -94,7 +95,7 @@ fun FilterScreen(
                         viewModel.applyFiltersAndLoad()
                         onNavigateBack()
                     },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).testTag("filter_apply_btn")
                 )
             }
         }
@@ -132,7 +133,7 @@ fun FilterScreen(
                     label = { Text("Od") },
                     suffix = { Text("zł") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).testTag("filter_price_min")
                 )
                 OutlinedTextField(
                     value = maxPriceText,
@@ -147,7 +148,7 @@ fun FilterScreen(
                     label = { Text("Do") },
                     suffix = { Text("zł") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).testTag("filter_price_max")
                 )
             }
 
@@ -213,6 +214,7 @@ fun FilterScreen(
                     val logicalKey = categoryEnum.name
                     val isSelected = logicalKey in trainersState.selectedCategories
                     FilterChip(
+                        modifier = Modifier.testTag("chip_${categoryEnum.name}"),
                         selected = isSelected,
                         onClick = { viewModel.onCategorySelected(logicalKey) },
                         label = { Text(displayName) },

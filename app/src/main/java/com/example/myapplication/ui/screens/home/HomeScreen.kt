@@ -55,6 +55,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -136,7 +137,7 @@ fun HomeScreen(
                         trainersViewModel.onSearchQueryChanged(it)
                     },
                     label = { Text(stringResource(R.string.search)) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().testTag("search_field"),
                     shape = shape,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = primaryColor,
@@ -232,7 +233,8 @@ fun HomeScreen(
                     onClick = { goToFilter() },
                     modifier = Modifier
                         .weight(1f)
-                        .height(50.dp),
+                        .height(50.dp)
+                        .testTag("filter_btn"),
                     shape = shape,
                     border = BorderStroke(1.dp, borderColor),
                     colors = ButtonDefaults.outlinedButtonColors(
@@ -411,6 +413,7 @@ fun HomeScreen(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(24.dp)
+                .testTag("map_btn")
         )
     }
 }

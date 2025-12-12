@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -110,7 +111,7 @@ fun TrainerDetailScreen(
                     MainButton(
                         text = "Umów wizytę",
                         onClick = { onBookClick(selectedTrainer.id ?: "") },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().testTag("book_visit_btn"),
                         containerColor = Color.Black,
                         contentColor = Color.White
                     )
@@ -169,6 +170,7 @@ fun TrainerDetailScreen(
                                 )
                                 .border(1.dp, borderColor, RoundedCornerShape(12.dp))
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
+                                .testTag("rate_btn")
                         ) {
                             Text(
                                 text = "Oceń",
@@ -191,6 +193,7 @@ fun TrainerDetailScreen(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
+                                    modifier = Modifier.testTag("trainer_fullname"),
                                     text = "${selectedTrainer.firstName} ${selectedTrainer.lastName}",
                                     style = MaterialTheme.typography.headlineMedium,
                                     fontWeight = FontWeight.Bold,
@@ -296,7 +299,8 @@ fun TrainerDetailScreen(
                                 columns = StaggeredGridCells.Fixed(2),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .heightIn(max = 1000.dp),
+                                    .heightIn(max = 1000.dp)
+                                    .testTag("gallery_grid"),
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 verticalItemSpacing = 12.dp,
                                 userScrollEnabled = false
@@ -307,6 +311,7 @@ fun TrainerDetailScreen(
                                         modifier = Modifier
                                             .clip(RoundedCornerShape(12.dp))
                                             .border(1.dp, Color.LightGray, RoundedCornerShape(12.dp))
+                                            .testTag("gallery_item_$imageUrl")
                                     ) {
                                         GalleryImage(
                                             item = GalleryItem(uri = imageUrl, isVideo = isVideo),

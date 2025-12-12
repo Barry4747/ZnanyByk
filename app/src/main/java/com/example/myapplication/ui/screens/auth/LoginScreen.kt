@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -147,7 +148,7 @@ fun LoginScreen(
                     keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Next
                 ),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().testTag("login_email")
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -174,7 +175,7 @@ fun LoginScreen(
                         Icon(imageVector = image, contentDescription = null)
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().testTag("login_password")
             )
 
             Box(
@@ -196,7 +197,7 @@ fun LoginScreen(
                     text = stringResource(R.string.login_button_message),
                     onClick = { viewModel.login(email, password) },
                     enabled = email.isNotBlank() && password.isNotBlank(),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().testTag("login_btn")
                 )
 
                 OrDivider()

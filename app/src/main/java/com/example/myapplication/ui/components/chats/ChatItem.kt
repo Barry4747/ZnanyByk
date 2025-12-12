@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.R
@@ -38,7 +39,8 @@ fun ChatItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick(item.chat.id, item.receiverId) }
-            .padding(12.dp),
+            .padding(12.dp)
+            .testTag("chatItem_${item.chat.id}"),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (item.isUnread) {
@@ -47,6 +49,7 @@ fun ChatItem(
                     .size(10.dp)
                     .clip(CircleShape)
                     .background(Color.Red)
+                    .testTag("unreadIndicator")
             )
         } else {
             Spacer(modifier = Modifier.width(10.dp))
@@ -64,13 +67,15 @@ fun ChatItem(
             ) {
                 Text(
                     text = item.receiverName,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.testTag("chatItemName")
                 )
 
                 Text(
                     text = item.chat.lastTimestamp.toRelativeTime(),
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
+                    color = Color.Gray,
+                    modifier = Modifier.testTag("chatItemTime")
                 )
             }
 
@@ -83,7 +88,8 @@ fun ChatItem(
                     color = if (item.isUnread) Color.Black else Color.Gray
                 ),
                 maxLines = 1,
-                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                modifier = Modifier.testTag("chatItemLastMessage")
             )
         }
     }

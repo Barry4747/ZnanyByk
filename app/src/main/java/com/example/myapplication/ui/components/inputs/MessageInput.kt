@@ -89,7 +89,7 @@ fun MessageInputBar(
                             }
                         },
 
-                        modifier = Modifier.padding(end = 4.dp)
+                        modifier = Modifier.padding(end = 4.dp).testTag("sendButton")
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.send_arrow),
