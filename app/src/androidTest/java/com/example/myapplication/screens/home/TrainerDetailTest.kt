@@ -73,13 +73,15 @@ class TrainerDetailIntegrationTest {
         }
 
         composeRule.waitUntil(timeoutMillis = 15000) {
-            val isSuccess = composeRule.onAllNodesWithTag("book_visit_btn").fetchSemanticsNodes().isNotEmpty()
-            val isFailure = composeRule.onAllNodesWithText(failureText).fetchSemanticsNodes().isNotEmpty()
+            val isSuccess =
+                composeRule.onAllNodesWithTag("book_visit_btn").fetchSemanticsNodes().isNotEmpty()
+            val isFailure =
+                composeRule.onAllNodesWithText(failureText).fetchSemanticsNodes().isNotEmpty()
             isSuccess || isFailure
         }
 
         if (composeRule.onAllNodesWithText(failureText).fetchSemanticsNodes().isNotEmpty()) {
-            throw AssertionError("Test nie przeszedł: Firebase zwrócił pustą listę trenerów lub wystąpił błąd sieci. 'selectedTrainer' jest null.")
+            throw AssertionError("Firebase zwrócił pustą listę trenerów lub wystąpił błąd sieci. 'selectedTrainer' jest null.")
         }
 
         composeRule.onNodeWithTag("book_visit_btn")
@@ -93,35 +95,33 @@ class TrainerDetailIntegrationTest {
 
     @Test
     fun trainerDetail_rateButton_showsDialog() {
-        val failureText = "Nie udało się załadować danych trenera."
-
         composeRule.setContent {
             MyApplicationTheme {
                 val viewModel = hiltViewModel<TrainersViewModel>()
-                viewModel.loadInitialTrainers()
-                Thread.sleep(3000)
+
+                LaunchedEffect(Unit) {
+                    viewModel.loadInitialTrainers()
+                }
+
                 val state by viewModel.trainersState.collectAsState()
 
-                LaunchedEffect(Unit) { viewModel.loadInitialTrainers() }
-
                 LaunchedEffect(state.trainers) {
-                    if (state.trainers.isNotEmpty() && state.selectedTrainer == null) {
+                    if (state.selectedTrainer == null && state.trainers.isNotEmpty()) {
                         viewModel.selectTrainer(state.trainers.first())
                     }
                 }
 
-                TrainerDetailScreen(onNavigateBack = {}, viewModel = viewModel, onBookClick = {})
+                TrainerDetailScreen(
+                    onNavigateBack = {},
+                    viewModel = viewModel,
+                    onBookClick = {}
+                )
             }
         }
 
-        composeRule.waitUntil(timeoutMillis = 15000) {
-            val isSuccess = composeRule.onAllNodesWithTag("rate_btn").fetchSemanticsNodes().isNotEmpty()
-            val isFailure = composeRule.onAllNodesWithText(failureText).fetchSemanticsNodes().isNotEmpty()
-            isSuccess || isFailure
-        }
-
-        if (composeRule.onAllNodesWithText(failureText).fetchSemanticsNodes().isNotEmpty()) {
-            throw AssertionError("Test nie przeszedł: rate_btn się nie pojawił.")
+        composeRule.waitUntil(15_000) {
+            composeRule.onAllNodesWithTag("trainer_fullname")
+                .fetchSemanticsNodes().isNotEmpty()
         }
 
         composeRule.onNodeWithTag("rate_btn")
@@ -129,6 +129,5 @@ class TrainerDetailIntegrationTest {
             .performClick()
 
         composeRule.waitForIdle()
-
     }
 }

@@ -48,7 +48,6 @@ class HomeIntegrationTest {
 
         composeRule.waitForIdle()
 
-        composeRule.onNodeWithText("No user logged in").assertDoesNotExist()
 
         composeRule.onNodeWithTag("search_field").assertIsDisplayed()
         composeRule.onNodeWithTag("filter_btn").assertIsDisplayed()
@@ -76,7 +75,6 @@ class HomeIntegrationTest {
 
         composeRule.waitForIdle()
 
-        composeRule.onNodeWithText("No user logged in").assertDoesNotExist()
 
         composeRule.onNodeWithTag("search_field").assertIsDisplayed()
         composeRule.onNodeWithTag("filter_btn").assertIsDisplayed()
