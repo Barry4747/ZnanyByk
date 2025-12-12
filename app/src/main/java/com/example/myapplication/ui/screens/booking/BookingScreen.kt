@@ -20,11 +20,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.myapplication.data.model.users.TrainerCategory
 import com.example.myapplication.viewmodel.booking.BookingViewModel
 import java.time.DayOfWeek
 import java.time.Instant
@@ -217,12 +219,19 @@ fun BookingScreen(
                         contentPadding = PaddingValues(horizontal = 24.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        items(state.categories) { category ->
-                            val isSelected = state.selectedCategory == category
+                        items(state.categories) { categoryName ->
+                            val isSelected = state.selectedCategory == categoryName
+
+                            val categoryEnum = TrainerCategory.entries.find { it.name == categoryName }
+
+                            val displayText = if (categoryEnum != null) {
+                                stringResource(id = categoryEnum.labelRes)
+                            } else {
+                                categoryName
+                            }
 
                             Surface(
-                                selected = isSelected,
-                                onClick = { viewModel.onCategorySelected(category) },
+                                onClick = { viewModel.onCategorySelected(categoryName) },
                                 shape = CircleShape,
                                 border = if (isSelected) null else BorderStroke(1.dp, Color(0xFFE0E0E0)),
                                 color = if (isSelected) Color.Black else Color.White,
@@ -234,7 +243,7 @@ fun BookingScreen(
                                     modifier = Modifier.padding(horizontal = 20.dp)
                                 ) {
                                     Text(
-                                        text = category,
+                                        text = displayText,
                                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                                     )
                                 }
