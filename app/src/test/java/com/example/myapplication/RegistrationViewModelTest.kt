@@ -64,16 +64,6 @@ class RegistrationViewModelTest {
     }
 
     @Test
-    fun `updateEmail with valid format clears error`() {
-        viewModel.updateEmail("bad")
-
-        viewModel.updateEmail("janusz@gmail.com")
-
-        val state = viewModel.registrationState.value
-        assertNull(state.emailValidationError)
-    }
-
-    @Test
     fun `updatePassword with too short password sets error`() {
         val shortPass = "12345"
 

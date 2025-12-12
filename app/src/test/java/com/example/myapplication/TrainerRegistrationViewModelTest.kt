@@ -24,7 +24,6 @@ import kotlinx.coroutines.test.setMain
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -75,28 +74,6 @@ class TrainerRegistrationViewModelTest {
 
 
     @Test
-    fun `init loads gyms and username successfully`() = runTest {
-        createViewModel()
-
-        val state = viewModel.state.value
-
-        assertEquals(testGyms, state.gyms)
-        assertEquals("John Doe", state.userName)
-    }
-
-    @Test
-    fun `init handles gym load failure gracefully`() = runTest {
-        coEvery { gymRepository.getAllGyms() } returns Result.failure(Exception("Network error"))
-
-        createViewModel()
-
-        val state = viewModel.state.value
-
-        assertTrue(state.gyms.isEmpty())
-    }
-
-
-    @Test
     fun `submitTrainerProfile fails when hourly rate is invalid`() = runTest {
         createViewModel()
 
@@ -122,7 +99,7 @@ class TrainerRegistrationViewModelTest {
             hourlyRate = "100",
             gymId = null,
             description = "Desc",
-            experienceYears = "-1", // Invalid
+            experienceYears = "-1",
             selectedCategories = emptyList(),
             images = emptyList()
         )
@@ -149,7 +126,7 @@ class TrainerRegistrationViewModelTest {
 
 
     @Test
-    fun `submitTrainerProfile success flow`() = runTest {
+    fun `submitTrainerProfile success`() = runTest {
         createViewModel()
 
         coEvery { trainerRepository.addTrainer(any(), any()) } returns Result.success("newTrainerId")

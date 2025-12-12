@@ -67,7 +67,7 @@ class BookingViewModelTest {
 
     @Test
     fun `calculateSlots filters out taken appointments`() {
-        val testDate = LocalDate.of(2024, 5, 20) // Monday
+        val testDate = LocalDate.of(2024, 5, 20) // Poniedzialek
         every { LocalDate.now() } returns testDate
         every { LocalTime.now() } returns LocalTime.of(8, 0)
 
@@ -128,7 +128,7 @@ class BookingViewModelTest {
         val tomorrow = today.plusDays(1) // Sunday
 
         every { LocalDate.now() } returns today
-        every { LocalTime.now() } returns LocalTime.of(20, 0) // Late evening today
+        every { LocalTime.now() } returns LocalTime.of(20, 0)
 
         val schedule = WeeklySchedule(
             sunday = listOf(

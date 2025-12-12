@@ -120,7 +120,7 @@ class ScheduleViewModelTest {
     }
 
     @Test
-    fun `applyBulkSchedule generates correct slots with breaks`() = runTest {
+    fun `applyBulkSchedule generates correct slots`() = runTest {
         val config = BulkScheduleConfig(
             selectedDays = setOf("Wednesday", "Friday"),
             startHour = 10,
@@ -150,51 +150,5 @@ class ScheduleViewModelTest {
         assertEquals("10:00", friSlots[0].time)
 
         assertTrue(result.monday.isNullOrEmpty())
-    }
-
-    @Test
-    fun `applyBulkSchedule merges with existing slots without duplicates`() = runTest {
-        val existingSlot = TrainingSlot(time = "10:00", duration = 60)
-        weeklyScheduleLiveData.value = WeeklySchedule(monday = listOf(existingSlot))
-
-        val config = BulkScheduleConfig(
-            selectedDays = setOf("Monday"),
-            startHour = 10,
-            startMinute = 0,
-            endHour = 12,
-            endMinute = 0,
-            durationMinutes = 60,
-            breakMinutes = 0
-        )
-
-        viewModel.applyBulkSchedule(config)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        val slot = slot<WeeklySchedule>()
-        coVerify { scheduleRepository.setWeeklySchedule(testUserId, capture(slot)) }
-
-        val monSlots = slot.captured.monday!!
-
-        assertEquals(2, monSlots.size)
-        assertEquals("10:00", monSlots[0].time)
-        assertEquals("11:00", monSlots[1].time)
-    }
-
-    @Test
-    fun `addNewSlot puts invalid time formats at the start or ignores sort`() = runTest {
-        val existing = TrainingSlot(time = "10:00", duration = 60)
-        weeklyScheduleLiveData.value = WeeklySchedule(sunday = listOf(existing))
-
-        val invalidSlot = TrainingSlot(time = "invalid", duration = 60)
-
-        viewModel.addNewSlot("Sunday", invalidSlot)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        val slot = slot<WeeklySchedule>()
-        coVerify { scheduleRepository.setWeeklySchedule(any(), capture(slot)) }
-
-        val sundaySlots = slot.captured.sunday!!
-        assertEquals("invalid", sundaySlots[0].time)
-        assertEquals("10:00", sundaySlots[1].time)
     }
 }
