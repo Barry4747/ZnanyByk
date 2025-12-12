@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.data.model.users.TrainerCategory
+import com.example.myapplication.ui.components.MainTopBar
 import com.example.myapplication.viewmodel.booking.BookingViewModel
 import java.time.DayOfWeek
 import java.time.Instant
@@ -99,27 +100,7 @@ fun BookingScreen(
     Scaffold(
         containerColor = Color.White,
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        "Rezerwacja",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = Color.Black
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color.Black
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White
-                )
-            )
+            MainTopBar(text = "Rezerwacja", onNavigateBack = onNavigateBack)
         },
         bottomBar = {
             Box(
