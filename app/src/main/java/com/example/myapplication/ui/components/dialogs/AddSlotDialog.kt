@@ -18,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.myapplication.ui.components.buttons.MainTextButton
+import com.example.myapplication.ui.components.fields.MainFormTextField
 import com.example.myapplication.ui.components.pickers.TimePickerRow
 
 @Composable
@@ -32,7 +34,7 @@ fun AddSlotDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Dodaj nowy slot - $day") },
+        title = { Text("Dodaj nowy slot") },
         text = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 TimePickerRow(
@@ -44,10 +46,10 @@ fun AddSlotDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                OutlinedTextField(
+                MainFormTextField(
                     value = durationText,
                     onValueChange = { durationText = it },
-                    label = { Text("Czas trwania (minuty)") },
+                    label = "Czas trwania (minuty)",
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(0.8f)
@@ -55,20 +57,17 @@ fun AddSlotDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = {
+            MainTextButton(onClick = {
                 val duration = durationText.toIntOrNull() ?: 0
                 if (duration > 0) {
                     val formattedTime = String.format("%02d:%02d", selectedHour, selectedMinute)
                     onConfirm(formattedTime, duration)
                 }
-            }) {
-                Text("Dodaj")
-            }
+            },
+                text="Dodaj")
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Anuluj")
-            }
+            MainTextButton(onClick = onDismiss, text="Anuluj")
         }
     )
 }

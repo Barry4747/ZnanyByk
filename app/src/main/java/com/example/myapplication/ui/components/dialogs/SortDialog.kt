@@ -29,7 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.ui.components.SortOptionItem
-import com.example.myapplication.viewmodel.SortOption
+import com.example.myapplication.viewmodel.trainer.SortOption
 
 
 @OptIn(ExperimentalMaterial3Api::class)

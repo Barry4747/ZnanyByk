@@ -3,6 +3,7 @@ package com.example.myapplication.utils
 import com.example.myapplication.data.model.trainings.Appointment
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 
 fun calculateAppointmentStatus(appointment: Appointment): Pair<Boolean, Boolean> {
     if (appointment.date == null) return Pair(false, false)
@@ -30,4 +31,18 @@ fun calculateAppointmentStatus(appointment: Appointment): Pair<Boolean, Boolean>
             now.get(Calendar.DAY_OF_YEAR) == startCalendar.get(Calendar.DAY_OF_YEAR)
 
     return Pair(isPast, isToday)
+}
+
+
+fun getPolishDayName(englishDay: String): String {
+    return when (englishDay.lowercase(Locale.ROOT)) {
+        "monday" -> "Poniedziałek"
+        "tuesday" -> "Wtorek"
+        "wednesday" -> "Środa"
+        "thursday" -> "Czwartek"
+        "friday" -> "Piątek"
+        "saturday" -> "Sobota"
+        "sunday" -> "Niedziela"
+        else -> englishDay.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
+    }
 }

@@ -2,20 +2,16 @@ package com.example.myapplication.ui.navigation
 
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import com.example.myapplication.ui.components.CustomBottomBar
 import com.example.myapplication.ui.components.Destination
 import com.example.myapplication.ui.screens.WelcomeScreen
 import com.example.myapplication.ui.screens.auth.CredentialsRegistrationScreen
@@ -36,13 +32,12 @@ import com.example.myapplication.ui.screens.home.SortScreen
 import com.example.myapplication.ui.screens.home.TrainerDetailScreen
 import com.example.myapplication.ui.screens.profile.TrainerRegistrationScreen
 import com.example.myapplication.ui.screens.scheduler.TrainerScheduleScreen
-import com.example.myapplication.ui.screens.scheduler.TrainerScheduleScreen
 import com.example.myapplication.viewmodel.profile.LocationOnboardingViewModel
 import com.example.myapplication.viewmodel.profile.PInfoEditViewModel
 import com.example.myapplication.viewmodel.profile.ProfileViewModel
 import com.example.myapplication.viewmodel.registration.AuthViewModel
 import com.example.myapplication.viewmodel.registration.RegistrationViewModel
-import com.example.myapplication.viewmodel.TrainersViewModel
+import com.example.myapplication.viewmodel.trainer.TrainersViewModel
 import com.example.myapplication.viewmodel.HomeViewModel
 import com.example.myapplication.viewmodel.MapViewModel
 import androidx.compose.animation.ExperimentalSharedTransitionApi

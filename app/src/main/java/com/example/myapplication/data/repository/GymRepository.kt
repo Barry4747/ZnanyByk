@@ -38,6 +38,20 @@ class GymRepository @Inject constructor() {
         }
     }
 
+    suspend fun getGymsByIds(gymIds: List<String>): Result<Map<String, Gym>> {
+        if (gymIds.isEmpty()) return Result.success(emptyMap())
+
+        return try {
+            val snapshot = gymsCollection.whereIn("__name__", gymIds).get().await()
+            val gyms = snapshot.documents.mapNotNull { doc ->
+                doc.toObject(Gym::class.java)?.copy(id = doc.id)
+            }.associateBy { it.id }
+            Result.success(gyms)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun searchGyms(query: String): Result<List<Gym>> {
         return try {
             val snapshot = gymsCollection.get().await()

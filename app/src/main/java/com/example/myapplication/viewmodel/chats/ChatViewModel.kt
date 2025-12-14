@@ -73,10 +73,6 @@ class ChatViewModel @Inject constructor(
         return authRepository.getCurrentUserId()
     }
 
-    fun getUserAvatarUrl(uid: String): String? {
-        return userRepository.getUserSync(uid)?.avatarUrl
-    }
-
     suspend fun markSeen() {
         chatRepository.markMessagesAsSeen(chatId, currentUserId)
     }

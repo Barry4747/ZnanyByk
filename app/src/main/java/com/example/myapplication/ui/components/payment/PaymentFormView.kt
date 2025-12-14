@@ -27,10 +27,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.myapplication.data.model.users.TrainerCategory
 import com.example.myapplication.ui.components.buttons.PaymentButton
 
 @Composable
@@ -61,8 +63,15 @@ fun PaymentFormView(
                 color = Color.Gray
             )
             Spacer(modifier = Modifier.height(8.dp))
+            val categoryEnum = TrainerCategory.entries.find { it.name == title }
+            val displayTitle = if (categoryEnum != null) {
+                stringResource(id = categoryEnum.labelRes)
+            } else {
+                title
+            }
+
             Text(
-                text = title,
+                text = displayTitle,
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
                 color = Color.Black
             )

@@ -35,19 +35,6 @@ class UserRepository @Inject constructor() {
         }
     }
 
-    suspend fun getUserByEmail(email: String): Result<User?> {
-        return try {
-            val snapshot = usersCollection
-                .whereEqualTo("email", email)
-                .get()
-                .await()
-            val user = snapshot.documents.firstOrNull()?.toObject(User::class.java)
-            Result.success(user)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
     suspend fun updateUser(uid: String, user: User): Result<Unit> {
         return try {
             usersCollection.document(uid).set(user).await()
@@ -72,27 +59,6 @@ class UserRepository @Inject constructor() {
                 .set(mapOf("location" to locationMap), SetOptions.merge())
                 .await()
             Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-
-
-    suspend fun deleteUser(uid: String): Result<Unit> {
-        return try {
-            usersCollection.document(uid).delete().await()
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    suspend fun getAllUsers(): Result<List<User>> {
-        return try {
-            val snapshot = usersCollection.get().await()
-            val users = snapshot.toObjects(User::class.java)
-            Result.success(users)
         } catch (e: Exception) {
             Result.failure(e)
         }
